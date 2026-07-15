@@ -7,15 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Abstractions\" />
-    <Folder Include="Enums\" />
     <Folder Include="Exceptions\" />
     <Folder Include="Constants\" />
     <Folder Include="Events\" />
-    <Folder Include="Entities\" />
     <Folder Include="Interfaces\Repositories\" />
     <Folder Include="ValueObjects\" />
     <Folder Include="Specifications\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.10" />
   </ItemGroup>
 
 </Project>

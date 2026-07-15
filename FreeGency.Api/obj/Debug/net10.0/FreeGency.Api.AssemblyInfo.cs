@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FreeGency.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e2f79ac65775f28acf541195d001fb7add3bb141")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ffb4e2005fdb5e6e8146476137da9b25b865560c")]
 [assembly: System.Reflection.AssemblyProductAttribute("FreeGency.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FreeGency.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
