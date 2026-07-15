@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\Models\" />
+    <Folder Include="Common\Exceptions\" />
+    <Folder Include="Common\Mappings\" />
+    <Folder Include="Common\Interfaces\" />
+    <Folder Include="Common\Behaviors\" />
+    <Folder Include="Common\Errors\" />
+    <Folder Include="Common\Helpers\" />
+    <Folder Include="Common\Extensions\" />
+    <Folder Include="Common\Constants\" />
+    <Folder Include="Common\DTOs\" />
+    <Folder Include="Common\Results\" />
+    <Folder Include="Features\" />
+  </ItemGroup>
+
+</Project>

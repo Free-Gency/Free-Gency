@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="FreeGency.AI/FreeGency.AI.csproj" />
+    <Project Path="FreeGency.Api/FreeGency.Api.csproj" />
+    <Project Path="FreeGency.Application/FreeGency.Application.csproj" />
+    <Project Path="FreeGency.Domain/FreeGency.Domain.csproj" />
+    <Project Path="FreeGency.Infrastructure/FreeGency.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>
