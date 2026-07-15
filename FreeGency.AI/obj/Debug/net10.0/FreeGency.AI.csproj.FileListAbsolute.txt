@@ -1,0 +1,12 @@
+I:\.Net Projects\freeGency\Free-Gency\FreeGency.AI\bin\Debug\net10.0\FreeGency.AI.deps.json
+I:\.Net Projects\freeGency\Free-Gency\FreeGency.AI\bin\Debug\net10.0\FreeGency.AI.dll
+I:\.Net Projects\freeGency\Free-Gency\FreeGency.AI\bin\Debug\net10.0\FreeGency.AI.pdb
+I:\.Net Projects\freeGency\Free-Gency\FreeGency.AI\obj\Debug\net10.0\FreeGency.AI.GeneratedMSBuildEditorConfig.editorconfig
+I:\.Net Projects\freeGency\Free-Gency\FreeGency.AI\obj\Debug\net10.0\FreeGency.AI.AssemblyInfoInputs.cache
+I:\.Net Projects\freeGency\Free-Gency\FreeGency.AI\obj\Debug\net10.0\FreeGency.AI.AssemblyInfo.cs
+I:\.Net Projects\freeGency\Free-Gency\FreeGency.AI\obj\Debug\net10.0\FreeGency.AI.csproj.CoreCompileInputs.cache
+I:\.Net Projects\freeGency\Free-Gency\FreeGency.AI\obj\Debug\net10.0\FreeGency.AI.sourcelink.json
+I:\.Net Projects\freeGency\Free-Gency\FreeGency.AI\obj\Debug\net10.0\FreeGency.AI.dll
+I:\.Net Projects\freeGency\Free-Gency\FreeGency.AI\obj\Debug\net10.0\refint\FreeGency.AI.dll
+I:\.Net Projects\freeGency\Free-Gency\FreeGency.AI\obj\Debug\net10.0\FreeGency.AI.pdb
+I:\.Net Projects\freeGency\Free-Gency\FreeGency.AI\obj\Debug\net10.0\ref\FreeGency.AI.dll

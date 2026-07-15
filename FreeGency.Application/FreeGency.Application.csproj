@@ -21,4 +21,8 @@
     <Folder Include="Features\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FreeGency.Domain\FreeGency.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

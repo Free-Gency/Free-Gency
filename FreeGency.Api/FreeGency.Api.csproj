@@ -18,4 +18,9 @@
     <Folder Include="Hubs\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FreeGency.Application\FreeGency.Application.csproj" />
+    <ProjectReference Include="..\FreeGency.Infrastructure\FreeGency.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

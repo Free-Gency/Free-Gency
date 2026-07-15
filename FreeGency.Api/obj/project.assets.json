@@ -36,6 +36,43 @@
             "related": ".pdb;.xml"
           }
         }
+      },
+      "FreeGency.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "FreeGency.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/FreeGency.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/FreeGency.Application.dll": {}
+        }
+      },
+      "FreeGency.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/FreeGency.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/FreeGency.Domain.dll": {}
+        }
+      },
+      "FreeGency.Infrastructure/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "FreeGency.Application": "1.0.0",
+          "FreeGency.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/FreeGency.Infrastructure.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/FreeGency.Infrastructure.dll": {}
+        }
       }
     }
   },
@@ -75,31 +112,48 @@
         "microsoft.openapi.2.0.0.nupkg.sha512",
         "microsoft.openapi.nuspec"
       ]
+    },
+    "FreeGency.Application/1.0.0": {
+      "type": "project",
+      "path": "../FreeGency.Application/FreeGency.Application.csproj",
+      "msbuildProject": "../FreeGency.Application/FreeGency.Application.csproj"
+    },
+    "FreeGency.Domain/1.0.0": {
+      "type": "project",
+      "path": "../FreeGency.Domain/FreeGency.Domain.csproj",
+      "msbuildProject": "../FreeGency.Domain/FreeGency.Domain.csproj"
+    },
+    "FreeGency.Infrastructure/1.0.0": {
+      "type": "project",
+      "path": "../FreeGency.Infrastructure/FreeGency.Infrastructure.csproj",
+      "msbuildProject": "../FreeGency.Infrastructure/FreeGency.Infrastructure.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "FreeGency.Application >= 1.0.0",
+      "FreeGency.Infrastructure >= 1.0.0",
       "Microsoft.AspNetCore.OpenApi >= 10.0.9"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Abdul\\.nuget\\packages\\": {},
+    "C:\\Users\\Dell\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\My Startups\\FreeGency\\FreeGency.Api\\FreeGency.Api.csproj",
+      "projectUniqueName": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Api\\FreeGency.Api.csproj",
       "projectName": "FreeGency.Api",
-      "projectPath": "D:\\My Startups\\FreeGency\\FreeGency.Api\\FreeGency.Api.csproj",
-      "packagesPath": "C:\\Users\\Abdul\\.nuget\\packages\\",
-      "outputPath": "D:\\My Startups\\FreeGency\\FreeGency.Api\\obj\\",
+      "projectPath": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Api\\FreeGency.Api.csproj",
+      "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
+      "outputPath": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Api\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Abdul\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -114,7 +168,14 @@
         "net10.0": {
           "framework": "net10.0",
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj": {
+              "projectPath": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj"
+            },
+            "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj": {
+              "projectPath": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
@@ -158,7 +219,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

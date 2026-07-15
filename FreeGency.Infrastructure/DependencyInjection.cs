@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FreeGency.Infrastructure
 {
-    internal class DependencyInjection
+    public class DependencyInjection
     {
     }
 }

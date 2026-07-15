@@ -24,4 +24,9 @@
     <Folder Include="Services\Notifications\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FreeGency.Application\FreeGency.Application.csproj" />
+    <ProjectReference Include="..\FreeGency.Domain\FreeGency.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

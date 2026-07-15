@@ -1,7 +1,32 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\My Startups\\FreeGency\\",
-  "Documents": [],
+  "WorkspaceRootPath": "I:\\.Net Projects\\freeGency\\Free-Gency\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{28AE8EE9-48DC-3C3B-6866-7A42EC7DF8B8}|FreeGency.Api\\FreeGency.Api.csproj|i:\\.net projects\\freegency\\free-gency\\freegency.api\\freegency.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{28AE8EE9-48DC-3C3B-6866-7A42EC7DF8B8}|FreeGency.Api\\FreeGency.Api.csproj|solutionrelative:freegency.api\\freegency.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{49B0AF59-8244-070C-C16E-6DC18D66FDD6}|FreeGency.Application\\FreeGency.Application.csproj|i:\\.net projects\\freegency\\free-gency\\freegency.application\\freegency.application.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{49B0AF59-8244-070C-C16E-6DC18D66FDD6}|FreeGency.Application\\FreeGency.Application.csproj|solutionrelative:freegency.application\\freegency.application.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F5DE41F-6543-EDE9-FA12-C9B7AD3110B7}|FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj|i:\\.net projects\\freegency\\free-gency\\freegency.infrastructure\\freegency.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{2F5DE41F-6543-EDE9-FA12-C9B7AD3110B7}|FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj|solutionrelative:freegency.infrastructure\\freegency.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{28AE8EE9-48DC-3C3B-6866-7A42EC7DF8B8}|FreeGency.Api\\FreeGency.Api.csproj|i:\\.net projects\\freegency\\free-gency\\freegency.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{28AE8EE9-48DC-3C3B-6866-7A42EC7DF8B8}|FreeGency.Api\\FreeGency.Api.csproj|solutionrelative:freegency.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{49B0AF59-8244-070C-C16E-6DC18D66FDD6}|FreeGency.Application\\FreeGency.Application.csproj|i:\\.net projects\\freegency\\free-gency\\freegency.application\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{49B0AF59-8244-070C-C16E-6DC18D66FDD6}|FreeGency.Application\\FreeGency.Application.csproj|solutionrelative:freegency.application\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F5DE41F-6543-EDE9-FA12-C9B7AD3110B7}|FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj|i:\\.net projects\\freegency\\free-gency\\freegency.infrastructure\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2F5DE41F-6543-EDE9-FA12-C9B7AD3110B7}|FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj|solutionrelative:freegency.infrastructure\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,19 +34,85 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "FreeGency.Api",
+              "DocumentMoniker": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Api\\FreeGency.Api.csproj",
+              "RelativeDocumentMoniker": "FreeGency.Api\\FreeGency.Api.csproj",
+              "ToolTip": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Api\\FreeGency.Api.csproj*",
+              "RelativeToolTip": "FreeGency.Api\\FreeGency.Api.csproj*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-07-15T18:31:03.631Z",
+              "EditorCaption": ""
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "FreeGency.Application",
+              "DocumentMoniker": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj",
+              "RelativeDocumentMoniker": "FreeGency.Application\\FreeGency.Application.csproj",
+              "ToolTip": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj*",
+              "RelativeToolTip": "FreeGency.Application\\FreeGency.Application.csproj*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-07-15T18:30:49.229Z",
+              "EditorCaption": ""
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{a80febb4-e7e0-4147-b476-21aaf2453969}"
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "FreeGency.Infrastructure",
+              "DocumentMoniker": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj",
+              "RelativeDocumentMoniker": "FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj",
+              "ToolTip": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj*",
+              "RelativeToolTip": "FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj*",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-07-15T18:30:21.781Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Api\\Program.cs",
+              "RelativeDocumentMoniker": "FreeGency.Api\\Program.cs",
+              "ToolTip": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Api\\Program.cs",
+              "RelativeToolTip": "FreeGency.Api\\Program.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAowAkAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T18:29:27.198Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "DependencyInjection.cs",
+              "DocumentMoniker": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Application\\DependencyInjection.cs",
+              "RelativeDocumentMoniker": "FreeGency.Application\\DependencyInjection.cs",
+              "ToolTip": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Application\\DependencyInjection.cs*",
+              "RelativeToolTip": "FreeGency.Application\\DependencyInjection.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T18:29:09.945Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "DependencyInjection.cs",
+              "DocumentMoniker": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Infrastructure\\DependencyInjection.cs",
+              "RelativeDocumentMoniker": "FreeGency.Infrastructure\\DependencyInjection.cs",
+              "ToolTip": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Infrastructure\\DependencyInjection.cs",
+              "RelativeToolTip": "FreeGency.Infrastructure\\DependencyInjection.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T18:28:52.028Z",
+              "EditorCaption": ""
             }
           ]
         }
