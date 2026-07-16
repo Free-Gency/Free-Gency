@@ -4,7 +4,8 @@ using System.Text;
 
 namespace FreeGency.Domain.Enums
 {
-    internal class RevieweeType
+    public enum RevieweeType
     {
+        Team=0,User=1
     }
 }

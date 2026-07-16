@@ -4,7 +4,8 @@ using System.Text;
 
 namespace FreeGency.Domain.Enums
 {
-    internal class FundingStatus
+    public enum FundingStatus
     {
+        Unlocked=0, Locked, Completed
     }
 }

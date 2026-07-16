@@ -9,7 +9,7 @@ namespace FreeGency.Domain.Entities
     {
         public string Title { get; set; }
         public string Description { get; set; }
-        public string ClientId { get; set; }
+        public Guid ClientId { get; set; }
         public Guid CategoryId { get; set; }
         public Guid SpecialtyId { get; set; }
         public bool IsFixedPrice { get; set; }

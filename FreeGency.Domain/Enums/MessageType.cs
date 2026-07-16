@@ -4,7 +4,8 @@ using System.Text;
 
 namespace FreeGency.Domain.Enums
 {
-    internal class MessageType
+    public enum MessageType
     {
+        Text=0,File
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FreeGency.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,8 +12,12 @@ namespace FreeGency.Domain.Entities
         public string Description { get; set; }
         public decimal Amount { get; set; }
         public decimal ReleasedAmount { get; set; }
-        public decimal RefundedAmount { get; set; }
         public int SortOrder { get; set; }
-        //public 
+        public ReleaseStatus ReleaseStatus { get; set;  }
+        public WorkStatus WorkStatus { get; set; }
+        public string ProposedByUserId { get; set; }
+        public DateTime SubmittedAt { get; set; }
+        public DateTime AvailableAt { get;set; }
+        public DateTime ReleasedAt { get; set; }
     }
 }

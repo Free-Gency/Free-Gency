@@ -4,7 +4,9 @@ using System.Text;
 
 namespace FreeGency.Domain.Entities
 {
-    internal class PortfolioSkills
+    public class PortfolioSkills
     {
+        public Guid PortfolioProjectId { get; set; }
+        public Guid SkillId { get; set; }
     }
 }

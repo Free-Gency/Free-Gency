@@ -4,7 +4,8 @@ using System.Text;
 
 namespace FreeGency.Domain.Enums
 {
-    internal class TeamPayoutSplits
+    public class TeamPayoutSplits
     {
+        public Guid TeamId { get; set; }
     }
 }

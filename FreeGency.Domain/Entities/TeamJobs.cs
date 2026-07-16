@@ -11,7 +11,7 @@ namespace FreeGency.Domain.Entities
         public string Title { get; set; }
         public string Description { get; set; }
         public TeamJobStatus Status { get; set; }
-        public string CreatedByUserId { get;set;  }
+        public Guid CreatedByUserId { get;set;  }
         public DateTime ClosedAt { get; set; }
     }
 }

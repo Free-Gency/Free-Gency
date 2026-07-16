@@ -10,7 +10,7 @@ namespace FreeGency.Domain.Entities
         public Guid ProjectId { get; set; }
         public ApplicantType ApplicantType { get; set; }
         public Guid TeamId { get; set; }
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public string CoverLetter { get; set; }
         public decimal ProposedBudget { get; set; }
         public ProposalStatus Status { get; set; }

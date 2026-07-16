@@ -9,7 +9,7 @@ namespace FreeGency.Domain.Entities
     {
         public Guid TeamId { get; set; }
         public Guid TeamJobId { get; set; }
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public string CoverLetter { get; set; }
         public string Job { get; set; }
         public TeamJoinRequestStatus Status { get; set; }

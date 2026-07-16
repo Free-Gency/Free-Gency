@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FreeGency.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ffb4e2005fdb5e6e8146476137da9b25b865560c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c821c8e366b5e2f6bf25bcd40aeed9a4b0eda2a3")]
 [assembly: System.Reflection.AssemblyProductAttribute("FreeGency.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FreeGency.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

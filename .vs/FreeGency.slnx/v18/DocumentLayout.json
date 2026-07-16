@@ -3,32 +3,216 @@
   "WorkspaceRootPath": "D:\\FreeGency ITI\\Free-Gency\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\proposalattachments.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\proposalattachments.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\milestones.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\milestones.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\releasestatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\releasestatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\userskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\userskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\abstractions\\iauditableentity .cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\abstractions\\iauditableentity .cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\abstractions\\ibaseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\abstractions\\ibaseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\abstractions\\isoftdeletableentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\abstractions\\isoftdeletableentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\wallet.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\wallet.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\userinterests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\userinterests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\userapp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\userapp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teamskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teamskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teams.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teams.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teampayoutsplits.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teampayoutsplits.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teammembers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teammembers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teamjoinrequests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teamjoinrequests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teamjobskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teamjobskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teamjobs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teamjobs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teamcategories.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teamcategories.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\specialties.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\specialties.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\sociallinks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\sociallinks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\skills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\skills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\savedprojects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\savedprojects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\reviews.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\reviews.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\proposalattachments.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\proposalattachments.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\projectskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\projectskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\projects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\projects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\projectproposals.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\projectproposals.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\projectmembers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\projectmembers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\projectfiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\projectfiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\projectevents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\projectevents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\portfolioskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\portfolioskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\portfolioprojects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\portfolioprojects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\portfolioimages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\portfolioimages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\categories.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\categories.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\abstractions\\ibaseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\abstractions\\ibaseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\milestones.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\milestones.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\messages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\messages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\ledgerentries.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\ledgerentries.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\escrowholds.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\escrowholds.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\developerprofiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\developerprofiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\clientprofiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\clientprofiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\chatrooms.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\chatrooms.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\chatroommembers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\chatroommembers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\messagetype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\messagetype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\roomtype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\roomtype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\revieweetype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\revieweetype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\visibility.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\visibility.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\eventtype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\eventtype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\filekind.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\filekind.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\splittype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\splittype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\teampayoutsplits.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\teampayoutsplits.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\planstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\planstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\fundingstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\fundingstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\entrytype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\entrytype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\owner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\owner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\workstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\workstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\releasestatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\releasestatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\proposalstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -37,26 +221,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\applicanttype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\applicanttype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\projectskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\projectskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\userskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\userskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\skills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\skills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\projects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\projects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teamjoinrequests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teamjoinrequests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\projectstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -75,68 +239,8 @@
       "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\teamjoinrequeststatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teamjobskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teamjobskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teamjobs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teamjobs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teammembers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teammembers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teams.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teams.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\teamjobstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\teamjobstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\sociallinks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\sociallinks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\enums\\owner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\enums\\owner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teamskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teamskills.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\teamcategories.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\teamcategories.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\specialties.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\specialties.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\categories.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\categories.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\savedprojects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\savedprojects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\userinterests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\userinterests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\developerprofiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\developerprofiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\clientprofiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\clientprofiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|d:\\freegency iti\\free-gency\\freegency.domain\\entities\\userapp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3354929C-DD78-A694-2AE9-2BCDCB442F81}|FreeGency.Domain\\FreeGency.Domain.csproj|solutionrelative:freegency.domain\\entities\\userapp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{28AE8EE9-48DC-3C3B-6866-7A42EC7DF8B8}|FreeGency.Api\\FreeGency.Api.csproj|d:\\freegency iti\\free-gency\\freegency.api\\freegency.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
@@ -170,7 +274,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -178,332 +282,85 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ReleaseStatus.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ReleaseStatus.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\ReleaseStatus.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ReleaseStatus.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Enums\\ReleaseStatus.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 4,
+              "Title": "UserInterests.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\UserInterests.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\UserInterests.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\UserInterests.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\UserInterests.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T22:23:06.064Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Milestones.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Milestones.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Milestones.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Milestones.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\Milestones.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAApwAgAAAArAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T22:17:10.302Z",
+              "WhenOpened": "2026-07-15T20:22:02.885Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "ProposalAttachments.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProposalAttachments.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\ProposalAttachments.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProposalAttachments.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\ProposalAttachments.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T22:14:10.613Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "IBaseEntity.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Abstractions\\IBaseEntity.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Abstractions\\IBaseEntity.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Abstractions\\IBaseEntity.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Abstractions\\IBaseEntity.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T20:14:39.726Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ISoftDeletableEntity.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Abstractions\\ISoftDeletableEntity.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Abstractions\\ISoftDeletableEntity.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Abstractions\\ISoftDeletableEntity.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Abstractions\\ISoftDeletableEntity.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T20:16:25.574Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "IAuditableEntity .cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Abstractions\\IAuditableEntity .cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Abstractions\\IAuditableEntity .cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Abstractions\\IAuditableEntity .cs",
-              "RelativeToolTip": "FreeGency.Domain\\Abstractions\\IAuditableEntity .cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T20:15:31.131Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "ProjectProposals.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectProposals.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\ProjectProposals.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectProposals.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\ProjectProposals.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T21:52:25.556Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "ProposalStatus.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ProposalStatus.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\ProposalStatus.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ProposalStatus.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Enums\\ProposalStatus.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAASAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T22:07:10.8Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "ApplicantType.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ApplicantType.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\ApplicantType.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ApplicantType.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Enums\\ApplicantType.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAOAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T21:55:21.647Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "ProjectSkills.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectSkills.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\ProjectSkills.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectSkills.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\ProjectSkills.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAoAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T21:50:44.144Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "ProjectStatus.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ProjectStatus.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\ProjectStatus.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ProjectStatus.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Enums\\ProjectStatus.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T21:39:19.596Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "Projects.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Projects.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Projects.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Projects.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\Projects.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAywBgAAAAxAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T21:22:45.445Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "TeamJoinRequests.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamJoinRequests.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\TeamJoinRequests.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamJoinRequests.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\TeamJoinRequests.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAcAAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T21:15:42.083Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "profileMode.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\profileMode.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\profileMode.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\profileMode.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Enums\\profileMode.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAATAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T20:01:23.222Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "Skills.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Skills.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Skills.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Skills.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\Skills.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T20:39:55.548Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
               "Title": "UserSkills.cs",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\UserSkills.cs",
               "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\UserSkills.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\UserSkills.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\UserSkills.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\UserSkills.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\UserSkills.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-07-15T20:20:25.057Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "TeamJoinRequestStatus.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\TeamJoinRequestStatus.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\TeamJoinRequestStatus.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\TeamJoinRequestStatus.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Enums\\TeamJoinRequestStatus.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAASAAAAAAAAAA==",
+              "DocumentIndex": 3,
+              "Title": "Wallet.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Wallet.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Wallet.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Wallet.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\Wallet.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T21:18:06.62Z",
+              "WhenOpened": "2026-07-16T08:11:48.263Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "Role.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\Role.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\Role.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\Role.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Enums\\Role.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAFAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "IAuditableEntity .cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Abstractions\\IAuditableEntity .cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Abstractions\\IAuditableEntity .cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Abstractions\\IAuditableEntity .cs",
+              "RelativeToolTip": "FreeGency.Domain\\Abstractions\\IAuditableEntity .cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T21:01:01.169Z",
+              "WhenOpened": "2026-07-15T20:15:31.131Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
-              "Title": "TeamJobSkills.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamJobSkills.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\TeamJobSkills.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamJobSkills.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\TeamJobSkills.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAFAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "ISoftDeletableEntity.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Abstractions\\ISoftDeletableEntity.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Abstractions\\ISoftDeletableEntity.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Abstractions\\ISoftDeletableEntity.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Abstractions\\ISoftDeletableEntity.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T21:11:35.853Z",
+              "WhenOpened": "2026-07-15T20:16:25.574Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
-              "Title": "TeamJobStatus.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\TeamJobStatus.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\TeamJobStatus.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\TeamJobStatus.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Enums\\TeamJobStatus.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAmAAAAAAAAAA==",
+              "DocumentIndex": 5,
+              "Title": "userApp.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\userApp.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\userApp.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\userApp.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\userApp.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T21:05:32.228Z",
+              "WhenOpened": "2026-07-15T19:56:33.297Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
-              "Title": "TeamJobs.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamJobs.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\TeamJobs.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamJobs.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\TeamJobs.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAtAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T21:03:35.812Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 20,
-              "Title": "TeamMembers.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamMembers.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\TeamMembers.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamMembers.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\TeamMembers.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T20:59:24.944Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 23,
-              "Title": "SocialLinks.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\SocialLinks.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\SocialLinks.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\SocialLinks.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\SocialLinks.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAnAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T20:52:07.006Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 21,
-              "Title": "Teams.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Teams.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Teams.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Teams.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\Teams.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAArAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T20:42:36.541Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 24,
-              "Title": "owner.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\owner.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\owner.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\owner.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Enums\\owner.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAPAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T20:56:04.654Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 6,
               "Title": "TeamSkills.cs",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamSkills.cs",
               "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\TeamSkills.cs",
@@ -516,7 +373,85 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 7,
+              "Title": "Teams.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Teams.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Teams.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Teams.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\Teams.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T20:42:36.541Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "TeamPayoutSplits.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamPayoutSplits.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\TeamPayoutSplits.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamPayoutSplits.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\TeamPayoutSplits.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T08:44:07.015Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "TeamMembers.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamMembers.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\TeamMembers.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamMembers.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\TeamMembers.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T20:59:24.944Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "TeamJoinRequests.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamJoinRequests.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\TeamJoinRequests.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamJoinRequests.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\TeamJoinRequests.cs*",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAsAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T21:15:42.083Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "TeamJobSkills.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamJobSkills.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\TeamJobSkills.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamJobSkills.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\TeamJobSkills.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T21:11:35.853Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "TeamJobs.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamJobs.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\TeamJobs.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamJobs.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\TeamJobs.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T21:03:35.812Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
               "Title": "TeamCategories.cs",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\TeamCategories.cs",
               "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\TeamCategories.cs",
@@ -529,7 +464,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 14,
               "Title": "Specialties.cs",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Specialties.cs",
               "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Specialties.cs",
@@ -542,7 +477,189 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "SocialLinks.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\SocialLinks.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\SocialLinks.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\SocialLinks.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\SocialLinks.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T20:52:07.006Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Skills.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Skills.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Skills.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Skills.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\Skills.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T20:39:55.548Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "SavedProjects.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\SavedProjects.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\SavedProjects.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\SavedProjects.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\SavedProjects.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T20:23:01.644Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "Reviews.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Reviews.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Reviews.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Reviews.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\Reviews.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T09:54:35.053Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "ProposalAttachments.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProposalAttachments.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\ProposalAttachments.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProposalAttachments.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\ProposalAttachments.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T22:14:10.613Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "ProjectSkills.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectSkills.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\ProjectSkills.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectSkills.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\ProjectSkills.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T21:50:44.144Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "Projects.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Projects.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Projects.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Projects.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\Projects.cs*",
+              "ViewState": "AgIAAAsAAAAAAAAAAAA9wAoAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T21:22:45.445Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "ProjectProposals.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectProposals.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\ProjectProposals.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectProposals.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\ProjectProposals.cs*",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAwAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T21:52:25.556Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "ProjectMembers.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectMembers.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\ProjectMembers.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectMembers.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\ProjectMembers.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T07:56:04.387Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "ProjectFiles.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectFiles.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\ProjectFiles.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectFiles.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\ProjectFiles.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T08:49:13.525Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "ProjectEvents.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectEvents.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\ProjectEvents.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ProjectEvents.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\ProjectEvents.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T09:06:53.812Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "PortfolioSkills.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\PortfolioSkills.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\PortfolioSkills.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\PortfolioSkills.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\PortfolioSkills.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T10:15:32.969Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "PortfolioProjects.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\PortfolioProjects.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\PortfolioProjects.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\PortfolioProjects.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\PortfolioProjects.cs*",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAUwBMAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T09:12:01.257Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 28,
+              "Title": "PortfolioImages.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\PortfolioImages.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\PortfolioImages.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\PortfolioImages.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\PortfolioImages.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T09:17:11.529Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
               "Title": "Categories.cs",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Categories.cs",
               "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Categories.cs",
@@ -555,72 +672,390 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
-              "Title": "SavedProjects.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\SavedProjects.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\SavedProjects.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\SavedProjects.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\SavedProjects.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T20:23:01.644Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 30,
-              "Title": "UserInterests.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\UserInterests.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\UserInterests.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\UserInterests.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\UserInterests.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAArAAAAAAAAAA==",
+              "Title": "IBaseEntity.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Abstractions\\IBaseEntity.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Abstractions\\IBaseEntity.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Abstractions\\IBaseEntity.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Abstractions\\IBaseEntity.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T20:22:02.885Z",
+              "WhenOpened": "2026-07-15T20:14:39.726Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 31,
+              "Title": "Milestones.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Milestones.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Milestones.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Milestones.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\Milestones.cs*",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwAkAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T22:17:10.302Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "Messages.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Messages.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\Messages.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\Messages.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\Messages.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T10:08:40.165Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "LedgerEntries.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\LedgerEntries.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\LedgerEntries.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\LedgerEntries.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\LedgerEntries.cs*",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABEAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T08:18:37.182Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "EscrowHolds.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\EscrowHolds.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\EscrowHolds.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\EscrowHolds.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\EscrowHolds.cs*",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAA8AAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T08:23:39.936Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
               "Title": "DeveloperProfiles.cs",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\DeveloperProfiles.cs",
               "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\DeveloperProfiles.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\DeveloperProfiles.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\DeveloperProfiles.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAyAAAAAAAAAA==",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\DeveloperProfiles.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\DeveloperProfiles.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-07-15T20:18:22.802Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 36,
               "Title": "ClientProfiles.cs",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ClientProfiles.cs",
               "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\ClientProfiles.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ClientProfiles.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\ClientProfiles.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ClientProfiles.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\ClientProfiles.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-07-15T20:08:42.534Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
-              "Title": "userApp.cs",
-              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\userApp.cs",
-              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\userApp.cs",
-              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\userApp.cs",
-              "RelativeToolTip": "FreeGency.Domain\\Entities\\userApp.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAIAAAAAAAAAA==",
+              "DocumentIndex": 37,
+              "Title": "ChatRooms.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ChatRooms.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\ChatRooms.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ChatRooms.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\ChatRooms.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T19:56:33.297Z",
+              "WhenOpened": "2026-07-16T10:04:14.711Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 38,
+              "Title": "ChatRoomMembers.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ChatRoomMembers.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Entities\\ChatRoomMembers.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Entities\\ChatRoomMembers.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Entities\\ChatRoomMembers.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T10:07:02.916Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "MessageType.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\MessageType.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\MessageType.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\MessageType.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\MessageType.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T10:09:50.648Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "RoomType.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\RoomType.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\RoomType.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\RoomType.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\RoomType.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T10:04:41.849Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "RevieweeType.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\RevieweeType.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\RevieweeType.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\RevieweeType.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\RevieweeType.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T09:55:48.403Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "Visibility.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\Visibility.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\Visibility.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\Visibility.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\Visibility.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T09:15:24.594Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "EventType.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\EventType.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\EventType.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\EventType.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\EventType.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T09:08:46.712Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "FileKind.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\FileKind.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\FileKind.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\FileKind.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\FileKind.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T09:00:09.24Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "SplitType.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\SplitType.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\SplitType.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\SplitType.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\SplitType.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T08:45:48.14Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "TeamPayoutSplits.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\TeamPayoutSplits.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\TeamPayoutSplits.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\TeamPayoutSplits.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\TeamPayoutSplits.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T08:40:09.879Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
+              "Title": "PlanStatus.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\PlanStatus.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\PlanStatus.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\PlanStatus.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\PlanStatus.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T08:36:41.858Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
+              "Title": "FundingStatus.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\FundingStatus.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\FundingStatus.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\FundingStatus.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\FundingStatus.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T08:30:49.11Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 49,
+              "Title": "EntryType.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\EntryType.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\EntryType.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\EntryType.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\EntryType.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T08:19:32.257Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 51,
+              "Title": "WorkStatus.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\WorkStatus.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\WorkStatus.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\WorkStatus.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\WorkStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAABNAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-16T07:53:08.585Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 52,
+              "Title": "ReleaseStatus.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ReleaseStatus.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\ReleaseStatus.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ReleaseStatus.cs*",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\ReleaseStatus.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T22:23:06.064Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 50,
+              "Title": "owner.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\owner.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\owner.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\owner.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\owner.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T20:56:04.654Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 53,
+              "Title": "ProposalStatus.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ProposalStatus.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\ProposalStatus.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ProposalStatus.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\ProposalStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T22:07:10.8Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 54,
+              "Title": "ApplicantType.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ApplicantType.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\ApplicantType.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ApplicantType.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\ApplicantType.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T21:55:21.647Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 55,
+              "Title": "ProjectStatus.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ProjectStatus.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\ProjectStatus.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\ProjectStatus.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\ProjectStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T21:39:19.596Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 57,
+              "Title": "profileMode.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\profileMode.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\profileMode.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\profileMode.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\profileMode.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T20:01:23.222Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 58,
+              "Title": "TeamJoinRequestStatus.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\TeamJoinRequestStatus.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\TeamJoinRequestStatus.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\TeamJoinRequestStatus.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\TeamJoinRequestStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T21:18:06.62Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 56,
+              "Title": "Role.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\Role.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\Role.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\Role.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\Role.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T21:01:01.169Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 59,
+              "Title": "TeamJobStatus.cs",
+              "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\TeamJobStatus.cs",
+              "RelativeDocumentMoniker": "FreeGency.Domain\\Enums\\TeamJobStatus.cs",
+              "ToolTip": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\Enums\\TeamJobStatus.cs",
+              "RelativeToolTip": "FreeGency.Domain\\Enums\\TeamJobStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T21:05:32.228Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 60,
               "Title": "FreeGency.Api.csproj",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Api\\FreeGency.Api.csproj",
               "RelativeDocumentMoniker": "FreeGency.Api\\FreeGency.Api.csproj",
@@ -628,12 +1063,11 @@
               "RelativeToolTip": "FreeGency.Api\\FreeGency.Api.csproj",
               "ViewState": "AgIAAAwAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-07-15T18:31:03.631Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-15T18:31:03.631Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 61,
               "Title": "FreeGency.Application.csproj",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj",
               "RelativeDocumentMoniker": "FreeGency.Application\\FreeGency.Application.csproj",
@@ -641,12 +1075,11 @@
               "RelativeToolTip": "FreeGency.Application\\FreeGency.Application.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-07-15T18:30:49.229Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-15T18:30:49.229Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 62,
               "Title": "FreeGency.Infrastructure.csproj",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj",
               "RelativeDocumentMoniker": "FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj",
@@ -654,12 +1087,11 @@
               "RelativeToolTip": "FreeGency.Infrastructure\\FreeGency.Infrastructure.csproj",
               "ViewState": "AgIAABAAAAAAAAAAAABBwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-07-15T18:30:21.781Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-15T18:30:21.781Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 63,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Api\\Program.cs",
               "RelativeDocumentMoniker": "FreeGency.Api\\Program.cs",
@@ -667,12 +1099,11 @@
               "RelativeToolTip": "FreeGency.Api\\Program.cs",
               "ViewState": "AgIAAAUAAAAAAAAAAAA7wAkAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T18:29:27.198Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-15T18:29:27.198Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 64,
               "Title": "DependencyInjection.cs",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Application\\DependencyInjection.cs",
               "RelativeDocumentMoniker": "FreeGency.Application\\DependencyInjection.cs",
@@ -680,12 +1111,11 @@
               "RelativeToolTip": "FreeGency.Application\\DependencyInjection.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T18:29:09.945Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-15T18:29:09.945Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 65,
               "Title": "DependencyInjection.cs",
               "DocumentMoniker": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Infrastructure\\DependencyInjection.cs",
               "RelativeDocumentMoniker": "FreeGency.Infrastructure\\DependencyInjection.cs",
@@ -693,8 +1123,7 @@
               "RelativeToolTip": "FreeGency.Infrastructure\\DependencyInjection.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T18:28:52.028Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-15T18:28:52.028Z"
             }
           ]
         }

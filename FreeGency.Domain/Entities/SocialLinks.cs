@@ -8,7 +8,7 @@ namespace FreeGency.Domain.Entities
     public class SocialLinks
     {
         public owner OwnerType { get; set; }
-        public string OwnerUserId { get; set; }
+        public Guid OwnerUserId { get; set; }
         public Guid OwnerTeamId { get; set; }
         public string Platform { get; set; }
         public string Url { get; set; }

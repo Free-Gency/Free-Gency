@@ -6,7 +6,7 @@ namespace FreeGency.Domain.Entities
 {
     public class UserInterests
     {
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public Guid CategoryId { get; set; }
     }
 }

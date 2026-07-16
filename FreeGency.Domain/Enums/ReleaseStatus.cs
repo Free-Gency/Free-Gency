@@ -6,6 +6,9 @@ namespace FreeGency.Domain.Enums
 {
     public enum ReleaseStatus
     {
-        //Locked=
+        Locked=0,
+        InReview,
+        Pending,
+        Released
     }
 }

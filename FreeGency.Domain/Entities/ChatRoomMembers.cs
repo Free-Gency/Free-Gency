@@ -4,7 +4,12 @@ using System.Text;
 
 namespace FreeGency.Domain.Entities
 {
-    internal class ChatRoomMembers
+    public class ChatRoomMembers
     {
+        public Guid ChatRoomId { get; set; }
+        public Guid UserId { get; set; }
+        public DateTime JoinedAt { get; set; }
+        public DateTime LastReadAt { get; set; }
+
     }
 }

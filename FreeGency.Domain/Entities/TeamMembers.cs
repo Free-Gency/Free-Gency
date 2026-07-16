@@ -8,7 +8,7 @@ namespace FreeGency.Domain.Entities
     public class TeamMembers
     {
         public Guid TeamId { get; set; }
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
 
         public Role TeamRole { get; set; }
 

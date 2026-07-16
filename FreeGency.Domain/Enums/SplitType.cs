@@ -4,7 +4,8 @@ using System.Text;
 
 namespace FreeGency.Domain.Enums
 {
-    internal class SplitType
+    public enum SplitType
     {
+        Percent=0,Fixed=1
     }
 }

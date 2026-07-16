@@ -4,7 +4,8 @@ using System.Text;
 
 namespace FreeGency.Domain.Enums
 {
-    internal class EntryType
+    public enum EntryType
     {
+        TopUp=0, EscrowLock, EscrowRelease, PendingCredit, AvailableCredit, Withdrawal, PlatformFee, TeamSplit
     }
 }

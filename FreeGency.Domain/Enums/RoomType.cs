@@ -4,7 +4,8 @@ using System.Text;
 
 namespace FreeGency.Domain.Enums
 {
-    internal class RoomType
+    public enum RoomType
     {
+        TeamMain=0 , TeamGroup=1, Proposal=2, Project=3
     }
 }
