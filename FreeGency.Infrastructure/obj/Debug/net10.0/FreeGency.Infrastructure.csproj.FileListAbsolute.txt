@@ -34,3 +34,5 @@ D:\FreeGency ITI\Free-Gency\FreeGency.Infrastructure\obj\Debug\net10.0\FreeGency
 D:\FreeGency ITI\Free-Gency\FreeGency.Infrastructure\obj\Debug\net10.0\refint\FreeGency.Infrastructure.dll
 D:\FreeGency ITI\Free-Gency\FreeGency.Infrastructure\obj\Debug\net10.0\FreeGency.Infrastructure.pdb
 D:\FreeGency ITI\Free-Gency\FreeGency.Infrastructure\obj\Debug\net10.0\ref\FreeGency.Infrastructure.dll
+D:\FreeGency ITI\Free-Gency\FreeGency.Infrastructure\bin\Debug\net10.0\FreeGency.Infrastructure.runtimeconfig.json
+D:\FreeGency ITI\Free-Gency\FreeGency.Infrastructure\obj\Debug\net10.0\FreeGency.Infrastructure.genruntimeconfig.cache
