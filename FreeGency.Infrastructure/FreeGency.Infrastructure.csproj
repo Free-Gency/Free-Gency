@@ -17,7 +17,6 @@
     <Folder Include="Persistence\Context\" />
     <Folder Include="Persistence\Extensions\" />
     <Folder Include="Persistence\Interceptors\" />
-    <Folder Include="Persistence\Repositories\" />
     <Folder Include="Persistence\Seeders\" />
     <Folder Include="Services\" />
     <Folder Include="Services\Payments\" />

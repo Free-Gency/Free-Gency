@@ -10,7 +10,6 @@
     <Folder Include="Exceptions\" />
     <Folder Include="Constants\" />
     <Folder Include="Events\" />
-    <Folder Include="Interfaces\Repositories\" />
     <Folder Include="ValueObjects\" />
     <Folder Include="Specifications\" />
   </ItemGroup>
