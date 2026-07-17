@@ -9,16 +9,16 @@
   <ItemGroup>
     <Folder Include="Common\Models\" />
     <Folder Include="Common\Exceptions\" />
-    <Folder Include="Common\Mappings\" />
-    <Folder Include="Common\Interfaces\" />
     <Folder Include="Common\Behaviors\" />
-    <Folder Include="Common\Errors\" />
-    <Folder Include="Common\Helpers\" />
     <Folder Include="Common\Extensions\" />
-    <Folder Include="Common\Constants\" />
-    <Folder Include="Common\DTOs\" />
-    <Folder Include="Common\Results\" />
-    <Folder Include="Features\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.11" />
   </ItemGroup>
 
   <ItemGroup>

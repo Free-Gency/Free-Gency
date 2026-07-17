@@ -41,4 +41,6 @@ public class User : IdentityUser<Guid>, ISoftDeletableEntity
     public ICollection<ChatRoom> CreatedChatRooms { get; set; } = [];
     public ICollection<ProjectFile> UploadedProjectFiles { get; set; } = [];
     public ICollection<ProjectEvent> ProjectEvents { get; set; } = [];
+    public  List<RefreshToken> refreshTokens { get; set; } = [];
+
 }

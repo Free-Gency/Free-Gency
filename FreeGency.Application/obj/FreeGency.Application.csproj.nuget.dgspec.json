@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj": {}
+    "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj": {}
   },
   "projects": {
-    "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj": {
+    "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj",
+        "projectUniqueName": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj",
         "projectName": "FreeGency.Application",
-        "projectPath": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj",
-        "packagesPath": "C:\\Users\\rmdan\\.nuget\\packages\\",
-        "outputPath": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Application\\obj\\",
+        "projectPath": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Application\\FreeGency.Application.csproj",
+        "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
+        "outputPath": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\rmdan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -30,10 +30,11 @@
         },
         "frameworks": {
           "net10.0": {
+            "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\FreeGency.Domain.csproj": {
-                "projectPath": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\FreeGency.Domain.csproj"
+              "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Domain\\FreeGency.Domain.csproj": {
+                "projectPath": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Domain\\FreeGency.Domain.csproj"
               }
             }
           }
@@ -48,11 +49,34 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.200"
+        "SdkAnalysisLevel": "10.0.300"
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
+          "dependencies": {
+            "FluentValidation": {
+              "target": "Package",
+              "version": "[12.1.1, )"
+            },
+            "FluentValidation.AspNetCore": {
+              "target": "Package",
+              "version": "[11.3.1, )"
+            },
+            "FluentValidation.DependencyInjectionExtensions": {
+              "target": "Package",
+              "version": "[12.1.1, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[10.0.10, )"
+            },
+            "Microsoft.AspNetCore.Http.Abstractions": {
+              "target": "Package",
+              "version": "[2.3.11, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -69,7 +93,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -347,20 +371,20 @@
         }
       }
     },
-    "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\FreeGency.Domain.csproj": {
+    "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Domain\\FreeGency.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\FreeGency.Domain.csproj",
+        "projectUniqueName": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Domain\\FreeGency.Domain.csproj",
         "projectName": "FreeGency.Domain",
-        "projectPath": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\FreeGency.Domain.csproj",
-        "packagesPath": "C:\\Users\\rmdan\\.nuget\\packages\\",
-        "outputPath": "D:\\FreeGency ITI\\Free-Gency\\FreeGency.Domain\\obj\\",
+        "projectPath": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Domain\\FreeGency.Domain.csproj",
+        "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
+        "outputPath": "I:\\.Net Projects\\freeGency\\Free-Gency\\FreeGency.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\rmdan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -373,6 +397,7 @@
         },
         "frameworks": {
           "net10.0": {
+            "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {}
           }
@@ -387,10 +412,11 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.200"
+        "SdkAnalysisLevel": "10.0.300"
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
@@ -414,7 +440,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
