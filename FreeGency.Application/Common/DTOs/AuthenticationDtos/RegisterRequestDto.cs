@@ -10,6 +10,8 @@ namespace FreeGency.Application.Common.DTOs.AuthenticationDtos
         public string LastName { get; init; }
         public string Email { get; init; }
         public string Password { get; init; }
+        public string Country { get; init; }
+        public string PhoneNumber { get; init; }
         public string Mode { get; init; }
     }
 }

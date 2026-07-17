@@ -1,3 +1,4 @@
+using EntityFrameworkCore.EncryptColumn.Util;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -22,7 +23,8 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
         optionsBuilder.UseSqlServer(connectionString);
-
-        return new ApplicationDbContext(optionsBuilder.Options);
+        var encryptionProvider = new GenerateEncryptionProvider(
+       "713c4c4aa4f7430e973c264926219e37");
+        return new ApplicationDbContext(optionsBuilder.Options, encryptionProvider);
     }
 }

@@ -1,3 +1,4 @@
+using EntityFrameworkCore.EncryptColumn.Attribute;
 using FreeGency.Domain.Abstractions;
 using FreeGency.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +11,9 @@ public class User : IdentityUser<Guid>, ISoftDeletableEntity
     public string LastName { get; set; } = string.Empty;
     public bool IsVerified { get; set; } = false;
     public profileMode? ActiveProfileMode { get; set; }
+    public string? Country { get; set; }
+    [EncryptColumn]
+    public string? code { get; set; }
 
     public DateTime CreatedAt { get; set; }
     public string CreatedBy { get; set; } = string.Empty;

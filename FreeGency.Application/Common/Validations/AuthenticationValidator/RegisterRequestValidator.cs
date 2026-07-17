@@ -15,7 +15,8 @@ namespace FreeGency.Application.Common.Validations.AuthenticationValidator
                .NotEmpty()
                .WithMessage("First name is required.")
                .MinimumLength(3);
-
+            RuleFor(x => x.Country).NotEmpty().WithMessage("Country is required.");
+            RuleFor(x => x.PhoneNumber).NotEmpty().WithMessage("Phone Number is required");
             RuleFor(x => x.LastName)
                 .NotEmpty()
                 .WithMessage("Last name is required.")
