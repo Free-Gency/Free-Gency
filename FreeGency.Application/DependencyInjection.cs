@@ -3,6 +3,7 @@ using FluentValidation.AspNetCore;
 using FreeGency.Application.Common.Helpers;
 using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Features.Authentication;
+using FreeGency.Application.Features.EmailFeature.Commands;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -19,6 +20,7 @@ namespace FreeGency.Application
         {
             services.AddSingleton<IJwtProvider, JwtProvider>();
             services.AddScoped<IAuthServices, AuthServices>();
+            services.AddScoped<IEmailAuthService, EmailAuthService>();
             services.AddFluentValidationAutoValidation()
                     .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddOptions<JwtOptions>()
@@ -28,9 +30,10 @@ namespace FreeGency.Application
             services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequiredLength = 8;
-                //options.SignIn.RequireConfirmedEmail = true;
+                options.SignIn.RequireConfirmedEmail = true;
                 options.User.RequireUniqueEmail = true;
             });
+            services.AddHttpContextAccessor();
 
             return services;
         }
