@@ -27,6 +27,11 @@ namespace FreeGency.Application.Features.Authentication
             var user = dto.ToEntity();
             var result = await userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded) return Result.Failure(new Error(result.Errors.First().Code, result.Errors.First().Description, StatusCodes.Status400BadRequest));
+            var clientPro = new ClientProfile
+            {
+                Id = Guid.CreateVersion7(),
+                UserId = user.Id
+            };
             return Result.Success();
         }
 

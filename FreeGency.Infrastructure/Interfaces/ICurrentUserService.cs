@@ -1,4 +1,4 @@
-namespace FreeGency.Application.Common.Interfaces;
+namespace FreeGency.Infrastructure.Interfaces;
 
 public interface ICurrentUserService
 {

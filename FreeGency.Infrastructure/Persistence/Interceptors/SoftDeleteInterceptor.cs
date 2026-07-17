@@ -1,5 +1,5 @@
-using FreeGency.Application.Common.Interfaces;
 using FreeGency.Domain.Abstractions;
+using FreeGency.Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 

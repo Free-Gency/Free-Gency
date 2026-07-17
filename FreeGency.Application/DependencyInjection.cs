@@ -18,6 +18,7 @@ namespace FreeGency.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddSingleton<IJwtProvider, JwtProvider>();
+            services.AddScoped<IAuthServices, AuthServices>();
             services.AddFluentValidationAutoValidation()
                     .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddOptions<JwtOptions>()

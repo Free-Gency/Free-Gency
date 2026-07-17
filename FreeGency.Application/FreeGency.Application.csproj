@@ -7,9 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Common\Behaviors\**" />
+    <EmbeddedResource Remove="Common\Behaviors\**" />
+    <None Remove="Common\Behaviors\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\Constants\" />
     <Folder Include="Common\Models\" />
     <Folder Include="Common\Exceptions\" />
-    <Folder Include="Common\Behaviors\" />
     <Folder Include="Common\Extensions\" />
   </ItemGroup>
 
@@ -23,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FreeGency.Domain\FreeGency.Domain.csproj" />
+    <ProjectReference Include="..\FreeGency.Infrastructure\FreeGency.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

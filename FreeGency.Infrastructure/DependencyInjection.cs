@@ -1,5 +1,5 @@
-﻿using FreeGency.Application.Common.Interfaces;
-using FreeGency.Application.Features.Authentication;
+﻿
+using FreeGency.Infrastructure.Interfaces;
 using FreeGency.Infrastructure.Persistence.Context;
 using FreeGency.Infrastructure.Persistence.Interceptors;
 using FreeGency.Infrastructure.Services;
@@ -16,7 +16,6 @@ public static class DependencyInjection
     {
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
-        services.AddScoped<IAuthServices, AuthServices>();
         services.AddScoped<AuditInterceptor>();
         services.AddScoped<SoftDeleteInterceptor>();
 
@@ -27,7 +26,7 @@ public static class DependencyInjection
                 sp.GetRequiredService<AuditInterceptor>(),
                 sp.GetRequiredService<SoftDeleteInterceptor>());
         });
-        
+
         return services;
     }
 }

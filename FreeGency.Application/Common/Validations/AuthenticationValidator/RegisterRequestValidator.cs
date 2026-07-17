@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
-using FreeGency.Application.Common.Constants;
 using FreeGency.Application.Common.DTOs.AuthenticationDtos;
+using FreeGency.Application.Common.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Text;
