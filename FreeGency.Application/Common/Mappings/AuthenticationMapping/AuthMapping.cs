@@ -31,7 +31,9 @@ namespace FreeGency.Application.Common.Mappings.AuthenticationMapping
                 UserName = dto.Email,
                 FristName = dto.FirstName,
                 LastName = dto.LastName,
-                ActiveProfileMode = dto.Mode == "Client" ? profileMode.Client : profileMode.Developer
+                ActiveProfileMode = dto.Mode == "Client" ? profileMode.Client : profileMode.Developer,
+                PhoneNumber=dto.PhoneNumber,
+                Country=dto.Country
             };
         }
     }

@@ -1,22 +1,29 @@
-﻿using FoundIt.Application.Common.Models;
+﻿using EntityFrameworkCore.EncryptColumn.Interfaces;
+using FoundIt.Application.Common.Models;
 using FreeGency.Application.Common.DTOs.AuthenticationDtos;
 using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Common.Mappings.AuthenticationMapping;
 using FreeGency.Application.Common.Results;
+using FreeGency.Application.Features.Authentication.Dtos;
 using FreeGency.Domain.Entities;
 using FreeGency.Domain.Enums;
+using FreeGency.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace FreeGency.Application.Features.Authentication
 {
-    public class AuthServices(UserManager<User> userManager,IJwtProvider jwtProvider) : IAuthServices
+    public class AuthServices(UserManager<User> userManager,IJwtProvider jwtProvider
+                              ,IHttpContextAccessor httpContextAccessor,IEmailService emailService,IEncryptionProvider encryptionProvider) : IAuthServices
     {
         private readonly int _refreshTokenExpiryDays = 14;
 
@@ -27,11 +34,17 @@ namespace FreeGency.Application.Features.Authentication
             var user = dto.ToEntity();
             var result = await userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded) return Result.Failure(new Error(result.Errors.First().Code, result.Errors.First().Description, StatusCodes.Status400BadRequest));
-            var clientPro = new ClientProfile
-            {
-                Id = Guid.CreateVersion7(),
-                UserId = user.Id
-            };
+            // generate profiles
+            //send comfirmaion email
+            var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(
+                               Encoding.UTF8.GetBytes(code));
+            var RequestAccessor = httpContextAccessor.HttpContext.Request;
+            var ReturnUrl = $"{RequestAccessor.Scheme}://{RequestAccessor.Host}/Auth/ConfirmEmail?userId={user.Id}&code={code}";
+            //body
+            var resultOfConfirmEmail = await emailService.SendMassege(user.Email!, ReturnUrl, "Confirm Your Email");
+            if (!resultOfConfirmEmail)
+                return Result.Failure<string>(AuthenticationErrors.ConfirmEmail);
             return Result.Success();
         }
 
@@ -44,6 +57,7 @@ namespace FreeGency.Application.Features.Authentication
             var isValidPassword = await userManager.CheckPasswordAsync(user, dto.Password);
             if (!isValidPassword)
                 return Result.Failure<AuthResponseDto>(UserErrors.InvalidCredentials);
+            if (!user.EmailConfirmed) return Result.Failure<AuthResponseDto>(AuthenticationErrors.EmailUserNotConfirmed);
             var authResponse = await GetAuthResponseDto(user);
             
             return Result.Success(authResponse);   
@@ -93,6 +107,50 @@ namespace FreeGency.Application.Features.Authentication
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
 
-       
+        public async Task<Result<string>> ComfirmEmail(ConfirmEmailRequestDto dto)
+        {
+            if (dto.code == null || dto.userId == null) return Result.Failure<string>(AuthenticationErrors.InvalidEmailConfirmationToken);
+            dto.code = Encoding.UTF8.GetString(
+                                       WebEncoders.Base64UrlDecode(dto.code));
+            var user = await userManager.FindByIdAsync(dto.userId);
+            if (user == null) return Result.Failure<string>(AuthenticationErrors.InvalidEmailConfirmationToken);
+            var result = await userManager.ConfirmEmailAsync(user, dto.code);
+            if (result.Succeeded) return Result.Success("Email Comfirmed");
+            return Result.Failure<string>(AuthenticationErrors.InvalidEmailConfirmationToken);
+        }
+
+        public async Task<Result<string>> SendResetPasswordCode(ResetPasswordRequestDto dto)
+        {
+            var user = await userManager.FindByEmailAsync(dto.Email);
+            if (user == null) return Result.Failure<string>(UserErrors.UserNotFound);
+            Random geerator = new Random();
+            string randomNumber = geerator.Next(0, 1000000).ToString("D6");
+            user.code = randomNumber;
+            var result =await userManager.UpdateAsync(user);
+            if (!result.Succeeded) return Result.Failure<string>(new Error(result.Errors.First().Code, result.Errors.First().Description, StatusCodes.Status400BadRequest));
+            var message = "Code to Reset Password : " + randomNumber;
+            await emailService.SendMassege(user.Email!, message, "Reset Password Code");
+            return Result.Success("Code send successfly");
+        }
+
+        public async Task<Result> ComfirmCodeAsync(ConfirmCodeRequestDto dto)
+        {
+            var user = await userManager.FindByEmailAsync(dto.email);
+            if (user == null) return Result.Failure(UserErrors.UserNotFound);
+            var usercode = user.code;
+            if (dto.code != usercode) return Result.Failure(UserErrors.InvalidResetCode);
+            user.code = null;
+            await userManager.UpdateAsync(user);
+            return Result.Success();
+        }
+
+        public async Task<Result<string>> ResetNewPassword(ResetPasswordandConfirmPasswordRequestDto dto)
+        {
+            var user = await userManager.FindByEmailAsync(dto.email);
+            if (user == null) return Result.Failure<string>(UserErrors.UserNotFound);
+            await userManager.RemovePasswordAsync(user);
+            await userManager.AddPasswordAsync(user, dto.password);
+            return Result.Success("Password Reset Successfly");
+        }
     }
 }
