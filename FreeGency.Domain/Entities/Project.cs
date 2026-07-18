@@ -43,6 +43,7 @@ public class Project : ISoftDeletableEntity
     public ICollection<ProjectEvent> ProjectEvents { get; set; } = [];
     public ICollection<Review> Reviews { get; set; } = [];
     public ICollection<ChatRoom> ChatRooms { get; set; } = [];
+    public ICollection<LedgerEntry> LedgerEntries { get; set; } = [];
     public EscrowHold? EscrowHold { get; set; }
     public ICollection<TeamPayoutSplit> TeamPayoutSplits { get; set; } = [];
 }

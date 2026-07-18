@@ -28,16 +28,16 @@ public sealed class TeamRepository : GenericRepository<Team>, ITeamRepository
             .ToListAsync(ct);
     }
 
-    public Task<Team?> GetByTeamCodeAsync(string teamCode, CancellationToken ct = default)
+    public async Task<Team?> GetByTeamCodeAsync(string teamCode, CancellationToken ct = default)
     {
-        return _dbSet
+        return await _dbSet
             .AsNoTracking()
             .FirstOrDefaultAsync(t => t.TeamCode == teamCode, ct);
     }
 
-    public Task<Team?> GetByTeamCodeWithDetailsAsync(string teamCode, CancellationToken ct = default)
+    public async Task<Team?> GetByTeamCodeWithDetailsAsync(string teamCode, CancellationToken ct = default)
     {
-        return _dbSet
+        return await _dbSet
             .AsNoTracking()
             .Include(t => t.Owner)
             .Include(t => t.TeamCategories).ThenInclude(tc => tc.Category)
