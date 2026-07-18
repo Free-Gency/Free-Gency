@@ -46,6 +46,17 @@ namespace FreeGency.Api
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("Frontend", policy =>
+                {
+                    policy.WithOrigins(
+                            builder.Configuration["FrontendUrl"] ?? "http://localhost:4200")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
            
             var app = builder.Build();
 
@@ -55,7 +66,14 @@ namespace FreeGency.Api
                 app.MapOpenApi();
             }
 
-            app.UseHttpsRedirection();
+            // Skip HTTPS redirect in Development so the Angular app can call http://localhost:5101
+            // without browsers failing on the redirect to the self-signed HTTPS endpoint.
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
+
+            app.UseCors("Frontend");
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();

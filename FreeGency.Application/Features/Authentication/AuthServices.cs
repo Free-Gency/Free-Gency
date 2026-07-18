@@ -1,4 +1,4 @@
-﻿using EntityFrameworkCore.EncryptColumn.Interfaces;
+using EntityFrameworkCore.EncryptColumn.Interfaces;
 using FoundIt.Application.Common.Models;
 using FreeGency.Application.Common.DTOs.AuthenticationDtos;
 using FreeGency.Application.Common.Errors;
@@ -23,7 +23,8 @@ using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 namespace FreeGency.Application.Features.Authentication
 {
     public class AuthServices(UserManager<User> userManager,IJwtProvider jwtProvider
-                              ,IHttpContextAccessor httpContextAccessor,IEmailService emailService,IEncryptionProvider encryptionProvider) : IAuthServices
+                              ,IHttpContextAccessor httpContextAccessor,IEmailService emailService,IEncryptionProvider encryptionProvider
+                              ,Microsoft.Extensions.Configuration.IConfiguration configuration) : IAuthServices
     {
         private readonly int _refreshTokenExpiryDays = 14;
 
@@ -39,8 +40,9 @@ namespace FreeGency.Application.Features.Authentication
             var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(
                                Encoding.UTF8.GetBytes(code));
-            var RequestAccessor = httpContextAccessor.HttpContext.Request;
-            var ReturnUrl = $"{RequestAccessor.Scheme}://{RequestAccessor.Host}/Auth/ConfirmEmail?userId={user.Id}&code={code}";
+            var frontendUrl = configuration["FrontendUrl"]?.TrimEnd('/')
+                ?? $"{httpContextAccessor.HttpContext!.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}";
+            var ReturnUrl = $"{frontendUrl}/auth/confirm-email?userId={user.Id}&code={code}";
             //body
             var resultOfConfirmEmail = await emailService.SendMassege(user.Email!, ReturnUrl, "Confirm Your Email");
             if (!resultOfConfirmEmail)
