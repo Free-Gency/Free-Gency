@@ -4,6 +4,7 @@ using FreeGency.Application.Common.Helpers;
 using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Features.Authentication;
 using FreeGency.Application.Features.EmailFeature.Commands;
+using FreeGency.Application.Features.ExternalFeature.Commands;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +19,7 @@ namespace FreeGency.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            services.AddScoped<IExternalServices, ExternalServices>();
             services.AddSingleton<IJwtProvider, JwtProvider>();
             services.AddScoped<IAuthServices, AuthServices>();
             services.AddScoped<IEmailAuthService, EmailAuthService>();

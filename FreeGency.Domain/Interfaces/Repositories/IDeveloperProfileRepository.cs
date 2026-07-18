@@ -9,7 +9,7 @@ namespace FreeGency.Domain.Interfaces.Repositories
         Task<bool> ExistsForUserAsync(Guid userId, CancellationToken ct = default);
         Task ReplaceSkillsAsync(Guid userId, IEnumerable<Guid> skillIds, CancellationToken ct = default);
         Task ReplaceInterestsAsync(Guid userId, IEnumerable<Guid> categoryIds, CancellationToken ct = default);
-        Task UpdateRatingAsync(Guid userId, decimal avg, int count);
+        Task UpdateRatingAsync(Guid userId, decimal avg, int count, CancellationToken ct = default);
         Task<IEnumerable<DeveloperProfile>> SearchBySkillsAsync(IEnumerable<Guid> skillIds, CancellationToken ct = default);
     }
 }

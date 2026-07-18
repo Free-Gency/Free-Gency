@@ -1,4 +1,3 @@
-﻿
 using Microsoft.EntityFrameworkCore;
 
 namespace FreeGency.Infrastructure.Persistence.Repositories.Teams;
