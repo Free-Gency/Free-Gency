@@ -27,7 +27,7 @@ public class Project : ISoftDeletableEntity
     public int? EstimatedDurationDays { get; set; }
     public ProjectStatus Status { get; set; } = ProjectStatus.Draft;
     public Guid? AssignedTeamId { get; set; }
-    public string? AssignedUserId { get; set; }
+    public Guid? AssignedUserId { get; set; }
     public DateTime? CompletedAt { get; set; }
 
     public User Client { get; set; } = null!;

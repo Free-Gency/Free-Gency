@@ -5,7 +5,9 @@ namespace FreeGency.Domain.Interfaces.Repositories.Portfolio;
 
 public interface IPortfolioProjectRepository : IGenericRepository<PortfolioProject>
 {
-    Task<IReadOnlyList<PortfolioProject>> GetByOwnerAsync(owner ownerType, Guid ownerId, CancellationToken ct = default);
+    Task<IReadOnlyList<PortfolioProject>> GetByOwnerIdAsync(owner ownerType, Guid ownerId, CancellationToken ct = default);
+
+    Task<IReadOnlyList<PortfolioProject>> GetByOwnerIdWithDetailsAsync(owner ownerType, Guid ownerId, CancellationToken ct = default);
 
     Task<PortfolioProject?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default);
 

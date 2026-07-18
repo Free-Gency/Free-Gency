@@ -1,7 +1,4 @@
 ﻿
-using FreeGency.Domain.Entities;
-using FreeGency.Domain.Interfaces.Repositories.Teams;
-using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace FreeGency.Infrastructure.Persistence.Repositories.Teams;
@@ -14,37 +11,53 @@ public sealed class TeamRepository : GenericRepository<Team>, ITeamRepository
     public async Task<IReadOnlyList<Team>> GetByOwnerUserIdAsync(Guid ownerUserId, CancellationToken ct = default)
     {
         return await _dbSet
+            .AsNoTracking()
+            .Where(t => t.OwnerUserId == ownerUserId)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<Team>> GetByOwnerUserIdWithDetailsAsync(Guid ownerUserId, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
             .Where(t => t.OwnerUserId == ownerUserId)
             .Include(t => t.Owner)
             .Include(t => t.TeamCategories).ThenInclude(tc => tc.Category)
             .Include(t => t.TeamSkills).ThenInclude(ts => ts.Skill)
             .Include(t => t.TeamMembers).ThenInclude(tm => tm.User)
             .Include(t => t.SocialLinks)
-            .AsNoTracking()
             .ToListAsync(ct);
     }
 
     public Task<Team?> GetByTeamCodeAsync(string teamCode, CancellationToken ct = default)
     {
         return _dbSet
-            .Include(t => t.Owner)
-            .Include(t => t.TeamCategories).ThenInclude(tc => tc.Category)
-            .Include(t => t.TeamSkills).ThenInclude(ts => ts.Skill)
-            .Include(t => t.TeamMembers).ThenInclude(tm => tm.User)
-            .Include(t => t.SocialLinks)
             .AsNoTracking()
             .FirstOrDefaultAsync(t => t.TeamCode == teamCode, ct);
     }
 
-    public async Task<Team?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default)
+    public Task<Team?> GetByTeamCodeWithDetailsAsync(string teamCode, CancellationToken ct = default)
     {
-        return await _dbSet
+        return _dbSet
+            .AsNoTracking()
             .Include(t => t.Owner)
             .Include(t => t.TeamCategories).ThenInclude(tc => tc.Category)
             .Include(t => t.TeamSkills).ThenInclude(ts => ts.Skill)
             .Include(t => t.TeamMembers).ThenInclude(tm => tm.User)
             .Include(t => t.SocialLinks)
+            .FirstOrDefaultAsync(t => t.TeamCode == teamCode, ct);
+    }
+
+
+    public async Task<Team?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default)
+    {
+        return await _dbSet
             .AsNoTracking()
+            .Include(t => t.Owner)
+            .Include(t => t.TeamCategories).ThenInclude(tc => tc.Category)
+            .Include(t => t.TeamSkills).ThenInclude(ts => ts.Skill)
+            .Include(t => t.TeamMembers).ThenInclude(tm => tm.User)
+            .Include(t => t.SocialLinks)
             .FirstOrDefaultAsync(t => t.Id == id, ct);
     }
 

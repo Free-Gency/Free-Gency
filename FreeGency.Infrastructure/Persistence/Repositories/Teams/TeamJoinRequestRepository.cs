@@ -1,7 +1,4 @@
-using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
-using FreeGency.Domain.Interfaces.Repositories.Teams;
-using FreeGency.Infrastructure.Persistence.Context;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace FreeGency.Infrastructure.Persistence.Repositories.Teams;
@@ -13,11 +10,9 @@ public sealed class TeamJoinRequestRepository : GenericRepository<TeamJoinReques
     public async Task<IReadOnlyList<TeamJoinRequest>> GetPendingByTeamIdAsync(Guid teamId, CancellationToken ct = default)
     {
         return await _dbSet
-            .Where(r => r.TeamId == teamId && r.Status == TeamJoinRequestStatus.pending)
-            .Include(r => r.User)
-            .Include(r => r.TeamJob)
-            .OrderByDescending(r => r.RequestedAt)
             .AsNoTracking()
+            .Where(r => r.TeamId == teamId && r.Status == TeamJoinRequestStatus.pending)
+            .OrderByDescending(r => r.RequestedAt)
             .ToListAsync(ct);
     }
 
@@ -25,21 +20,19 @@ public sealed class TeamJoinRequestRepository : GenericRepository<TeamJoinReques
     public async Task<IReadOnlyList<TeamJoinRequest>> GetByUserIdAsync(Guid userId, CancellationToken ct = default)
     {
         return await _dbSet
-            .Where(r => r.UserId == userId)
-            .Include(r => r.User)
-            .Include(r => r.TeamJob)
-            .OrderByDescending(r => r.RequestedAt)
             .AsNoTracking()
+            .Where(r => r.UserId == userId)
+            .OrderByDescending(r => r.RequestedAt)
             .ToListAsync(ct);
     }
 
     public async Task<TeamJoinRequest?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default)
     {
         return await _dbSet
+            .AsNoTracking()
             .Where(r => r.Id == id)
             .Include(r => r.User)
             .Include(r => r.TeamJob)
-            .AsNoTracking()
             .FirstOrDefaultAsync(ct);
     }
 

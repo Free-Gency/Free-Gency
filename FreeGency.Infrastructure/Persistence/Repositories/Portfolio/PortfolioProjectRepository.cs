@@ -7,9 +7,25 @@ public sealed class PortfolioProjectRepository : GenericRepository<PortfolioProj
 {
     public PortfolioProjectRepository(ApplicationDbContext context) : base(context) { }
 
-    public async Task<IReadOnlyList<PortfolioProject>> GetByOwnerAsync(owner ownerType, Guid ownerId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<PortfolioProject>> GetByOwnerIdAsync(owner ownerType, Guid ownerId, CancellationToken ct = default)
     {
-        var query = _dbSet.AsQueryable();
+        var query = _dbSet.AsNoTracking().AsQueryable();
+
+        query = ownerType switch
+        {
+            owner.User => query.Where(p => p.OwnerType == owner.User && p.OwnerUserId == ownerId),
+            owner.Team => query.Where(p => p.OwnerType == owner.Team && p.OwnerTeamId == ownerId),
+            _ => query.Where(_ => false)
+        };
+
+        return await query
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<PortfolioProject>> GetByOwnerIdWithDetailsAsync(owner ownerType, Guid ownerId, CancellationToken ct = default)
+    {
+        var query = _dbSet.AsNoTracking().AsQueryable();
 
         query = ownerType switch
         {
@@ -23,17 +39,16 @@ public sealed class PortfolioProjectRepository : GenericRepository<PortfolioProj
             .Include(p => p.PortfolioSkills)
             .Include(p => p.Category)
             .OrderByDescending(p => p.CreatedAt)
-            .AsNoTracking()
             .ToListAsync(ct);
     }
 
     public async Task<PortfolioProject?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default)
     {
         return await _dbSet
+            .AsNoTracking()
             .Include(p => p.PortfolioImages)
             .Include(p => p.PortfolioSkills).ThenInclude(ps => ps.Skill)
             .Include(p => p.Category)
-            .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id, ct);
     }
 

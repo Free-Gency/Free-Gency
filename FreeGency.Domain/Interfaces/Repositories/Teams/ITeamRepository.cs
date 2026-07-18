@@ -7,7 +7,11 @@ public interface ITeamRepository : IGenericRepository<Team>
 {
     Task<IReadOnlyList<Team>> GetByOwnerUserIdAsync(Guid ownerUserId, CancellationToken ct = default);
 
+    Task<IReadOnlyList<Team>> GetByOwnerUserIdWithDetailsAsync(Guid ownerUserId, CancellationToken ct = default);
+
     Task<Team?> GetByTeamCodeAsync(string teamCode, CancellationToken ct = default);
+
+    Task<Team?> GetByTeamCodeWithDetailsAsync(string teamCode, CancellationToken ct = default);
 
     Task<Team?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default);
 

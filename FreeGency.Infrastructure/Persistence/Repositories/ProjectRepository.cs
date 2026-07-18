@@ -93,7 +93,7 @@ public class ProjectRepository : GenericRepository<Project>,IProjectRepository
         var project = await _dbSet.FirstOrDefaultAsync(p => p.Id == id, ct);
         if (project is null)
             throw new KeyNotFoundException("Project not found.");
-        project.AssignedUserId = userId?.ToString();
+        project.AssignedUserId = userId;
         project.AssignedTeamId = teamId;
         project.Status = ProjectStatus.InProgress;
         _dbSet.Update(project);

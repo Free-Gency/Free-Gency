@@ -1,7 +1,4 @@
-using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
-using FreeGency.Domain.Interfaces.Repositories.Teams;
-using FreeGency.Infrastructure.Persistence.Context;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace FreeGency.Infrastructure.Persistence.Repositories.Teams;
@@ -13,10 +10,8 @@ public sealed class TeamJobRepository : GenericRepository<TeamJob>, ITeamJobRepo
     public async Task<IReadOnlyList<TeamJob>> GetOpenByTeamIdAsync(Guid teamId, CancellationToken ct = default)
     {
         return await _dbSet
-            .Where(j => j.TeamId == teamId && j.Status == TeamJobStatus.open)
-            .Include(j => j.Team)
-            .Include(j => j.TeamJobSkills).ThenInclude(tjs => tjs.Skill)
             .AsNoTracking()
+            .Where(j => j.TeamId == teamId && j.Status == TeamJobStatus.open)
             .ToListAsync(ct);
     }
 
@@ -40,12 +35,9 @@ public sealed class TeamJobRepository : GenericRepository<TeamJob>, ITeamJobRepo
         }
 
         return await query
-            .Include(j => j.Team)
-            .Include(j => j.TeamJobSkills).ThenInclude(tjs => tjs.Skill)
             .OrderByDescending(j => j.CreatedAt)
             .Skip(skip)
             .Take(take)
-            .AsNoTracking()
             .ToListAsync(ct);
     }
 
@@ -53,20 +45,28 @@ public sealed class TeamJobRepository : GenericRepository<TeamJob>, ITeamJobRepo
     public async Task<TeamJob?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default)
     {
         return await _dbSet
+            .AsNoTracking()
             .Where(j => j.Id == id)
             .Include(j => j.Team)
             .Include(j => j.TeamJobSkills).ThenInclude(tjs => tjs.Skill)
-            .AsNoTracking()
             .FirstOrDefaultAsync(ct);
     }
 
     public async Task<IReadOnlyList<TeamJob>> GetAllByTeamIdAsync(Guid teamId, CancellationToken ct = default)
     {
         return await _dbSet
+            .AsNoTracking()
+            .Where(j => j.TeamId == teamId)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<TeamJob>> GetAllByTeamIdWithDetailsAsync(Guid teamId, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
             .Where(j => j.TeamId == teamId)
             .Include(j => j.Team)
             .Include(j => j.TeamJobSkills).ThenInclude(tjs => tjs.Skill)
-            .AsNoTracking()
             .ToListAsync(ct);
     }
 

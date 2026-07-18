@@ -1,7 +1,4 @@
-﻿using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
-using FreeGency.Domain.Interfaces.Repositories.Teams;
-using FreeGency.Infrastructure.Persistence.Context;
+﻿
 using Microsoft.EntityFrameworkCore;
 
 
@@ -16,20 +13,16 @@ public sealed class TeamMemberRepository : GenericRepository<TeamMember>, ITeamM
     public async Task<IReadOnlyList<TeamMember>> GetByTeamIdAsync(Guid teamId, CancellationToken ct = default)
     {
         return await _dbSet
-            .Where(tm => tm.TeamId == teamId)
-            .Include(tm => tm.User)
-            .Include(tm => tm.Team)
             .AsNoTracking()
+            .Where(tm => tm.TeamId == teamId)
             .ToListAsync(ct);
     }
 
     public async Task<IReadOnlyList<TeamMember>> GetByUserIdAsync(Guid userId, CancellationToken ct = default)
     {
         return await _dbSet
-            .Where(tm => tm.UserId == userId)
-            .Include(tm => tm.User)
-            .Include(tm => tm.Team)
             .AsNoTracking()
+            .Where(tm => tm.UserId == userId)
             .ToListAsync(ct);
     }
 
@@ -37,18 +30,16 @@ public sealed class TeamMemberRepository : GenericRepository<TeamMember>, ITeamM
     public async Task<TeamMember?> GetSingleInTeamAsync(Guid teamId, Guid userId, CancellationToken ct = default)
     {
         return await _dbSet
-            .Where(tm => tm.TeamId == teamId && tm.UserId == userId)
-            .Include(tm => tm.User)
-            .Include(tm => tm.Team)
             .AsNoTracking()
+            .Where(tm => tm.TeamId == teamId && tm.UserId == userId)
             .FirstOrDefaultAsync(ct);
     }
 
     public async Task<int> GetMemberCountAsync(Guid teamId, CancellationToken ct = default)
     {
         return await _dbSet
-            .Where(tm => tm.TeamId == teamId)
             .AsNoTracking()
+            .Where(tm => tm.TeamId == teamId)
             .CountAsync(ct);
     }
 
@@ -77,10 +68,8 @@ public sealed class TeamMemberRepository : GenericRepository<TeamMember>, ITeamM
     public async Task<IReadOnlyList<TeamMember>> GetLeadersAsync(Guid teamId, CancellationToken ct = default)
     {
         return await _dbSet
-            .Where(tm => tm.TeamId == teamId && tm.TeamRole == Role.TeamLeader)
-            .Include(tm => tm.User)
-            .Include(tm => tm.Team)
             .AsNoTracking()
+            .Where(tm => tm.TeamId == teamId && tm.TeamRole == Role.TeamLeader)
             .ToListAsync(ct);
     }
 
