@@ -1,13 +1,6 @@
 ﻿
 using EntityFrameworkCore.EncryptColumn.Interfaces;
 using EntityFrameworkCore.EncryptColumn.Util;
-using FreeGency.Domain.Interfaces.Repositories.Teams;
-using FreeGency.Infrastructure.Implementations;
-using FreeGency.Infrastructure.Interfaces;
-using FreeGency.Infrastructure.Persistence.Context;
-using FreeGency.Infrastructure.Persistence.Interceptors;
-using FreeGency.Infrastructure.Persistence.Repositories.Teams;
-using FreeGency.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +25,9 @@ public static class DependencyInjection
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
         services.AddScoped<ITeamJobRepository, TeamJobRepository>();
         services.AddScoped<ITeamJoinRequestRepository, TeamJoinRequestRepository>();
+        services.AddScoped<IPortfolioProjectRepository, PortfolioProjectRepository>();
+
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
