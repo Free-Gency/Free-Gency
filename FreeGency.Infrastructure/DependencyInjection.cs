@@ -1,11 +1,6 @@
 ﻿
 using EntityFrameworkCore.EncryptColumn.Interfaces;
 using EntityFrameworkCore.EncryptColumn.Util;
-using FreeGency.Infrastructure.Implementations;
-using FreeGency.Infrastructure.Interfaces;
-using FreeGency.Infrastructure.Persistence.Context;
-using FreeGency.Infrastructure.Persistence.Interceptors;
-using FreeGency.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +20,15 @@ public static class DependencyInjection
         services.AddScoped<IEmailService,EmailService>();
         services.AddScoped<AuditInterceptor>();
         services.AddScoped<SoftDeleteInterceptor>();
+
+        services.AddScoped<ITeamRepository, TeamRepository>();
+        services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
+        services.AddScoped<ITeamJobRepository, TeamJobRepository>();
+        services.AddScoped<ITeamJoinRequestRepository, TeamJoinRequestRepository>();
+        services.AddScoped<IPortfolioProjectRepository, PortfolioProjectRepository>();
+
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
