@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using FreeGency.Domain.Entities;
+using FreeGency.Domain.Enums;
+
+namespace FreeGency.Domain.Interfaces.Repositories
+{
+    public interface IProjectRepository : IGenericRepository<Project>
+    {
+        Task<IEnumerable<Project>> GetByClientIdAsync( Guid clientId, ProjectStatus? status = null, CancellationToken ct = default);
+
+        Task<IEnumerable<Project>> SearchOpenAsync( string? keyword, Guid? categoryI, Guid? specialtyId, decimal? minBudget, decimal? maxBudget, CancellationToken ct = default);
+
+        Task AddWithSkillsAsync( Project project, IEnumerable<Guid> skillIds, CancellationToken ct = default);
+
+        Task UpdateStatusAsync( Guid id,  ProjectStatus status, CancellationToken ct = default);
+
+        Task SetAssigneeAsync( Guid id, Guid? userId, Guid? teamId,  CancellationToken ct = default);
+
+        Task ReplaceSkillsAsync( Guid projectId, IEnumerable<Guid> skillIds, CancellationToken ct = default);
+
+        Task SaveProjectAsync( Guid projectId, Guid userId, CancellationToken ct = default);
+
+        Task UnsaveProjectAsync( Guid projectId, Guid userId,CancellationToken ct = default);
+
+        Task<IEnumerable<Project>> GetSavedByUserAsync(Guid userId, CancellationToken ct = default);
+    }
+}
