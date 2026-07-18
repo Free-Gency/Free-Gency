@@ -17,12 +17,13 @@ namespace FreeGency.Api
             var builder = WebApplication.CreateBuilder(args);
            
             builder.Services.AddInfrastructure(builder.Configuration)
-                            .AddApplication();
+                            .AddApplication(); 
             builder.Services.AddIdentity<User, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
             #region
             var JwtSettings = builder.Configuration.GetSection(JwtOptions.NameSection).Get<JwtOptions>();
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -41,7 +42,16 @@ namespace FreeGency.Api
                          ValidIssuer = JwtSettings?.Issuer,
                          ValidAudience = JwtSettings?.Audience
                      };
+                 }).AddCookie().AddGoogle(options =>
+                 {
+                     options.ClientId =
+                         builder.Configuration["Authentication:Google:ClientId"]!;
+
+                     options.ClientSecret =
+                         builder.Configuration["Authentication:Google:ClientSecret"]!;
+                     options.SignInScheme = IdentityConstants.ExternalScheme;
                  });
+
             #endregion
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
