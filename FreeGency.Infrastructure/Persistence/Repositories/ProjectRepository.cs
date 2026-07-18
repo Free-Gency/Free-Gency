@@ -9,50 +9,37 @@ public class ProjectRepository : GenericRepository<Project>,IProjectRepository
     public ProjectRepository(ApplicationDbContext context):base(context) 
     {            
     }
-    public async Task<IEnumerable<Project>> GetByClientIdAsync(Guid clientId, ProjectStatus? status = null,CancellationToken ct = default)
+    public async Task<IEnumerable<Project>> GetByClientIdAsync(Guid clientId,ProjectStatus? status = null,CancellationToken ct = default)
     {
-        IQueryable<Project> query = _dbSet.AsNoTracking().AsSplitQuery().Include(p => p.Category)
-            .Include(p => p.Specialty).Include(p => p.ProjectSkills).ThenInclude(ps => ps.Skill).Where(p => p.ClientId == clientId);
-        if (status.HasValue)
-        {
-            query = query.Where(p => p.Status == status.Value);
-        }
-        return await query.OrderByDescending(p => p.CreatedAt).ToListAsync(ct);
-    }
-    public async Task<IEnumerable<Project>> SearchOpenAsync(string? keyword,Guid? categoryId,Guid? specialtyId,decimal? minBudget,decimal? maxBudget,CancellationToken ct = default)
-    {
-        IQueryable<Project> query = _dbSet.AsNoTracking().AsSplitQuery().Include(p => p.Client).Include(p => p.Category).Include(p => p.Specialty) .Include(p => p.ProjectSkills)
-                .ThenInclude(ps => ps.Skill).Where(p => p.Status == ProjectStatus.Open);
+        IQueryable<Project> query = _dbSet.AsNoTracking().Where(p => p.ClientId == clientId);
 
+        if (status.HasValue)
+            query = query.Where(p => p.Status == status.Value);
+
+        return await query
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync(ct);
+    }
+    public async Task<IEnumerable<Project>> SearchOpenAsync(string? keyword, Guid? categoryId,Guid? specialtyId,decimal? minBudget,decimal? maxBudget,CancellationToken ct = default)
+    {
+        IQueryable<Project> query = _dbSet.AsNoTracking().Where(p => p.Status == ProjectStatus.Open);
         if (!string.IsNullOrWhiteSpace(keyword))
         {
-            query = query.Where(p => EF.Functions.Like(p.Title, $"%{keyword}%") ||EF.Functions.Like(p.Description, $"%{keyword}%"));
+            query = query.Where(p =>
+                EF.Functions.Like(p.Title, $"%{keyword}%") ||
+                EF.Functions.Like(p.Description, $"%{keyword}%"));
         }
-
         if (categoryId.HasValue)
-        {
             query = query.Where(p => p.CategoryId == categoryId.Value);
-        }
-
         if (specialtyId.HasValue)
-        {
             query = query.Where(p => p.SpecialtyId == specialtyId.Value);
-        }
-
         if (minBudget.HasValue)
-        {
             query = query.Where(p => p.BudgetMax >= minBudget.Value);
-        }
-
         if (maxBudget.HasValue)
-        {
             query = query.Where(p => p.BudgetMin <= maxBudget.Value);
-        }
 
         return await query.OrderByDescending(p => p.CreatedAt).ToListAsync(ct);
     }
-
-
     public async Task AddWithSkillsAsync(Project project,IEnumerable<Guid> skillIds,CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(project);
@@ -141,22 +128,10 @@ public class ProjectRepository : GenericRepository<Project>,IProjectRepository
             return;
         _context.Set<SavedProject>().Remove(savedProject);
     }
-    public async Task<IEnumerable<Project>> GetSavedByUserAsync(Guid userId,CancellationToken ct = default)
+    public async Task<IEnumerable<Project>> GetSavedByUserAsync(Guid userId,
+    CancellationToken ct = default)
     {
-        return await _context.Set<SavedProject>().AsNoTracking().AsSplitQuery()
-            .Where(x => x.UserId == userId)
-            .Include(x => x.Project)
-                .ThenInclude(x => x.Client)
-            .Include(x => x.Project)
-                .ThenInclude(x => x.Category)
-            .Include(x => x.Project)
-                .ThenInclude(x => x.Specialty)
-            .Include(x => x.Project)
-                .ThenInclude(x => x.ProjectSkills)
-                    .ThenInclude(x => x.Skill)
-            .Select(x => x.Project)
-            .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync(ct);
+        return await _context.Set<SavedProject>().AsNoTracking().Where(x => x.UserId == userId).Select(x => x.Project).OrderByDescending(x => x.CreatedAt).ToListAsync(ct);
     }
 
 }

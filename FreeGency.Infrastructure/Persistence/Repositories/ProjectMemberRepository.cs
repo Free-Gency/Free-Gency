@@ -10,11 +10,10 @@ public class ProjectMemberRepository:GenericRepository<ProjectMember>,IProjectMe
     public ProjectMemberRepository(ApplicationDbContext context):base(context)
     {
     }
-   public async Task<IEnumerable<ProjectMember>> GetByProjectIdAsync(Guid projectId,CancellationToken ct = default)
+    public async Task<IEnumerable<ProjectMember>> GetByProjectIdAsync(Guid projectId,CancellationToken ct = default)
     {
-        return await _dbSet.AsNoTracking().AsSplitQuery().Include(pm => pm.User).Where(pm => pm.ProjectId == projectId).OrderBy(pm => pm.AssignedAt).ToListAsync(ct);
+        return await _dbSet.AsNoTracking().Where(pm => pm.ProjectId == projectId).OrderBy(pm => pm.AssignedAt).ToListAsync(ct);
     }
-
     public async Task<bool> IsMemberAsync(Guid projectId,Guid userId, CancellationToken ct = default)
     {
         return await _dbSet.AsNoTracking().AnyAsync(pm=>pm.ProjectId == projectId&&pm.UserId == userId,ct);
