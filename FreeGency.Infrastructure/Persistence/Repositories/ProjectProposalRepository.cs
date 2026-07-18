@@ -15,23 +15,20 @@ public class ProjectProposalRepository
     }
     public async Task<IEnumerable<ProjectProposal>> GetByProjectIdAsync(Guid projectId,ProposalStatus? status = null,CancellationToken ct = default)
     {
-        IQueryable<ProjectProposal> query = _dbSet.AsNoTracking().AsSplitQuery().Include(p => p.Project).ThenInclude(p => p.Category).Include(p => p.Project).ThenInclude(p => p.Specialty)
-            .Include(p => p.User).Include(p => p.Team).Include(p => p.ProposalAttachments).Where(p => p.ProjectId == projectId);
-
+        IQueryable<ProjectProposal> query = _dbSet.AsNoTracking().Where(p => p.ProjectId == projectId);
         if (status.HasValue)
         {
             query = query.Where(p => p.Status == status.Value);
         }
-
         return await query.OrderByDescending(p => p.AppliedAt).ToListAsync(ct);
     }
     public async Task<IEnumerable<ProjectProposal>> GetByApplicantAsync(ApplicantType applicantType,Guid applicantId,ProposalStatus? status = null,CancellationToken ct = default)
     {
-        IQueryable<ProjectProposal> query = _dbSet.AsNoTracking().AsSplitQuery().Include(p => p.Project).ThenInclude(p => p.Category).Include(p => p.Project).ThenInclude(p => p.Specialty).Include(p => p.ProposalAttachments);
+        IQueryable<ProjectProposal> query = _dbSet.AsNoTracking();
         query = applicantType switch
         {
-            ApplicantType.User =>query.Where(p => p.UserId == applicantId),
-            ApplicantType.Team =>query.Where(p => p.TeamId == applicantId),
+            ApplicantType.User => query.Where(p => p.UserId == applicantId),
+            ApplicantType.Team => query.Where(p => p.TeamId == applicantId),
             _ => throw new ArgumentOutOfRangeException(nameof(applicantType))
         };
 
@@ -40,11 +37,8 @@ public class ProjectProposalRepository
             query = query.Where(p => p.Status == status.Value);
         }
 
-        return await query
-            .OrderByDescending(p => p.AppliedAt)
-            .ToListAsync(ct);
+        return await query.OrderByDescending(p => p.AppliedAt).ToListAsync(ct);
     }
-
     public async Task<bool> HasPendingOrActiveAsync(Guid projectId,ApplicantType applicantType,Guid applicantId,CancellationToken ct = default)
     {
         IQueryable<ProjectProposal> query = _dbSet.AsNoTracking().Where(p =>p.ProjectId == projectId &&(p.Status == ProposalStatus.Pending ||p.Status == ProposalStatus.Accepted));
@@ -68,8 +62,8 @@ public class ProjectProposalRepository
             proposal.Id = Guid.NewGuid();
         proposal.AppliedAt = DateTime.UtcNow;
         await _dbSet.AddAsync(proposal, ct);
-        var files = attachments?.ToList() ?? [];
-       if (files.Count == 0)
+        var files = attachments?.Distinct().ToList() ?? [];
+        if (files.Count == 0)
             return;
         foreach (var file in files)
         {
