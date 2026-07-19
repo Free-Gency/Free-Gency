@@ -33,12 +33,17 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
 
             if (user == null)
             {
+                if (ResolveIntent(info) != "signup")
+                    return Result.Failure<AuthResponseDto>(ExternalErrors.ExternalAccountNotFound);
+
+                var profile = ResolveSignupMode(info);
+
                 user = new User
                 {
                     Email = email,
                     UserName = email,
                     EmailConfirmed = true,
-                    ActiveProfileMode = profileMode.Client
+                    ActiveProfileMode = profile
                 };
 
                 var result = await userManager.CreateAsync(user);
@@ -60,6 +65,24 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
             var authResponse = user.ToDto(token, expiresIn, refreshToken, refreshTokenEXpirationDays);
             return Result.Success(authResponse);
         }
+
+        private static string ResolveIntent(Microsoft.AspNetCore.Identity.ExternalLoginInfo? info)
+        {
+            if (info?.AuthenticationProperties?.Items.TryGetValue("intent", out var intent) == true
+                && intent == "signup")
+                return "signup";
+
+            return "login";
+        }
+
+        private static profileMode ResolveSignupMode(Microsoft.AspNetCore.Identity.ExternalLoginInfo? info)
+        {
+            if (info?.AuthenticationProperties?.Items.TryGetValue("signupMode", out var mode) != true)
+                return profileMode.Client;
+
+            return mode == "Developer" ? profileMode.Developer : profileMode.Client;
+        }
+
         private string GenerateRefreshToken()
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));

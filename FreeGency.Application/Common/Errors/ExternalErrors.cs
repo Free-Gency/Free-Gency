@@ -17,5 +17,10 @@ namespace FreeGency.Application.Common.Errors
                 "External.EmailNotFound",
                 "The external provider did not return an email address.",
                 StatusCodes.Status400BadRequest);
+
+        public static readonly Error ExternalAccountNotFound = new(
+                "External.AccountNotFound",
+                "No account found. Please sign up first.",
+                StatusCodes.Status404NotFound);
     }
 }

@@ -1,4 +1,4 @@
-@FreeGency.Api_HostAddress = http://localhost:5101
+@FreeGency.Api_HostAddress = https://localhost:7186
 
 GET {{FreeGency.Api_HostAddress}}/weatherforecast/
 Accept: application/json
