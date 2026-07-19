@@ -76,12 +76,7 @@ namespace FreeGency.Api
                 app.MapOpenApi();
             }
 
-            // Skip HTTPS redirect in Development so the Angular app can call http://localhost:5101
-            // without browsers failing on the redirect to the self-signed HTTPS endpoint.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseHttpsRedirection();
-            }
+            app.UseHttpsRedirection();
 
             app.UseCors("Frontend");
             app.UseAuthentication();
