@@ -25,6 +25,7 @@ public class ChatRoom : ISoftDeletableEntity
     public Project? Project { get; set; }
     public ProjectProposal? Proposal { get; set; }
     public User? CreatedByUser { get; set; }
+    public bool IsReadOnly { get; set; } = false;
     public ICollection<ChatRoomMember> ChatRoomMembers { get; set; } = [];
     public ICollection<Message> Messages { get; set; } = [];
 }
