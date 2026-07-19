@@ -61,6 +61,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<EscrowHold> EscrowHolds => Set<EscrowHold>();
     public DbSet<TeamPayoutSplit> TeamPayoutSplits => Set<TeamPayoutSplit>();
 
+    // Notifications
+    public DbSet<Notification> Notifications => Set<Notification>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

@@ -46,5 +46,6 @@ public class User : IdentityUser<Guid>, ISoftDeletableEntity
     public ICollection<ProjectFile> UploadedProjectFiles { get; set; } = [];
     public ICollection<ProjectEvent> ProjectEvents { get; set; } = [];
     public  List<RefreshToken> refreshTokens { get; set; } = [];
+    public ICollection<Notification> Notifications { get; set; } = [];
 
 }
