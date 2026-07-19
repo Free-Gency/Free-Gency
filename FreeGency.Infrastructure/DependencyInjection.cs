@@ -1,10 +1,12 @@
 ﻿
+using System.Reflection;
 using EntityFrameworkCore.EncryptColumn.Interfaces;
 using EntityFrameworkCore.EncryptColumn.Util;
+using FreeGency.Domain.Interfaces.Repositories;
+using FreeGency.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace FreeGency.Infrastructure;
 
@@ -26,6 +28,15 @@ public static class DependencyInjection
         services.AddScoped<ITeamJobRepository, TeamJobRepository>();
         services.AddScoped<ITeamJoinRequestRepository, TeamJoinRequestRepository>();
         services.AddScoped<IPortfolioProjectRepository, PortfolioProjectRepository>();
+        services.AddScoped<IProjectRepository, ProjectRepository>();
+        services.AddScoped<IProjectProposalRepository, ProjectProposalRepository>();
+        services.AddScoped<IMilestoneRepository, MilestoneRepository>();
+        services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
+        services.AddScoped<IProjectFileRepository, ProjectFileRepository>();
+        services.AddScoped<IProjectEventRepository, ProjectEventRepository>();
+        services.AddScoped<IEscrowHoldRepository, EscrowHoldRepository>();
+        services.AddScoped<ITeamPayoutSplitRepository, TeamPayoutSplitRepository>();
+        services.AddScoped<IChatRoomRepository, ChatRoomRepository>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

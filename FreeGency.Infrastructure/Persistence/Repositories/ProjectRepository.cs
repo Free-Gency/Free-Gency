@@ -128,8 +128,7 @@ public class ProjectRepository : GenericRepository<Project>,IProjectRepository
             return;
         _context.Set<SavedProject>().Remove(savedProject);
     }
-    public async Task<IEnumerable<Project>> GetSavedByUserAsync(Guid userId,
-    CancellationToken ct = default)
+    public async Task<IEnumerable<Project>> GetSavedByUserAsync(Guid userId,CancellationToken ct = default)
     {
         return await _context.Set<SavedProject>().AsNoTracking().Where(x => x.UserId == userId).Select(x => x.Project).OrderByDescending(x => x.CreatedAt).ToListAsync(ct);
     }
