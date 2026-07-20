@@ -21,8 +21,8 @@ public class TeamJob : ISoftDeletableEntity
     public Guid CreatedByUserId { get; set; }
     public DateTime? ClosedAt { get; set; }
 
-    public Team Team { get; set; } = null!;
-    public User CreatedByUser { get; set; } = null!;
-    public ICollection<TeamJobSkill> TeamJobSkills { get; set; } = [];
-    public ICollection<TeamJoinRequest> TeamJoinRequests { get; set; } = [];
+    public virtual Team Team { get; set; } = null!;
+    public virtual User CreatedByUser { get; set; } = null!;
+    public virtual ICollection<TeamJobSkill> TeamJobSkills { get; set; } = [];
+    public virtual ICollection<TeamJoinRequest> TeamJoinRequests { get; set; } = [];
 }

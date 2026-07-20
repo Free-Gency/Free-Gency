@@ -17,5 +17,5 @@ public class ProposalAttachment : ISoftDeletableEntity
     public string FileName { get; set; } = string.Empty;
     public string FileUrl { get; set; } = string.Empty;
 
-    public ProjectProposal Proposal { get; set; } = null!;
+    public virtual ProjectProposal Proposal { get; set; } = null!;
 }

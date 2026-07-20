@@ -26,9 +26,9 @@ public class PortfolioProject : ISoftDeletableEntity
     public Guid? CategoryId { get; set; }
     public Visibility Visibility { get; set; } = Visibility.Public;
 
-    public User? OwnerUser { get; set; }
-    public Team? OwnerTeam { get; set; }
-    public Category? Category { get; set; }
-    public ICollection<PortfolioImage> PortfolioImages { get; set; } = [];
-    public ICollection<PortfolioSkill> PortfolioSkills { get; set; } = [];
+    public virtual User? OwnerUser { get; set; }
+    public virtual Team? OwnerTeam { get; set; }
+    public virtual Category? Category { get; set; }
+    public virtual ICollection<PortfolioImage> PortfolioImages { get; set; } = [];
+    public virtual ICollection<PortfolioSkill> PortfolioSkills { get; set; } = [];
 }

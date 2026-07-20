@@ -21,10 +21,10 @@ public class ChatRoom : ISoftDeletableEntity
     public Guid? CreatedByUserId { get; set; }
     public string? Title { get; set; }
 
-    public Team? Team { get; set; }
-    public Project? Project { get; set; }
-    public ProjectProposal? Proposal { get; set; }
-    public User? CreatedByUser { get; set; }
-    public ICollection<ChatRoomMember> ChatRoomMembers { get; set; } = [];
-    public ICollection<Message> Messages { get; set; } = [];
+    public virtual Team? Team { get; set; }
+    public virtual Project? Project { get; set; }
+    public virtual ProjectProposal? Proposal { get; set; }
+    public virtual User? CreatedByUser { get; set; }
+    public virtual ICollection<ChatRoomMember> ChatRoomMembers { get; set; } = [];
+    public virtual ICollection<Message> Messages { get; set; } = [];
 }

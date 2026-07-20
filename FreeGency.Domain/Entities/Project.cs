@@ -30,20 +30,20 @@ public class Project : ISoftDeletableEntity
     public Guid? AssignedUserId { get; set; }
     public DateTime? CompletedAt { get; set; }
 
-    public User Client { get; set; } = null!;
-    public Category Category { get; set; } = null!;
-    public Specialty? Specialty { get; set; }
-    public Team? AssignedTeam { get; set; }
-    public ICollection<ProjectSkill> ProjectSkills { get; set; } = [];
-    public ICollection<ProjectProposal> ProjectProposals { get; set; } = [];
-    public ICollection<SavedProject> SavedProjects { get; set; } = [];
-    public ICollection<Milestone> Milestones { get; set; } = [];
-    public ICollection<ProjectMember> ProjectMembers { get; set; } = [];
-    public ICollection<ProjectFile> ProjectFiles { get; set; } = [];
-    public ICollection<ProjectEvent> ProjectEvents { get; set; } = [];
-    public ICollection<Review> Reviews { get; set; } = [];
-    public ICollection<ChatRoom> ChatRooms { get; set; } = [];
-    public ICollection<LedgerEntry> LedgerEntries { get; set; } = [];
-    public EscrowHold? EscrowHold { get; set; }
-    public ICollection<TeamPayoutSplit> TeamPayoutSplits { get; set; } = [];
+    public virtual User Client { get; set; } = null!;
+    public virtual Category Category { get; set; } = null!;
+    public virtual Specialty? Specialty { get; set; }
+    public virtual Team? AssignedTeam { get; set; }
+    public virtual ICollection<ProjectSkill> ProjectSkills { get; set; } = [];
+    public virtual ICollection<ProjectProposal> ProjectProposals { get; set; } = [];
+    public virtual ICollection<SavedProject> SavedProjects { get; set; } = [];
+    public virtual ICollection<Milestone> Milestones { get; set; } = [];
+    public virtual ICollection<ProjectMember> ProjectMembers { get; set; } = [];
+    public virtual ICollection<ProjectFile> ProjectFiles { get; set; } = [];
+    public virtual ICollection<ProjectEvent> ProjectEvents { get; set; } = [];
+    public virtual ICollection<Review> Reviews { get; set; } = [];
+    public virtual ICollection<ChatRoom> ChatRooms { get; set; } = [];
+    public virtual ICollection<LedgerEntry> LedgerEntries { get; set; } = [];
+    public virtual EscrowHold? EscrowHold { get; set; }
+    public virtual ICollection<TeamPayoutSplit> TeamPayoutSplits { get; set; } = [];
 }

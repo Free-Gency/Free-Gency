@@ -18,6 +18,6 @@ public class ChatRoomMember : ISoftDeletableEntity
     public DateTime JoinedAt { get; set; }
     public DateTime? LastReadAt { get; set; }
 
-    public ChatRoom ChatRoom { get; set; } = null!;
-    public User User { get; set; } = null!;
+    public virtual ChatRoom ChatRoom { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
 }

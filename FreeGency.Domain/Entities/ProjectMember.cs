@@ -19,6 +19,6 @@ public class ProjectMember : ISoftDeletableEntity
     public Guid AssignedByUserId { get; set; }
     public DateTime AssignedAt { get; set; }
 
-    public Project Project { get; set; } = null!;
-    public User User { get; set; } = null!;
+    public virtual Project Project { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
 }

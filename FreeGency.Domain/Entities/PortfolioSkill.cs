@@ -16,6 +16,6 @@ public class PortfolioSkill : ISoftDeletableEntity
     public Guid PortfolioProjectId { get; set; }
     public Guid SkillId { get; set; }
 
-    public PortfolioProject PortfolioProject { get; set; } = null!;
-    public Skill Skill { get; set; } = null!;
+    public virtual PortfolioProject PortfolioProject { get; set; } = null!;
+    public virtual Skill Skill { get; set; } = null!;
 }

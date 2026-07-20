@@ -1,4 +1,4 @@
-﻿using FreeGency.Domain.Abstractions;
+using FreeGency.Domain.Abstractions;
 using FreeGency.Domain.Enums;
 
 namespace FreeGency.Domain.Entities;
@@ -21,5 +21,5 @@ public class Wallet : ISoftDeletableEntity
     public decimal Reserved { get; set; } = 0;
     public decimal Pending { get; set; } = 0;
 
-    public ICollection<LedgerEntry> LedgerEntries { get; set; } = [];
+    public virtual ICollection<LedgerEntry> LedgerEntries { get; set; } = [];
 }

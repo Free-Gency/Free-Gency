@@ -22,8 +22,8 @@ public class Review : ISoftDeletableEntity
     public Guid? RevieweeUserId { get; set; }
     public int Rating { get; set; }
     public string? Comment { get; set; }
-    public Project Project { get; set; } = null!;
-    public User ReviewerUser { get; set; } = null!;
-    public Team? RevieweeTeam { get; set; }
-    public User? RevieweeUser { get; set; }
+    public virtual Project Project { get; set; } = null!;
+    public virtual User ReviewerUser { get; set; } = null!;
+    public virtual Team? RevieweeTeam { get; set; }
+    public virtual User? RevieweeUser { get; set; }
 }

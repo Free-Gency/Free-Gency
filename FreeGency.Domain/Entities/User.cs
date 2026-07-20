@@ -23,29 +23,29 @@ public class User : IdentityUser<Guid>, ISoftDeletableEntity
     public DateTime? DeletedAt { get; set; }
     public string? DeletedBy { get; set; }
 
-    public ClientProfile? ClientProfile { get; set; }
-    public DeveloperProfile? DeveloperProfile { get; set; }
-    public ICollection<Team> OwnedTeams { get; set; } = [];
-    public ICollection<Project> PostedProjects { get; set; } = [];
-    public ICollection<TeamMember> TeamMemberships { get; set; } = [];
-    public ICollection<ProjectProposal> ProjectProposals { get; set; } = [];
-    public ICollection<UserSkill> UserSkills { get; set; } = [];
-    public ICollection<UserInterest> UserInterests { get; set; } = [];
-    public ICollection<SavedProject> SavedProjects { get; set; } = [];
-    public ICollection<TeamJoinRequest> TeamJoinRequests { get; set; } = [];
-    public ICollection<SocialLink> SocialLinks { get; set; } = [];
-    public ICollection<ProjectMember> ProjectMembers { get; set; } = [];
-    public ICollection<ChatRoomMember> ChatRoomMembers { get; set; } = [];
-    public ICollection<Message> SentMessages { get; set; } = [];
-    public ICollection<Review> ReviewsWritten { get; set; } = [];
-    public ICollection<Review> ReviewsReceived { get; set; } = [];
-    public ICollection<PortfolioProject> PortfolioProjects { get; set; } = [];
-    public ICollection<TeamPayoutSplit> TeamPayoutSplits { get; set; } = [];
-    public ICollection<TeamJob> CreatedTeamJobs { get; set; } = [];
-    public ICollection<ChatRoom> CreatedChatRooms { get; set; } = [];
-    public ICollection<ProjectFile> UploadedProjectFiles { get; set; } = [];
-    public ICollection<ProjectEvent> ProjectEvents { get; set; } = [];
-    public  List<RefreshToken> refreshTokens { get; set; } = [];
-    public ICollection<Notification> Notifications { get; set; } = [];
+    public virtual ClientProfile? ClientProfile { get; set; }
+    public virtual DeveloperProfile? DeveloperProfile { get; set; }
+    public virtual ICollection<Team> OwnedTeams { get; set; } = [];
+    public virtual ICollection<Project> PostedProjects { get; set; } = [];
+    public virtual ICollection<TeamMember> TeamMemberships { get; set; } = [];
+    public virtual ICollection<ProjectProposal> ProjectProposals { get; set; } = [];
+    public virtual ICollection<UserSkill> UserSkills { get; set; } = [];
+    public virtual ICollection<UserInterest> UserInterests { get; set; } = [];
+    public virtual ICollection<SavedProject> SavedProjects { get; set; } = [];
+    public virtual ICollection<TeamJoinRequest> TeamJoinRequests { get; set; } = [];
+    public virtual ICollection<SocialLink> SocialLinks { get; set; } = [];
+    public virtual ICollection<ProjectMember> ProjectMembers { get; set; } = [];
+    public virtual ICollection<ChatRoomMember> ChatRoomMembers { get; set; } = [];
+    public virtual ICollection<Message> SentMessages { get; set; } = [];
+    public virtual ICollection<Review> ReviewsWritten { get; set; } = [];
+    public virtual ICollection<Review> ReviewsReceived { get; set; } = [];
+    public virtual ICollection<PortfolioProject> PortfolioProjects { get; set; } = [];
+    public virtual ICollection<TeamPayoutSplit> TeamPayoutSplits { get; set; } = [];
+    public virtual ICollection<TeamJob> CreatedTeamJobs { get; set; } = [];
+    public virtual ICollection<ChatRoom> CreatedChatRooms { get; set; } = [];
+    public virtual ICollection<ProjectFile> UploadedProjectFiles { get; set; } = [];
+    public virtual ICollection<ProjectEvent> ProjectEvents { get; set; } = [];
+    public virtual List<RefreshToken> refreshTokens { get; set; } = [];
+    public virtual ICollection<Notification> Notifications { get; set; } = [];
 
 }

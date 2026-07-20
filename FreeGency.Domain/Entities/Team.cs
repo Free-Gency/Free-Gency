@@ -21,17 +21,17 @@ public class Team : ISoftDeletableEntity
     public decimal AverageRating { get; set; } = 0;
     public int RatingCount { get; set; } = 0;
 
-    public User Owner { get; set; } = null!;
-    public ICollection<TeamMember> TeamMembers { get; set; } = [];
-    public ICollection<TeamCategory> TeamCategories { get; set; } = [];
-    public ICollection<TeamSkill> TeamSkills { get; set; } = [];
-    public ICollection<TeamJob> TeamJobs { get; set; } = [];
-    public ICollection<TeamJoinRequest> TeamJoinRequests { get; set; } = [];
-    public ICollection<SocialLink> SocialLinks { get; set; } = [];
-    public ICollection<ProjectProposal> ProjectProposals { get; set; } = [];
-    public ICollection<Project> AssignedProjects { get; set; } = [];
-    public ICollection<TeamPayoutSplit> TeamPayoutSplits { get; set; } = [];
-    public ICollection<ChatRoom> ChatRooms { get; set; } = [];
-    public ICollection<PortfolioProject> PortfolioProjects { get; set; } = [];
-    public ICollection<Review> Reviews { get; set; } = [];
+    public virtual User Owner { get; set; } = null!;
+    public virtual ICollection<TeamMember> TeamMembers { get; set; } = [];
+    public virtual ICollection<TeamCategory> TeamCategories { get; set; } = [];
+    public virtual ICollection<TeamSkill> TeamSkills { get; set; } = [];
+    public virtual ICollection<TeamJob> TeamJobs { get; set; } = [];
+    public virtual ICollection<TeamJoinRequest> TeamJoinRequests { get; set; } = [];
+    public virtual ICollection<SocialLink> SocialLinks { get; set; } = [];
+    public virtual ICollection<ProjectProposal> ProjectProposals { get; set; } = [];
+    public virtual ICollection<Project> AssignedProjects { get; set; } = [];
+    public virtual ICollection<TeamPayoutSplit> TeamPayoutSplits { get; set; } = [];
+    public virtual ICollection<ChatRoom> ChatRooms { get; set; } = [];
+    public virtual ICollection<PortfolioProject> PortfolioProjects { get; set; } = [];
+    public virtual ICollection<Review> Reviews { get; set; } = [];
 }
