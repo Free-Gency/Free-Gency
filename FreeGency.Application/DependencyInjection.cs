@@ -2,6 +2,7 @@
 using FluentValidation.AspNetCore;
 using FreeGency.Application.Common.Helpers;
 using FreeGency.Application.Common.Interfaces;
+using FreeGency.Application.Features.Account.Queries;
 using FreeGency.Application.Features.Authentication;
 using FreeGency.Application.Features.EmailFeature.Commands;
 using FreeGency.Application.Features.ExternalFeature.Commands;
@@ -19,6 +20,7 @@ namespace FreeGency.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IExternalServices, ExternalServices>();
             services.AddSingleton<IJwtProvider, JwtProvider>();
             services.AddScoped<IAuthServices, AuthServices>();

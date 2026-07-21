@@ -8,7 +8,10 @@ using FreeGency.Application.Common.Results;
 using FreeGency.Application.Features.Authentication.Dtos;
 using FreeGency.Domain.Entities;
 using FreeGency.Domain.Enums;
+using FreeGency.Domain.Interfaces;
+using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Infrastructure.Interfaces;
+using FreeGency.Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +27,7 @@ namespace FreeGency.Application.Features.Authentication
 {
     public class AuthServices(UserManager<User> userManager,IJwtProvider jwtProvider
                               ,IHttpContextAccessor httpContextAccessor,IEmailService emailService,IEncryptionProvider encryptionProvider
-                              ,Microsoft.Extensions.Configuration.IConfiguration configuration) : IAuthServices
+                              ,Microsoft.Extensions.Configuration.IConfiguration configuration,IUnitOfWork unitOfWork) : IAuthServices
     {
         private readonly int _refreshTokenExpiryDays = 14;
 
@@ -36,6 +39,23 @@ namespace FreeGency.Application.Features.Authentication
             var result = await userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded) return Result.Failure(new Error(result.Errors.First().Code, result.Errors.First().Description, StatusCodes.Status400BadRequest));
             // generate profiles
+            if (dto.Mode == "Client")
+            {
+                var repo = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
+                var clientprofile = new ClientProfile
+                {
+                    UserId = user.Id
+                };
+                await repo.AddAsync(clientprofile);
+                await unitOfWork.SaveChangesAsync();
+            }
+            else
+            {
+                var repo = unitOfWork.Repository<DeveloperProfileRepository, DeveloperProfile>();
+                var devProfile = new DeveloperProfile { UserId = user.Id };
+                await repo.AddAsync(devProfile);
+                await unitOfWork.SaveChangesAsync();
+            }
             //send comfirmaion email
             var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(
