@@ -41,7 +41,7 @@ namespace FreeGency.Application.Features.Authentication
             code = WebEncoders.Base64UrlEncode(
                                Encoding.UTF8.GetBytes(code));
             var frontendUrl = configuration["FrontendUrl"]?.TrimEnd('/')
-                ?? $"{httpContextAccessor.HttpContext!.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}";
+                ?? "http://localhost:4200";
             var ReturnUrl = $"{frontendUrl}/auth/confirm-email?userId={user.Id}&code={code}";
             //body
             var resultOfConfirmEmail = await emailService.SendMassege(user.Email!, ReturnUrl, "Confirm Your Email");

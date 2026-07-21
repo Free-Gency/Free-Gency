@@ -63,8 +63,11 @@ namespace FreeGency.Api
             {
                 options.AddPolicy("Frontend", policy =>
                 {
-                    policy.WithOrigins(
-                            builder.Configuration["FrontendUrl"] ?? "http://localhost:4200")
+                    var origins = builder.Configuration
+                        .GetSection("FrontendUrls")
+                        .Get<string[]>() ?? [builder.Configuration["FrontendUrl"] ?? "http://localhost:4200"];
+
+                    policy.WithOrigins(origins)
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
