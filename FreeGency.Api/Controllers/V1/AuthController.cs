@@ -10,7 +10,7 @@ namespace FreeGency.Api.Controllers.V1
     [ApiController]
     public class AuthController (IAuthServices authServices): ControllerBase
     {
-        [HttpPost("")]
+        [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequestDto dto)
         {
             var result = await authServices.GetTokenAsync(dto);
