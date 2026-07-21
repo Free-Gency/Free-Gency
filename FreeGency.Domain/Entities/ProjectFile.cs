@@ -21,7 +21,7 @@ public class ProjectFile : ISoftDeletableEntity
     public string FileUrl { get; set; } = string.Empty;
     public FileKind FileKind { get; set; }
 
-    public Project Project { get; set; } = null!;
-    public Milestone? Milestone { get; set; }
-    public User UploadedByUser { get; set; } = null!;
+    public virtual Project Project { get; set; } = null!;
+    public virtual Milestone? Milestone { get; set; }
+    public virtual User UploadedByUser { get; set; } = null!;
 }

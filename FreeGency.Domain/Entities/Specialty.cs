@@ -17,6 +17,6 @@ public class Specialty : ISoftDeletableEntity
     public string NameEn { get; set; } = string.Empty;
     public string NameAr { get; set; } = string.Empty;
 
-    public Category Category { get; set; } = null!;
-    public ICollection<Project> Projects { get; set; } = [];
+    public virtual Category Category { get; set; } = null!;
+    public virtual ICollection<Project> Projects { get; set; } = [];
 }

@@ -17,9 +17,9 @@ public class Category : ISoftDeletableEntity
     public string NameEn { get; set; } = string.Empty;
     public string? ImageCover { get; set; }
 
-    public ICollection<Specialty> Specialties { get; set; } = [];
-    public ICollection<Project> Projects { get; set; } = [];
-    public ICollection<TeamCategory> TeamCategories { get; set; } = [];
-    public ICollection<UserInterest> UserInterests { get; set; } = [];
-    public ICollection<PortfolioProject> PortfolioProjects { get; set; } = [];
+    public virtual ICollection<Specialty> Specialties { get; set; } = [];
+    public virtual ICollection<Project> Projects { get; set; } = [];
+    public virtual ICollection<TeamCategory> TeamCategories { get; set; } = [];
+    public virtual ICollection<UserInterest> UserInterests { get; set; } = [];
+    public virtual ICollection<PortfolioProject> PortfolioProjects { get; set; } = [];
 }

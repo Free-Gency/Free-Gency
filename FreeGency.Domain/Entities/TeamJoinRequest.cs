@@ -24,7 +24,7 @@ public class TeamJoinRequest : ISoftDeletableEntity
     public DateTime? ResponseAt { get; set; }
     public string? RespondedByUserId { get; set; }
 
-    public Team Team { get; set; } = null!;
-    public TeamJob? TeamJob { get; set; }
-    public User User { get; set; } = null!;
+    public virtual Team Team { get; set; } = null!;
+    public virtual TeamJob? TeamJob { get; set; }
+    public virtual User User { get; set; } = null!;
 }

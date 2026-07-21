@@ -20,7 +20,7 @@ public class TeamPayoutSplit : ISoftDeletableEntity
     public SplitType SplitType { get; set; }
     public decimal Value { get; set; }
 
-    public Team Team { get; set; } = null!;
-    public Project? Project { get; set; }
-    public User User { get; set; } = null!;
+    public virtual Team Team { get; set; } = null!;
+    public virtual Project? Project { get; set; }
+    public virtual User User { get; set; } = null!;
 }

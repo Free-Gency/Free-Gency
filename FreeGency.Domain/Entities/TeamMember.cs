@@ -20,6 +20,6 @@ public class TeamMember : ISoftDeletableEntity
     public string? Job { get; set; }
     public string? JoinedAt { get; set; }
 
-    public Team Team { get; set; } = null!;
-    public User User { get; set; } = null!;
+    public virtual Team Team { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
 }

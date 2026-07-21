@@ -22,5 +22,5 @@ public class EscrowHold : ISoftDeletableEntity
     public DateTime? LockedAt { get; set; }
     public DateTime? PlanAgreedAt { get; set; }
 
-    public Project Project { get; set; } = null!;
+    public virtual Project Project { get; set; } = null!;
 }

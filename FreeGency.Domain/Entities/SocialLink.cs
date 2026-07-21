@@ -20,6 +20,6 @@ public class SocialLink : ISoftDeletableEntity
     public string Platform { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
 
-    public User? OwnerUser { get; set; }
-    public Team? OwnerTeam { get; set; }
+    public virtual User? OwnerUser { get; set; }
+    public virtual Team? OwnerTeam { get; set; }
 }

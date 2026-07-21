@@ -17,5 +17,5 @@ public class PortfolioImage : ISoftDeletableEntity
     public string ImageUrl { get; set; } = string.Empty;
     public int SortOrder { get; set; } = 0;
 
-    public PortfolioProject PortfolioProject { get; set; } = null!;
+    public virtual PortfolioProject PortfolioProject { get; set; } = null!;
 }
