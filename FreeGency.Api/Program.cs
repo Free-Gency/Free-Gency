@@ -5,6 +5,7 @@ using FreeGency.Infrastructure;
 using FreeGency.Infrastructure.Persistence.Context;
 using FreeGency.Infrastructure.Persistence.Seeding;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -77,9 +78,15 @@ namespace FreeGency.Api
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
+                app.UseHttpsRedirection();
             }
-
-            app.UseHttpsRedirection();
+            else
+            {
+                app.UseForwardedHeaders(new ForwardedHeadersOptions
+                {
+                    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+                });
+            }
 
             app.UseCors("Frontend");
             app.UseAuthentication();
