@@ -32,7 +32,7 @@ public class ProjectRepository : GenericRepository<Project>,IProjectRepository
         if (categoryId.HasValue)
             query = query.Where(p => p.CategoryId == categoryId.Value);
         if (specialtyId.HasValue)
-            query = query.Where(p => p.SpecialtyId == specialtyId.Value);
+            query = query.Where(p => p.ProjectSpecialties.Any(ps => ps.SpecialtyId == specialtyId.Value));
         if (minBudget.HasValue)
             query = query.Where(p => p.BudgetMax >= minBudget.Value);
         if (maxBudget.HasValue)

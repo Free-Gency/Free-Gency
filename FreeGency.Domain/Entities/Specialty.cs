@@ -13,10 +13,11 @@ public class Specialty : ISoftDeletableEntity
     public DateTime? DeletedAt { get; set; }
     public string? DeletedBy { get; set; }
 
-    public Guid CategoryId { get; set; }
     public string NameEn { get; set; } = string.Empty;
     public string NameAr { get; set; } = string.Empty;
 
-    public virtual Category Category { get; set; } = null!;
-    public virtual ICollection<Project> Projects { get; set; } = [];
+    public virtual ICollection<Category> Categories { get; set; } = [];
+    public virtual ICollection<SpecialtySkill> SpecialtySkills { get; set; } = [];
+    public virtual ICollection<TeamSpecialty> TeamSpecialties { get; set; } = [];
+    public virtual ICollection<ProjectSpecialty> ProjectSpecialties { get; set; } = [];
 }

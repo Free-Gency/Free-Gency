@@ -18,7 +18,6 @@ public class Project : ISoftDeletableEntity
     public string Description { get; set; } = string.Empty;
     public Guid ClientId { get; set; }
     public Guid CategoryId { get; set; }
-    public Guid? SpecialtyId { get; set; }
     public bool IsFixedPrice { get; set; }
     public decimal BudgetMin { get; set; }
     public decimal BudgetMax { get; set; }
@@ -32,8 +31,8 @@ public class Project : ISoftDeletableEntity
 
     public virtual User Client { get; set; } = null!;
     public virtual Category Category { get; set; } = null!;
-    public virtual Specialty? Specialty { get; set; }
     public virtual Team? AssignedTeam { get; set; }
+    public virtual ICollection<ProjectSpecialty> ProjectSpecialties { get; set; } = [];
     public virtual ICollection<ProjectSkill> ProjectSkills { get; set; } = [];
     public virtual ICollection<ProjectProposal> ProjectProposals { get; set; } = [];
     public virtual ICollection<SavedProject> SavedProjects { get; set; } = [];

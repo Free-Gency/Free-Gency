@@ -16,6 +16,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Skill> Skills => Set<Skill>();
     public DbSet<Specialty> Specialties => Set<Specialty>();
+    public DbSet<CategorySpecialty> CategorySpecialties => Set<CategorySpecialty>();
+    public DbSet<SpecialtySkill> SpecialtySkills => Set<SpecialtySkill>();
 
     // Identity / profiles
     public DbSet<ClientProfile> ClientProfiles => Set<ClientProfile>();
@@ -29,6 +31,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
     public DbSet<TeamCategory> TeamCategories => Set<TeamCategory>();
     public DbSet<TeamSkill> TeamSkills => Set<TeamSkill>();
+    public DbSet<TeamSpecialty> TeamSpecialties => Set<TeamSpecialty>();
     public DbSet<TeamJob> TeamJobs => Set<TeamJob>();
     public DbSet<TeamJobSkill> TeamJobSkills => Set<TeamJobSkill>();
     public DbSet<TeamJoinRequest> TeamJoinRequests => Set<TeamJoinRequest>();
@@ -36,6 +39,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     // Marketplace
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<ProjectSkill> ProjectSkills => Set<ProjectSkill>();
+    public DbSet<ProjectSpecialty> ProjectSpecialties => Set<ProjectSpecialty>();
     public DbSet<ProjectMember> ProjectMembers => Set<ProjectMember>();
     public DbSet<ProjectProposal> ProjectProposals => Set<ProjectProposal>();
     public DbSet<ProposalAttachment> ProposalAttachments => Set<ProposalAttachment>();

@@ -25,6 +25,7 @@ public class Team : ISoftDeletableEntity
     public virtual ICollection<TeamMember> TeamMembers { get; set; } = [];
     public virtual ICollection<TeamCategory> TeamCategories { get; set; } = [];
     public virtual ICollection<TeamSkill> TeamSkills { get; set; } = [];
+    public virtual ICollection<TeamSpecialty> TeamSpecialties { get; set; } = [];
     public virtual ICollection<TeamJob> TeamJobs { get; set; } = [];
     public virtual ICollection<TeamJoinRequest> TeamJoinRequests { get; set; } = [];
     public virtual ICollection<SocialLink> SocialLinks { get; set; } = [];
