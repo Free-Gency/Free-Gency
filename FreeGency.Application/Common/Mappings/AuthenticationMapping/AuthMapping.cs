@@ -1,26 +1,22 @@
 ﻿using FreeGency.Application.Common.DTOs.AuthenticationDtos;
 using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FreeGency.Application.Common.Mappings.AuthenticationMapping
 {
     public static class AuthMapping
     {
-        public static AuthResponseDto ToDto(this User user,string token,int expiresIn,string refreshToken,DateTime refreshTokenEXpirationDays)
+        public static AuthResponseDto ToDto(this User user, string token, int expiresIn, string refreshToken, DateTime refreshTokenEXpirationDays)
         {
             return new AuthResponseDto
             {
-                Id=user.Id,
+                Id = user.Id,
                 Email = user.Email!,
                 FirstName = user.FristName,
                 LastName = user.LastName,
                 Token = token,
                 ExpiresIn = expiresIn,
-                RefreshToken=refreshToken,
-                RefreshTokenExpiration=refreshTokenEXpirationDays
+                RefreshToken = refreshToken,
+                RefreshTokenExpiration = refreshTokenEXpirationDays
             };
         }
         public static User ToEntity(this RegisterRequestDto dto)
@@ -32,8 +28,8 @@ namespace FreeGency.Application.Common.Mappings.AuthenticationMapping
                 FristName = dto.FirstName,
                 LastName = dto.LastName,
                 ActiveProfileMode = dto.Mode == "Client" ? profileMode.Client : profileMode.Developer,
-                PhoneNumber=dto.PhoneNumber,
-                Country=dto.Country
+                PhoneNumber = dto.PhoneNumber,
+                Country = dto.Country
             };
         }
     }

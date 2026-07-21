@@ -16,7 +16,6 @@
     <Folder Include="Common\Constants\" />
     <Folder Include="Common\Models\" />
     <Folder Include="Common\Exceptions\" />
-    <Folder Include="Common\Extensions\" />
   </ItemGroup>
 
   <ItemGroup>
