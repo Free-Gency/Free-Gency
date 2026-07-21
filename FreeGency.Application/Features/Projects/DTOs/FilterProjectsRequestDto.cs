@@ -1,6 +1,6 @@
 ﻿namespace FreeGency.Application.Features.Projects.DTOs
 {
-    public sealed class BrowseProjectsDto : PagedQuery
+    public sealed class FilterProjectsRequestDto : PagedQuery
     {
         public bool? IsFixedPrice { get; init; }
         public decimal? BudgetMin { get; init; }

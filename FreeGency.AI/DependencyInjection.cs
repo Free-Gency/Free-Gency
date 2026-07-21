@@ -1,0 +1,19 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.SemanticKernel.ChatCompletion;
+
+namespace FreeGency.AI;
+
+public static class DependencyInjection
+{
+    public static IServiceCollection AddAI(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddHttpClient<BedrockGatewayChatService>();
+
+        services.AddSingleton<IChatCompletionService, BedrockGatewayChatService>();
+
+        services.AddKernel();
+
+        return services;
+    }
+}

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using FreeGency.AI;
 
 namespace FreeGency.Api
 {
@@ -19,7 +20,8 @@ namespace FreeGency.Api
             var builder = WebApplication.CreateBuilder(args);
            
             builder.Services.AddInfrastructure(builder.Configuration)
-                            .AddApplication(); 
+                            .AddApplication();
+            builder.Services.AddAI(builder.Configuration);
             builder.Services.AddIdentity<User, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
