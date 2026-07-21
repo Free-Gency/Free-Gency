@@ -37,7 +37,8 @@ public static class DependencyInjection
         services.AddScoped<IEscrowHoldRepository, EscrowHoldRepository>();
         services.AddScoped<ITeamPayoutSplitRepository, TeamPayoutSplitRepository>();
         services.AddScoped<IChatRoomRepository, ChatRoomRepository>();
-
+        services.AddScoped<IClientProfileRepository, ClientProfileRepository>();
+        services.AddScoped<IDeveloperProfileRepository, DeveloperProfileRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 

@@ -10,5 +10,11 @@ namespace FreeGency.Infrastructure.Services
     {
         public Guid UserId => Guid.TryParse(
       httpContextAccessor.HttpContext?.User?.FindFirst("uid")?.Value, out var userId) ? userId : Guid.Empty;
+
+        public string origin =>
+                    $"{httpContextAccessor.HttpContext?.Request.Scheme}://" +
+                    $"{httpContextAccessor.HttpContext?.Request.Host}/";
+
     }
 }
+
