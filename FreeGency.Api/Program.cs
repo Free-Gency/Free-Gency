@@ -3,6 +3,7 @@ using FreeGency.Application.Common.Helpers;
 using FreeGency.Domain.Entities;
 using FreeGency.Infrastructure;
 using FreeGency.Infrastructure.Persistence.Context;
+using FreeGency.Infrastructure.Persistence.Seeding;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -69,6 +70,8 @@ namespace FreeGency.Api
             });
            
             var app = builder.Build();
+
+            DatabaseInitializer.InitializeAsync(app.Services).GetAwaiter().GetResult();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
