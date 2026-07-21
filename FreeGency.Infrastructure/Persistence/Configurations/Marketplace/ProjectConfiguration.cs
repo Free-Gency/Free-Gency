@@ -36,12 +36,6 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .HasForeignKey(p => p.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(p => p.Specialty)
-            .WithMany(s => s.Projects)
-            .HasForeignKey(p => p.SpecialtyId)
-            .OnDelete(DeleteBehavior.SetNull)
-            .IsRequired(false);
-
         builder.HasOne(p => p.AssignedTeam)
             .WithMany(t => t.AssignedProjects)
             .HasForeignKey(p => p.AssignedTeamId)

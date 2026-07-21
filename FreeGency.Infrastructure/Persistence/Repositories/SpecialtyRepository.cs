@@ -10,9 +10,10 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
         public SpecialtyRepository(ApplicationDbContext context) : base(context) { }
 
         public async Task<IEnumerable<Specialty>> GetByCategoryIdAsync(Guid categoryId, CancellationToken ct = default)
-            => await _dbSet
+            => await _context.Set<CategorySpecialty>()
                 .AsNoTracking()
-                .Where(s => s.CategoryId == categoryId)
+                .Where(cs => cs.CategoryId == categoryId)
+                .Select(cs => cs.Specialty)
                 .ToListAsync(ct);
     }
 }

@@ -19,7 +19,7 @@ public class ProjectEvent : ISoftDeletableEntity
     public Guid ActorUserId { get; set; }
     public EventType EventType { get; set; }
 
-    public Project Project { get; set; } = null!;
-    public Milestone? Milestone { get; set; }
-    public User ActorUser { get; set; } = null!;
+    public virtual Project Project { get; set; } = null!;
+    public virtual Milestone? Milestone { get; set; }
+    public virtual User ActorUser { get; set; } = null!;
 }

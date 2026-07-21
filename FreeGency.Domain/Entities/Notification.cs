@@ -1,4 +1,4 @@
-﻿using FreeGency.Domain.Abstractions;
+using FreeGency.Domain.Abstractions;
 using FreeGency.Domain.Enums;
 
 namespace FreeGency.Domain.Entities
@@ -34,12 +34,12 @@ namespace FreeGency.Domain.Entities
         public Guid? MessageId { get; set; }
 
         // Navigation Properties
-        public User User { get; set; } = null!;
-        public Project? Project { get; set; }
-        public ProjectProposal? ProjectProposal { get; set; }
-        public Team? Team { get; set; }
-        public Milestone? Milestone { get; set; }
-        public ChatRoom? ChatRoom { get; set; }
-        public Message? Message { get; set; }
+        public virtual User User { get; set; } = null!;
+        public virtual Project? Project { get; set; }
+        public virtual ProjectProposal? ProjectProposal { get; set; }
+        public virtual Team? Team { get; set; }
+        public virtual Milestone? Milestone { get; set; }
+        public virtual ChatRoom? ChatRoom { get; set; }
+        public virtual Message? Message { get; set; }
     }
 }

@@ -16,6 +16,6 @@ public class ProjectSkill : ISoftDeletableEntity
     public Guid ProjectId { get; set; }
     public Guid SkillId { get; set; }
 
-    public Project Project { get; set; } = null!;
-    public Skill Skill { get; set; } = null!;
+    public virtual Project Project { get; set; } = null!;
+    public virtual Skill Skill { get; set; } = null!;
 }

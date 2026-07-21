@@ -27,8 +27,8 @@ public class Milestone : ISoftDeletableEntity
     public DateTime? AvailableAt { get; set; }
     public DateTime? ReleasedAt { get; set; }
 
-    public Project Project { get; set; } = null!;
-    public ICollection<ProjectFile> ProjectFiles { get; set; } = [];
-    public ICollection<ProjectEvent> ProjectEvents { get; set; } = [];
-    public ICollection<LedgerEntry> LedgerEntries { get; set; } = [];
+    public virtual Project Project { get; set; } = null!;
+    public virtual ICollection<ProjectFile> ProjectFiles { get; set; } = [];
+    public virtual ICollection<ProjectEvent> ProjectEvents { get; set; } = [];
+    public virtual ICollection<LedgerEntry> LedgerEntries { get; set; } = [];
 }

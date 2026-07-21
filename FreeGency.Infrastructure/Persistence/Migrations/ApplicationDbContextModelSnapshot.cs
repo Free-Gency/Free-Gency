@@ -22,6 +22,21 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("CategorySpecialty", b =>
+                {
+                    b.Property<Guid>("CategoriesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SpecialtiesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("CategoriesId", "SpecialtiesId");
+
+                    b.HasIndex("SpecialtiesId");
+
+                    b.ToTable("CategorySpecialty", "catalog");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -78,6 +93,58 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.ToTable("Categories", "catalog");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.CategorySpecialty", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SpecialtyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id", "CategoryId", "SpecialtyId");
+
+                    b.HasIndex("SpecialtyId");
+
+                    b.HasIndex("CategoryId", "SpecialtyId")
+                        .IsUnique();
+
+                    b.ToTable("CategorySpecialties", "catalog");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.ChatRoom", b =>
                 {
                     b.Property<Guid>("Id")
@@ -110,9 +177,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
-
-                    b.Property<bool>("IsReadOnly")
-                        .HasColumnType("bit");
 
                     b.Property<Guid?>("ProjectId")
                         .HasColumnType("uniqueidentifier");
@@ -482,6 +546,9 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("ProjectId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ProjectId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -500,6 +567,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("MilestoneId");
 
                     b.HasIndex("ProjectId");
+
+                    b.HasIndex("ProjectId1");
 
                     b.HasIndex("WalletId");
 
@@ -664,6 +733,109 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("Milestones", "marketplace");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ActionUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ChatRoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<string>("Data")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("MessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("MilestoneId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProjectProposalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("TeamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatRoomId");
+
+                    b.HasIndex("MessageId");
+
+                    b.HasIndex("MilestoneId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("ProjectProposalId");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioImage", b =>
@@ -937,9 +1109,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsFixedPrice")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("SpecialtyId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -966,8 +1135,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("ClientId");
-
-                    b.HasIndex("SpecialtyId");
 
                     b.ToTable("Projects", "marketplace");
                 });
@@ -1310,6 +1477,58 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.ToTable("ProjectSkills", "marketplace");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.ProjectSpecialty", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SpecialtyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id", "ProjectId", "SpecialtyId");
+
+                    b.HasIndex("SpecialtyId");
+
+                    b.HasIndex("ProjectId", "SpecialtyId")
+                        .IsUnique();
+
+                    b.ToTable("ProjectSpecialties", "marketplace");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.ProposalAttachment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1617,9 +1836,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -1663,9 +1879,59 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
                     b.ToTable("Specialties", "catalog");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.SpecialtySkill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SpecialtyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id", "SpecialtyId", "SkillId");
+
+                    b.HasIndex("SkillId");
+
+                    b.HasIndex("SpecialtyId", "SkillId")
+                        .IsUnique();
+
+                    b.ToTable("SpecialtySkills", "catalog");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Team", b =>
@@ -1796,6 +2062,9 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasKey("Id", "TeamId", "CategoryId");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("TeamId")
+                        .IsUnique();
 
                     b.HasIndex("TeamId", "CategoryId")
                         .IsUnique();
@@ -2189,6 +2458,58 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("TeamSkills", "teams");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamSpecialty", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SpecialtyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id", "TeamId", "SpecialtyId");
+
+                    b.HasIndex("SpecialtyId");
+
+                    b.HasIndex("TeamId", "SpecialtyId")
+                        .IsUnique();
+
+                    b.ToTable("TeamSpecialties", "teams");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.User", b =>
@@ -2621,6 +2942,40 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.ToTable("UserTokens", "identity");
                 });
 
+            modelBuilder.Entity("CategorySpecialty", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.Specialty", null)
+                        .WithMany()
+                        .HasForeignKey("SpecialtiesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.CategorySpecialty", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.Specialty", "Specialty")
+                        .WithMany()
+                        .HasForeignKey("SpecialtyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Specialty");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.ChatRoom", b =>
                 {
                     b.HasOne("FreeGency.Domain.Entities.User", "CreatedByUser")
@@ -2716,6 +3071,10 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("FreeGency.Domain.Entities.Project", null)
+                        .WithMany("LedgerEntries")
+                        .HasForeignKey("ProjectId1");
+
                     b.HasOne("FreeGency.Domain.Entities.Wallet", "Wallet")
                         .WithMany("LedgerEntries")
                         .HasForeignKey("WalletId")
@@ -2756,6 +3115,53 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.ChatRoom", "ChatRoom")
+                        .WithMany()
+                        .HasForeignKey("ChatRoomId");
+
+                    b.HasOne("FreeGency.Domain.Entities.Message", "Message")
+                        .WithMany()
+                        .HasForeignKey("MessageId");
+
+                    b.HasOne("FreeGency.Domain.Entities.Milestone", "Milestone")
+                        .WithMany()
+                        .HasForeignKey("MilestoneId");
+
+                    b.HasOne("FreeGency.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId");
+
+                    b.HasOne("FreeGency.Domain.Entities.ProjectProposal", "ProjectProposal")
+                        .WithMany()
+                        .HasForeignKey("ProjectProposalId");
+
+                    b.HasOne("FreeGency.Domain.Entities.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId");
+
+                    b.HasOne("FreeGency.Domain.Entities.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChatRoom");
+
+                    b.Navigation("Message");
+
+                    b.Navigation("Milestone");
+
+                    b.Navigation("Project");
+
+                    b.Navigation("ProjectProposal");
+
+                    b.Navigation("Team");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioImage", b =>
@@ -2831,18 +3237,11 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("FreeGency.Domain.Entities.Specialty", "Specialty")
-                        .WithMany("Projects")
-                        .HasForeignKey("SpecialtyId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("AssignedTeam");
 
                     b.Navigation("Category");
 
                     b.Navigation("Client");
-
-                    b.Navigation("Specialty");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.ProjectEvent", b =>
@@ -2960,6 +3359,25 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("Skill");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.ProjectSpecialty", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.Project", "Project")
+                        .WithMany("ProjectSpecialties")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.Specialty", "Specialty")
+                        .WithMany("ProjectSpecialties")
+                        .HasForeignKey("SpecialtyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Specialty");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.ProposalAttachment", b =>
                 {
                     b.HasOne("FreeGency.Domain.Entities.ProjectProposal", "Proposal")
@@ -3040,15 +3458,23 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("OwnerUser");
                 });
 
-            modelBuilder.Entity("FreeGency.Domain.Entities.Specialty", b =>
+            modelBuilder.Entity("FreeGency.Domain.Entities.SpecialtySkill", b =>
                 {
-                    b.HasOne("FreeGency.Domain.Entities.Category", "Category")
-                        .WithMany("Specialties")
-                        .HasForeignKey("CategoryId")
+                    b.HasOne("FreeGency.Domain.Entities.Skill", "Skill")
+                        .WithMany("SpecialtySkills")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.Specialty", "Specialty")
+                        .WithMany("SpecialtySkills")
+                        .HasForeignKey("SpecialtyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Category");
+                    b.Navigation("Skill");
+
+                    b.Navigation("Specialty");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Team", b =>
@@ -3209,6 +3635,25 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("Team");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamSpecialty", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.Specialty", "Specialty")
+                        .WithMany("TeamSpecialties")
+                        .HasForeignKey("SpecialtyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.Team", "Team")
+                        .WithMany("TeamSpecialties")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Specialty");
+
+                    b.Navigation("Team");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.User", b =>
                 {
                     b.OwnsMany("FreeGency.Domain.Entities.RefreshToken", "refreshTokens", b1 =>
@@ -3341,8 +3786,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Projects");
 
-                    b.Navigation("Specialties");
-
                     b.Navigation("TeamCategories");
 
                     b.Navigation("UserInterests");
@@ -3377,6 +3820,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.Navigation("EscrowHold");
 
+                    b.Navigation("LedgerEntries");
+
                     b.Navigation("Milestones");
 
                     b.Navigation("ProjectEvents");
@@ -3388,6 +3833,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("ProjectProposals");
 
                     b.Navigation("ProjectSkills");
+
+                    b.Navigation("ProjectSpecialties");
 
                     b.Navigation("Reviews");
 
@@ -3409,6 +3856,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.Navigation("ProjectSkills");
 
+                    b.Navigation("SpecialtySkills");
+
                     b.Navigation("TeamJobSkills");
 
                     b.Navigation("TeamSkills");
@@ -3418,7 +3867,11 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Specialty", b =>
                 {
-                    b.Navigation("Projects");
+                    b.Navigation("ProjectSpecialties");
+
+                    b.Navigation("SpecialtySkills");
+
+                    b.Navigation("TeamSpecialties");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Team", b =>
@@ -3446,6 +3899,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("TeamPayoutSplits");
 
                     b.Navigation("TeamSkills");
+
+                    b.Navigation("TeamSpecialties");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.TeamJob", b =>
@@ -3466,6 +3921,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("CreatedTeamJobs");
 
                     b.Navigation("DeveloperProfile");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("OwnedTeams");
 

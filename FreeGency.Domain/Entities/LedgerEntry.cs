@@ -23,7 +23,7 @@ public class LedgerEntry : ISoftDeletableEntity
     public string IdempotencyKey { get; set; } = string.Empty;
     public string? PaymentProviderRef { get; set; }
 
-    public Wallet Wallet { get; set; } = null!;
-    public Project? Project { get; set; }
-    public Milestone? Milestone { get; set; }
+    public virtual Wallet Wallet { get; set; } = null!;
+    public virtual Project? Project { get; set; }
+    public virtual Milestone? Milestone { get; set; }
 }

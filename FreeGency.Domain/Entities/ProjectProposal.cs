@@ -24,9 +24,9 @@ public class ProjectProposal : ISoftDeletableEntity
     public DateTime AppliedAt { get; set; }
     public DateTime? ResponseAt { get; set; }
 
-    public Project Project { get; set; } = null!;
-    public Team? Team { get; set; }
-    public User? User { get; set; }
-    public ICollection<ProposalAttachment> ProposalAttachments { get; set; } = [];
-    public ChatRoom? ChatRoom { get; set; }
+    public virtual Project Project { get; set; } = null!;
+    public virtual Team? Team { get; set; }
+    public virtual User? User { get; set; }
+    public virtual ICollection<ProposalAttachment> ProposalAttachments { get; set; } = [];
+    public virtual ChatRoom? ChatRoom { get; set; }
 }

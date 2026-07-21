@@ -19,6 +19,6 @@ public class Message : ISoftDeletableEntity
     public string? FileUrl { get; set; }
     public string? FileName { get; set; }
 
-    public ChatRoom ChatRoom { get; set; } = null!;
-    public User? SenderUser { get; set; }
+    public virtual ChatRoom ChatRoom { get; set; } = null!;
+    public virtual User? SenderUser { get; set; }
 }

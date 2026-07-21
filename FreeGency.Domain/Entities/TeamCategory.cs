@@ -17,6 +17,6 @@ public class TeamCategory : ISoftDeletableEntity
     public Guid CategoryId { get; set; }
     public bool IsPrimary { get; set; } = false;
 
-    public Team Team { get; set; } = null!;
-    public Category Category { get; set; } = null!;
+    public virtual Team Team { get; set; } = null!;
+    public virtual Category Category { get; set; } = null!;
 }

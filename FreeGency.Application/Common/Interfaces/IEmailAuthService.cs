@@ -1,8 +1,4 @@
-﻿using FreeGency.Application.Common.Results;
-using FreeGency.Application.Features.EmailFeature.Dtos;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using FreeGency.Application.Features.EmailFeature.Dtos;
 
 namespace FreeGency.Application.Common.Interfaces
 {

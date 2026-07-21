@@ -15,9 +15,6 @@ public class SpecialtyConfiguration : IEntityTypeConfiguration<Specialty>
         builder.Property(s => s.NameEn).IsRequired().HasMaxLength(100);
         builder.Property(s => s.NameAr).IsRequired().HasMaxLength(100);
 
-        builder.HasOne(s => s.Category)
-            .WithMany(c => c.Specialties)
-            .HasForeignKey(s => s.CategoryId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // Category <-> Specialty is configured via CategorySpecialty join entity (M to M)
     }
 }

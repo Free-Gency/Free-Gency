@@ -6,7 +6,7 @@ namespace FreeGency.Domain.Interfaces.Repositories
     {
         Task<IEnumerable<Notification>> GetByUserIdAsync(Guid userId, bool? isRead = null, CancellationToken ct = default);
         Task MarkReadAsync(Guid id, CancellationToken ct = default);
-        Task MarkAllReadAsync(CancellationToken ct = default);
+        Task MarkAllReadAsync(Guid userId, CancellationToken ct = default);
         Task<int> CountUnreadAsync(Guid userId, CancellationToken ct = default);
     }
 }

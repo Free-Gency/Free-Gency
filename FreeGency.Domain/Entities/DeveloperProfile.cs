@@ -19,5 +19,5 @@ public class DeveloperProfile : ISoftDeletableEntity
     public decimal AverageRating { get; set; } = 0;
     public int RatingCount { get; set; } = 0;
 
-    public User User { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
 }

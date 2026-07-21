@@ -43,6 +43,7 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
+            options.UseLazyLoadingProxies();
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             options.AddInterceptors(
                 sp.GetRequiredService<AuditInterceptor>(),

@@ -16,6 +16,6 @@ public class TeamJobSkill : ISoftDeletableEntity
     public Guid TeamJobId { get; set; }
     public Guid SkillId { get; set; }
 
-    public TeamJob TeamJob { get; set; } = null!;
-    public Skill Skill { get; set; } = null!;
+    public virtual TeamJob TeamJob { get; set; } = null!;
+    public virtual Skill Skill { get; set; } = null!;
 }

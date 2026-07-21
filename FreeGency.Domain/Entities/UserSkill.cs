@@ -16,6 +16,6 @@ public class UserSkill : ISoftDeletableEntity
     public Guid UserId { get; set; }
     public Guid SkillId { get; set; }
 
-    public User User { get; set; } = null!;
-    public Skill Skill { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
+    public virtual Skill Skill { get; set; } = null!;
 }

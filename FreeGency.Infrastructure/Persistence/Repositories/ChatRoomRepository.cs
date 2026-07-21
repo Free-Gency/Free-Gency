@@ -87,12 +87,14 @@ public class ChatRoomRepository:GenericRepository<ChatRoom>, IChatRoomRepository
         _context.Set<ChatRoomMember>().Update(member);
     }
 
-    public async Task SetReadOnlyAsync(Guid roomId,CancellationToken ct = default)
+    public async Task SetReadOnlyAsync(Guid roomId, CancellationToken ct = default)
     {
         var room = await _dbSet.FirstOrDefaultAsync(x => x.Id == roomId, ct);
         if (room is null)
             throw new KeyNotFoundException("Chat room not found.");
-        room.IsReadOnly = true;
+
+        // IsReadOnly is configured as a shadow property in the EF model.
+        _context.Entry(room).Property<bool>("IsReadOnly").CurrentValue = true;
         _dbSet.Update(room);
     }
 }
