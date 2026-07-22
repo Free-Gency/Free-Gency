@@ -31,4 +31,8 @@ public class ClientAccountResponseDto
     public string? ProfileMode { get; set; }
 
     public List<CategoryDto> Interests { get; set; } = [];
+
+    public List<SpecialtyWithSkillsDto> Specialties { get; set; } = [];
+
+    public List<SkillDto> Skills { get; set; } = [];
 }

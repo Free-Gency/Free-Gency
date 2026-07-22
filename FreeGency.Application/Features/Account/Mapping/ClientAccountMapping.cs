@@ -26,6 +26,28 @@ public static class ClientAccountMapping
             ProfileMode = clientProfile.User.ActiveProfileMode.ToString(),
             Interests = clientProfile.UserInterests
                 .Select(ui => ui.Category.ToDto())
+                .ToList(),
+            Specialties = clientProfile.UserSpecialties
+                .Select(us => new SpecialtyWithSkillsDto
+                {
+                    Id = us.Specialty.Id,
+                    NameAr = us.Specialty.NameAr,
+                    NameEn = us.Specialty.NameEn,
+                    Skills = us.Specialty.SpecialtySkills
+                        .Select(ss => new SkillDto
+                        {
+                            Id = ss.Skill.Id,
+                            Name = ss.Skill.Name
+                        })
+                        .ToList()
+                })
+                .ToList(),
+            Skills = clientProfile.UserSkills
+                .Select(us => new SkillDto
+                {
+                    Id = us.Skill.Id,
+                    Name = us.Skill.Name
+                })
                 .ToList()
         };
     }
@@ -34,6 +56,7 @@ public static class ClientAccountMapping
     {
         client.User.FristName = dto.FirstName;
         client.User.LastName = dto.LastName;
+        client.User.Country = dto.Country;
         client.Bio = dto.Bio;
     }
 }

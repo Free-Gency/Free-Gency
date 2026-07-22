@@ -31,7 +31,7 @@ public class ProfileController(IAccountService accountService) : BaseApiControll
         return result.IsSuccess ? Ok() : result.ToProblem();
     }
 
-    [HttpPost("Developer")]
+    [HttpPost("developer")]
     public async Task<IActionResult> CreateDeveloperProfile()
     {
         var result = await accountService.CreateProfileDeveloperAsync();
@@ -45,7 +45,7 @@ public class ProfileController(IAccountService accountService) : BaseApiControll
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
-    [HttpGet("Developer/me")]
+    [HttpGet("developer/me")]
     public async Task<IActionResult> GetDeveloperProfile()
     {
         var result = await accountService.GetDeveloperProfile();

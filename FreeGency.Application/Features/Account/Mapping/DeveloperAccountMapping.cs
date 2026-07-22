@@ -1,4 +1,5 @@
-﻿using FreeGency.Application.Features.Account.Dtos;
+﻿using FreeGency.Application.Common.Mappings.CategoriesMapping;
+using FreeGency.Application.Features.Account.Dtos;
 
 namespace FreeGency.Application.Features.Account.Mapping;
 
@@ -16,6 +17,9 @@ public static class DeveloperAccountMapping
             AverageRating = developerProfile.AverageRating,
             RatingCount = developerProfile.RatingCount,
             Country = developerProfile.User.Country ?? string.Empty,
+            Interests = developerProfile.UserInterests
+                .Select(ui => ui.Category.ToDto())
+                .ToList(),
             Specialties = developerProfile.UserSpecialties
                 .Select(us => new SpecialtyWithSkillsDto
                 {

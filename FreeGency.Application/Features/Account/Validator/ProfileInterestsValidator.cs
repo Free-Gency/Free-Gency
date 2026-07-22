@@ -9,7 +9,6 @@ public sealed class ProfileInterestsValidator : AbstractValidator<ProfileInteres
     {
         RuleFor(x => x.CategoryIds)
             .NotNull()
-            .Must(ids => ids.Count > 0)
-            .WithMessage("At least one category is required.");
+            .WithMessage("CategoryIds is required.");
     }
 }

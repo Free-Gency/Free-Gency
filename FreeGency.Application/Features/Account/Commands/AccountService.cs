@@ -71,19 +71,7 @@ public partial class AccountService
         var spec = new UserSpecification(userId);
         var user = await _userRepository.GetEntityWithSpec(spec);
         if (user == null) return Result.Failure<string>(UserErrors.UserNotFound);
-        if (user.ActiveProfileMode == profileMode.Client)
-        {
-            user.ActiveProfileMode = profileMode.Developer;
-            var specDev = new DeveloperAccountSpecification(userId);
-            var profile = await _developerProfileRepository.GetEntityWithSpec(specDev);
-            if (profile == null)
-            {
-                var developerProfile = new DeveloperProfile { UserId = userId };
-                await _developerProfileRepository.AddAsync(developerProfile);
-                await unitOfWork.SaveChangesAsync();
-            }
-        }
-        else
+        if (user.ActiveProfileMode == profileMode.Developer)
         {
             user.ActiveProfileMode = profileMode.Client;
             var specClient = new ClientAccountSpecifiaction(userId);
@@ -92,6 +80,18 @@ public partial class AccountService
             {
                 var clientProfile = new ClientProfile { UserId = userId };
                 await _profileRepository.AddAsync(clientProfile);
+                await unitOfWork.SaveChangesAsync();
+            }
+        }
+        else
+        {
+            user.ActiveProfileMode = profileMode.Developer;
+            var specDev = new DeveloperAccountSpecification(userId);
+            var profile = await _developerProfileRepository.GetEntityWithSpec(specDev);
+            if (profile == null)
+            {
+                var developerProfile = new DeveloperProfile { UserId = userId };
+                await _developerProfileRepository.AddAsync(developerProfile);
                 await unitOfWork.SaveChangesAsync();
             }
         }
@@ -144,6 +144,9 @@ public partial class AccountService
                 userId));
 
         var categoryIds = dto.CategoryIds.Distinct().ToList();
+        if (categoryIds.Count == 0)
+            return ApiResponse.Failure(AppError.Validation("At least one category is required."));
+
         var validationError = await ValidateCategoriesAsync(categoryIds, ct);
         if (validationError is not null)
             return validationError;
@@ -198,6 +201,9 @@ public partial class AccountService
                 userId));
 
         var specialtyIds = dto.SpecialtyIds.Distinct().ToList();
+        if (specialtyIds.Count == 0)
+            return ApiResponse.Failure(AppError.Validation("At least one specialty is required."));
+
         var validationError = await ValidateSpecialtiesAsync(specialtyIds, ct);
         if (validationError is not null)
             return validationError;
