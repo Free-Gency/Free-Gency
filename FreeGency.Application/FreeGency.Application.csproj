@@ -16,8 +16,6 @@
     <Folder Include="Common\Constants\" />
     <Folder Include="Common\Models\" />
     <Folder Include="Common\Exceptions\" />
-    <Folder Include="Features\Account\Commands\" />
-    <Folder Include="Features\Account\Validator\" />
   </ItemGroup>
 
   <ItemGroup>

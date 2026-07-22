@@ -7,7 +7,7 @@ namespace FreeGency.Application.Common.Interfaces
 {
     public interface IAccountService
     {
-        Task<Result> UpdateProfileAsync();
+        Task<Result> UpdateClientProfileAsync(UpdateClientAccountDto dto);
         Task<Result<ClientAccountResponseDto>> GetClientProfile();
     }
 }

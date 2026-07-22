@@ -28,5 +28,11 @@ namespace FreeGency.Application.Features.Account.Mapping
                 ProfileMode = clientProfile.User.ActiveProfileMode.ToString()
             };
         }
+        public static void UpdateToEntity(this ClientProfile client,UpdateClientAccountDto dto)
+        {
+            client.User.FristName = dto.FirstName;
+            client.User.LastName = dto.LastName;
+            client.Bio = dto.Bio;
+        }
     }
 }

@@ -28,9 +28,6 @@ namespace FreeGency.Application.Features.Account.Queries
             return Result.Success(response);
         }
 
-        public Task<Result> UpdateProfileAsync()
-        {
-            throw new NotImplementedException();
-        }
+     
     }
 }
