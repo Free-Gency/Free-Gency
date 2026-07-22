@@ -11,7 +11,7 @@ public static class SpecialtyFilterExtensions
         if (filter.CategoryId.HasValue)
         {
             var categoryId = filter.CategoryId.Value;
-            query = query.Where(s => s.Categories.Any(c => c.Id == categoryId));
+            query = query.Where(s => s.CategorySpecialties.Any(cs => cs.CategoryId == categoryId));
         }
 
         return query;

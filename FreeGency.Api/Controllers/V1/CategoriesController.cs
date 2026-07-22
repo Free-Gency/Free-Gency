@@ -26,16 +26,14 @@ public class CategoriesController(ICategoryService _categoryService) : BaseApiCo
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateCategoryDto dto, CancellationToken ct)
+    public async Task<IActionResult> Create([FromForm] CreateCategoryDto dto, CancellationToken ct)
         => HandleResult(await _categoryService.CreateAsync(dto, ct));
 
     [Authorize]
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryDto dto, CancellationToken ct)
+    public async Task<IActionResult> Update(Guid id, [FromForm] UpdateCategoryDto dto, CancellationToken ct)
     {
-        if (id != dto.Id)
-            return HandleResult(ApiResponse.Failure(AppError.Validation("Route id does not match body id.")));
-
+        dto.Id = id;
         return HandleResult(await _categoryService.UpdateAsync(dto, ct));
     }
 
