@@ -1,4 +1,4 @@
-﻿using FreeGency.Domain.Interfaces.Repositories;
+using FreeGency.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace FreeGency.Infrastructure.Persistence.Repositories
@@ -45,6 +45,7 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
                 {
                     var newInterests = categoryIds.Select(categoryId => new UserInterest
                     {
+                        Id = Guid.NewGuid(),
                         UserId = userId,
                         CategoryId = categoryId
                     });

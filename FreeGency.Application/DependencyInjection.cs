@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using FreeGency.Application.Common.Helpers;
 using FreeGency.Application.Common.Interfaces;
@@ -6,6 +6,11 @@ using FreeGency.Application.Features.Account.Queries;
 using FreeGency.Application.Features.Authentication;
 using FreeGency.Application.Features.EmailFeature.Commands;
 using FreeGency.Application.Features.ExternalFeature.Commands;
+using FreeGency.Application.Features.categories;
+using FreeGency.Application.Features.Projects.Commands;
+using FreeGency.Application.Features.skills;
+using FreeGency.Application.Features.specialties;
+using FreeGency.Application.Features.userInterests;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +30,11 @@ namespace FreeGency.Application
             services.AddSingleton<IJwtProvider, JwtProvider>();
             services.AddScoped<IAuthServices, AuthServices>();
             services.AddScoped<IEmailAuthService, EmailAuthService>();
+            services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<ISkillService, SkillService>();
+            services.AddScoped<ISpecialtyService, SpecialtyService>();
+            services.AddScoped<IUserInterestService, UserInterestService>();
             services.AddFluentValidationAutoValidation()
                     .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddOptions<JwtOptions>()

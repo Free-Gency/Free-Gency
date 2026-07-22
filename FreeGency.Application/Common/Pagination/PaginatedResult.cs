@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Common.Pagination
+namespace FreeGency.Application.Common.Pagination
 {
     public sealed class PaginatedResult<T>
     {
@@ -38,5 +38,12 @@
 
             return new PaginatedResult<T>(items, pageNumber, pageSize, totalCount);
         }
+
+        public static PaginatedResult<T> FromList(
+            IReadOnlyCollection<T> items,
+            int pageNumber,
+            int pageSize,
+            int totalCount)
+            => new(items, pageNumber, pageSize, totalCount);
     }
 }
