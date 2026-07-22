@@ -1,5 +1,4 @@
-﻿using FreeGency.Application.Common.Mappings.CategoriesMapping;
-using FreeGency.Application.Features.Account.Dtos;
+﻿using FreeGency.Application.Features.Account.Dtos;
 using FreeGency.Domain.Entities;
 
 namespace FreeGency.Application.Features.Account.Mapping;
@@ -24,31 +23,10 @@ public static class ClientAccountMapping
             Email = clientProfile.User.Email!,
             ProjectsPostedCount = 0,
             ProfileMode = clientProfile.User.ActiveProfileMode.ToString(),
-            Interests = clientProfile.UserInterests
-                .Select(ui => ui.Category.ToDto())
-                .ToList(),
-            Specialties = clientProfile.UserSpecialties
-                .Select(us => new SpecialtyWithSkillsDto
-                {
-                    Id = us.Specialty.Id,
-                    NameAr = us.Specialty.NameAr,
-                    NameEn = us.Specialty.NameEn,
-                    Skills = us.Specialty.SpecialtySkills
-                        .Select(ss => new SkillDto
-                        {
-                            Id = ss.Skill.Id,
-                            Name = ss.Skill.Name
-                        })
-                        .ToList()
-                })
-                .ToList(),
-            Skills = clientProfile.UserSkills
-                .Select(us => new SkillDto
-                {
-                    Id = us.Skill.Id,
-                    Name = us.Skill.Name
-                })
-                .ToList()
+            Interests = ProfileCatalogMapping.ToNestedCatalog(
+                clientProfile.UserInterests,
+                clientProfile.UserSpecialties,
+                clientProfile.UserSkills)
         };
     }
 

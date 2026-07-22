@@ -1,6 +1,4 @@
-﻿using FreeGency.Application.Features.categories.Dtos;
-
-namespace FreeGency.Application.Features.Account.Dtos;
+﻿namespace FreeGency.Application.Features.Account.Dtos;
 
 public class DeveloperAccountResponseDto
 {
@@ -20,9 +18,5 @@ public class DeveloperAccountResponseDto
 
     public string Country { get; set; } = string.Empty;
 
-    public List<CategoryDto> Interests { get; set; } = [];
-
-    public List<SpecialtyWithSkillsDto> Specialties { get; set; } = [];
-
-    public List<SkillDto> Skills { get; set; } = [];
+    public List<ProfileInterestDto> Interests { get; set; } = [];
 }

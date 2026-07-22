@@ -9,9 +9,9 @@ public class ClientAccountSpecifiaction : BaseSpecification<ClientProfile>
         AddInclude("User");
         AddInclude("UserInterests.Category");
         AddInclude("UserSpecialties.Specialty");
-        AddInclude("UserSpecialties.Specialty.SpecialtySkills");
-        AddInclude("UserSpecialties.Specialty.SpecialtySkills.Skill");
+        AddInclude("UserSpecialties.Specialty.CategorySpecialties");
         AddInclude("UserSkills.Skill");
+        AddInclude("UserSkills.Skill.SpecialtySkills");
     }
 
     public ClientAccountSpecifiaction(Guid userId, bool? includes) : base(x => x.UserId == userId)

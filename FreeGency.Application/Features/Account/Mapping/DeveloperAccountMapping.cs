@@ -1,5 +1,5 @@
-﻿using FreeGency.Application.Common.Mappings.CategoriesMapping;
-using FreeGency.Application.Features.Account.Dtos;
+﻿using FreeGency.Application.Features.Account.Dtos;
+using FreeGency.Domain.Entities;
 
 namespace FreeGency.Application.Features.Account.Mapping;
 
@@ -17,31 +17,10 @@ public static class DeveloperAccountMapping
             AverageRating = developerProfile.AverageRating,
             RatingCount = developerProfile.RatingCount,
             Country = developerProfile.User.Country ?? string.Empty,
-            Interests = developerProfile.UserInterests
-                .Select(ui => ui.Category.ToDto())
-                .ToList(),
-            Specialties = developerProfile.UserSpecialties
-                .Select(us => new SpecialtyWithSkillsDto
-                {
-                    Id = us.Specialty.Id,
-                    NameAr = us.Specialty.NameAr,
-                    NameEn = us.Specialty.NameEn,
-                    Skills = us.Specialty.SpecialtySkills
-                        .Select(ss => new SkillDto
-                        {
-                            Id = ss.Skill.Id,
-                            Name = ss.Skill.Name
-                        })
-                        .ToList()
-                })
-                .ToList(),
-            Skills = developerProfile.UserSkills
-                .Select(us => new SkillDto
-                {
-                    Id = us.Skill.Id,
-                    Name = us.Skill.Name
-                })
-                .ToList()
+            Interests = ProfileCatalogMapping.ToNestedCatalog(
+                developerProfile.UserInterests,
+                developerProfile.UserSpecialties,
+                developerProfile.UserSkills)
         };
     }
 }

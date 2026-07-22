@@ -12,9 +12,9 @@ public class DeveloperAccountSpecification : BaseSpecification<DeveloperProfile>
     {
         AddInclude("User");
         AddInclude("UserSpecialties.Specialty");
-        AddInclude("UserSpecialties.Specialty.SpecialtySkills");
-        AddInclude("UserSpecialties.Specialty.SpecialtySkills.Skill");
+        AddInclude("UserSpecialties.Specialty.CategorySpecialties");
         AddInclude("UserInterests.Category");
         AddInclude("UserSkills.Skill");
+        AddInclude("UserSkills.Skill.SpecialtySkills");
     }
 }
