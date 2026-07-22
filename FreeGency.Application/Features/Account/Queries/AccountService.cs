@@ -14,7 +14,12 @@ namespace FreeGency.Application.Features.Account.Queries
 {
     public partial class AccountService (ICurrentUserService currentUserService,IUnitOfWork unitOfWork): IAccountService
     {
-        
+
+        private readonly IClientProfileRepository _profileRepository = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
+        private readonly IDeveloperProfileRepository _developerProfileRepository = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
+        private readonly IUserRepository _userRepository = unitOfWork.Repository<IUserRepository, User>();
+
+
         public async Task<Result<ClientAccountResponseDto>> GetClientProfile()
         {
             var userId = currentUserService.UserId;
@@ -28,6 +33,15 @@ namespace FreeGency.Application.Features.Account.Queries
             return Result.Success(response);
         }
 
-     
+        public async Task<Result<DeveloperAccountResponseDto>> GetDeveloperProfile()
+        {
+            var userId = currentUserService.UserId;
+            if (userId == Guid.Empty) return Result.Failure<DeveloperAccountResponseDto>(UserErrors.UserNotFound);
+            var spec = new DeveloperAccountSpecification(userId, true);
+            var developerProfile = await _developerProfileRepository.GetEntityWithSpec(spec);
+
+            var response = developerProfile!.ToDto();
+            return Result.Success(response);
+        }
     }
 }

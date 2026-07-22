@@ -22,7 +22,7 @@ public static class DependencyInjection
         services.AddScoped<IEmailService,EmailService>();
         services.AddScoped<AuditInterceptor>();
         services.AddScoped<SoftDeleteInterceptor>();
-
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
         services.AddScoped<ITeamJobRepository, TeamJobRepository>();

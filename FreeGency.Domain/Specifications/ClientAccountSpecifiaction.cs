@@ -11,5 +11,9 @@ namespace FreeGency.Domain.Specifications
         {
             AddInclude("User");
         }
+        public ClientAccountSpecifiaction(Guid userId,bool? includes) : base(x => x.UserId == userId)
+        {
+            
+        }
     }
 }
