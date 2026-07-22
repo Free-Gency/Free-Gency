@@ -76,7 +76,7 @@ namespace FreeGency.Api
             });
            
             var app = builder.Build();
-
+            app.UseStaticFiles();
             DatabaseInitializer.InitializeAsync(app.Services).GetAwaiter().GetResult();
 
             // Configure the HTTP request pipeline.

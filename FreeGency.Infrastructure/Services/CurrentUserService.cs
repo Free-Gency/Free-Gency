@@ -13,7 +13,7 @@ namespace FreeGency.Infrastructure.Services
 
         public string origin =>
                     $"{httpContextAccessor.HttpContext?.Request.Scheme}://" +
-                    $"{httpContextAccessor.HttpContext?.Request.Host}/";
+                    $"{httpContextAccessor.HttpContext?.Request.Host}";
 
     }
 }
