@@ -13,7 +13,7 @@ public static class SkillFilterExtensions
             var categoryId = filter.CategoryId.Value;
             query = query.Where(skill =>
                 skill.SpecialtySkills.Any(ss =>
-                    ss.Specialty.Categories.Any(c => c.Id == categoryId)));
+                    ss.Specialty.CategorySpecialties.Any(cs => cs.CategoryId == categoryId)));
         }
 
         if (filter.SpecialtyId.HasValue)

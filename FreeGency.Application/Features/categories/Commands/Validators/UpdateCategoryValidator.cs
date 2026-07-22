@@ -1,3 +1,5 @@
+using FluentValidation;
+using FreeGency.Application.Common.Validators;
 using FreeGency.Application.Features.categories.Dtos;
 
 namespace FreeGency.Application.Features.categories.Commands.Validators;
@@ -17,8 +19,6 @@ public sealed class UpdateCategoryValidator : AbstractValidator<UpdateCategoryDt
             .NotEmpty()
             .MaximumLength(100);
 
-        RuleFor(x => x.ImageCover)
-            .MaximumLength(500)
-            .When(x => x.ImageCover is not null);
+        UploadFileValidator.ApplyRules(this, x => x.ImageCover, UploadFileKind.Image, maxSizeInMb: 5);
     }
 }

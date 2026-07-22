@@ -4,6 +4,7 @@ using FreeGency.Application.Features.Account.Mapping;
 using FreeGency.Domain.Entities;
 using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Domain.Specifications;
+using FreeGency.Infrastructure.Integrations.Cloudinary;
 
 namespace FreeGency.Application.Features.Account.Queries;
 
@@ -20,7 +21,16 @@ public partial class AccountService
         clientAccount.UpdateToEntity(dto);
         if (dto.ProfileImage != null)
         {
-            clientAccount.ProfileImage = await SaveImage(dto.ProfileImage, "ClientProfile");
+            try
+            {
+                clientAccount.ProfileImage = (await storageService.UploadAsync(
+                    dto.ProfileImage,
+                    StorageFolders.ClientProfile)).Url;
+            }
+            catch (Exception)
+            {
+                return Result.Failure(FileErrors.UploadFailed);
+            }
         }
 
         repo.Update(clientAccount);
@@ -172,17 +182,4 @@ public partial class AccountService
         return null;
     }
 
-    private async Task<string> SaveImage(IFormFile file, string type)
-    {
-        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), $"wwwroot/Images/{type}");
-        if (!Directory.Exists(uploadsFolder))
-            Directory.CreateDirectory(uploadsFolder);
-        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-        using (var fileStream = new FileStream(filePath, FileMode.Create))
-        {
-            await file.CopyToAsync(fileStream);
-        }
-        return $"/Images/{type}/{uniqueFileName}";
-    }
 }
