@@ -14,12 +14,12 @@ public class CategorySpecialtyConfiguration : IEntityTypeConfiguration<CategoryS
         builder.HasIndex(cs => new { cs.CategoryId, cs.SpecialtyId }).IsUnique();
 
         builder.HasOne(cs => cs.Category)
-            .WithMany()
+            .WithMany(c => c.CategorySpecialties)
             .HasForeignKey(cs => cs.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(cs => cs.Specialty)
-            .WithMany()
+            .WithMany(s => s.CategorySpecialties)
             .HasForeignKey(cs => cs.SpecialtyId)
             .OnDelete(DeleteBehavior.Restrict);
     }

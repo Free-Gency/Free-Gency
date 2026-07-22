@@ -1,0 +1,9 @@
+{
+  "firstName": "Cloud",
+  "lastName": "Test",
+  "email": "cloudtest@freegency.dev",
+  "password": "Test@123456",
+  "country": "Egypt",
+  "phoneNumber": "01000000001",
+  "mode": "Client"
+}

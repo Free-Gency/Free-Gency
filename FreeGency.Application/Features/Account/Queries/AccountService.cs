@@ -12,7 +12,7 @@ using System.Text;
 
 namespace FreeGency.Application.Features.Account.Queries
 {
-    public partial class AccountService (ICurrentUserService currentUserService,IUnitOfWork unitOfWork): IAccountService
+    public partial class AccountService (ICurrentUserService currentUserService, IUnitOfWork unitOfWork, IStorageService storageService): IAccountService
     {
         
         public async Task<Result<ClientAccountResponseDto>> GetClientProfile()
@@ -24,10 +24,18 @@ namespace FreeGency.Application.Features.Account.Queries
             var clientAccount = await repo.GetEntityWithSpec(spec);
             if(clientAccount==null)return Result.Failure<ClientAccountResponseDto>(UserErrors.UserNotFound);
             var response = clientAccount.ToDto();
-            response.ProfileImage = currentUserService.origin + clientAccount.ProfileImage;
+            response.ProfileImage = ResolveProfileImageUrl(clientAccount.ProfileImage);
             return Result.Success(response);
         }
 
-     
+        private string? ResolveProfileImageUrl(string? profileImage)
+        {
+            if (string.IsNullOrWhiteSpace(profileImage))
+                return profileImage;
+
+            return Uri.TryCreate(profileImage, UriKind.Absolute, out _)
+                ? profileImage
+                : currentUserService.origin + profileImage;
+        }
     }
 }
