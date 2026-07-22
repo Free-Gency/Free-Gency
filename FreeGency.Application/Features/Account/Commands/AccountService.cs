@@ -1,4 +1,4 @@
-﻿using FreeGency.Application.Common.Errors;
+using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Features.Account.Dtos;
 using FreeGency.Application.Features.Account.Mapping;
 using FreeGency.Domain.Entities;
@@ -28,6 +28,9 @@ namespace FreeGency.Application.Features.Account.Queries
                 clientAccount.ProfileImage = await SaveImage(dto.ProfileImage, "ClientProfile");
             }
 
+            repo.Update(clientAccount);
+            await unitOfWork.SaveChangesAsync();
+            return Result.Success();
         }
         private async Task<string> SaveImage(IFormFile file, string type)
         {

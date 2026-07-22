@@ -27,5 +27,4 @@ public class ChatRoom : ISoftDeletableEntity
     public virtual User? CreatedByUser { get; set; }
     public virtual ICollection<ChatRoomMember> ChatRoomMembers { get; set; } = [];
     public virtual ICollection<Message> Messages { get; set; } = [];
-    public bool IsReadOnly { get; set; }
 }

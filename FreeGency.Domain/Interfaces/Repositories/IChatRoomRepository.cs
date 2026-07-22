@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using FreeGency.Domain.Entities;
@@ -22,7 +22,5 @@ namespace FreeGency.Domain.Interfaces.Repositories
         Task RemoveMemberAsync(Guid roomId,Guid userId,CancellationToken ct = default);
 
         Task UpdateLastReadAsync(Guid roomId,Guid userId,CancellationToken ct = default);
-
-        Task SetReadOnlyAsync(Guid roomId,CancellationToken ct = default);
     }
 }

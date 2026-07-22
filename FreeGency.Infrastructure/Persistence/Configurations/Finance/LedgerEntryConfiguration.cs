@@ -25,7 +25,7 @@ public class LedgerEntryConfiguration : IEntityTypeConfiguration<LedgerEntry>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(l => l.Project)
-            .WithMany()
+            .WithMany(p => p.LedgerEntries)
             .HasForeignKey(l => l.ProjectId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
