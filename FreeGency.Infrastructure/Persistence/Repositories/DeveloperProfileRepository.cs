@@ -30,6 +30,34 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
                         .ThenInclude(ui => ui.Category)
                 .SingleOrDefaultAsync(dp => dp.UserId == userId, ct);
 
+        public async Task AddInterestsAsync(Guid userId, IEnumerable<Guid> categoryIds, CancellationToken ct = default)
+        {
+            var ids = categoryIds?.Distinct().ToList() ?? [];
+            if (ids.Count == 0)
+                return;
+
+            var existingCategoryIds = await _context.UserInterests
+                .Where(ui => ui.UserId == userId)
+                .Select(ui => ui.CategoryId)
+                .ToListAsync(ct);
+
+            var toAdd = ids
+                .Except(existingCategoryIds)
+                .Select(categoryId => new UserInterest
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    CategoryId = categoryId
+                })
+                .ToList();
+
+            if (toAdd.Count == 0)
+                return;
+
+            await _context.UserInterests.AddRangeAsync(toAdd, ct);
+            await _context.SaveChangesAsync(ct);
+        }
+
         public async Task ReplaceInterestsAsync(Guid userId, IEnumerable<Guid> categoryIds, CancellationToken ct = default)
         {
             using var transaction = await _context.Database.BeginTransactionAsync(ct);

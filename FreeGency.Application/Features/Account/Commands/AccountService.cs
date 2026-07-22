@@ -4,47 +4,128 @@ using FreeGency.Application.Features.Account.Mapping;
 using FreeGency.Domain.Entities;
 using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Domain.Specifications;
-using FreeGency.Infrastructure.Interfaces;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace FreeGency.Application.Features.Account.Queries
+namespace FreeGency.Application.Features.Account.Queries;
+
+public partial class AccountService
 {
-    public partial class AccountService:IAccountService
+    public async Task<Result> UpdateClientProfileAsync(UpdateClientAccountDto dto)
     {
-        public async Task<Result> UpdateClientProfileAsync(UpdateClientAccountDto dto)
-        {
-            var userId = currentUserService.UserId;
-            if (userId == Guid.Empty) return Result.Failure(UserErrors.UserNotFound);
-            var repo = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
-            var spec = new ClientAccountSpecifiaction(userId);
-            var clientAccount = await repo.GetEntityWithSpec(spec);
+        var userId = currentUserService.UserId;
+        if (userId == Guid.Empty) return Result.Failure(UserErrors.UserNotFound);
+        var repo = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
+        var spec = new ClientAccountSpecifiaction(userId);
+        var clientAccount = await repo.GetEntityWithSpec(spec);
             if (clientAccount == null) return Result.Failure<ClientAccountResponseDto>(UserErrors.UserNotFound);
-            clientAccount.UpdateToEntity(dto);
-            if (dto.ProfileImage != null)
-            {
-                clientAccount.ProfileImage = await SaveImage(dto.ProfileImage, "ClientProfile");
-            }
-
-            repo.Update(clientAccount);
-            await unitOfWork.SaveChangesAsync();
-            return Result.Success();
-        }
-        private async Task<string> SaveImage(IFormFile file, string type)
+        clientAccount.UpdateToEntity(dto);
+        if (dto.ProfileImage != null)
         {
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), $"wwwroot/Images/{type}");
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(fileStream);
-            }
-            return $"/Images/{type}/{uniqueFileName}";
+            clientAccount.ProfileImage = await SaveImage(dto.ProfileImage, "ClientProfile");
         }
+
+        repo.Update(clientAccount);
+        await unitOfWork.SaveChangesAsync();
+        return Result.Success();
+    }
+
+    public Task<ApiResponse> AddClientInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default)
+        => AddInterestsAsync(requireDeveloperProfile: false, dto, ct);
+
+    public Task<ApiResponse> ReplaceClientInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default)
+        => ReplaceInterestsAsync(requireDeveloperProfile: false, dto, ct);
+
+    public Task<ApiResponse> AddDeveloperInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default)
+        => AddInterestsAsync(requireDeveloperProfile: true, dto, ct);
+
+    public Task<ApiResponse> ReplaceDeveloperInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default)
+        => ReplaceInterestsAsync(requireDeveloperProfile: true, dto, ct);
+
+    private async Task<ApiResponse> AddInterestsAsync(
+        bool requireDeveloperProfile,
+        ProfileInterestsDto dto,
+        CancellationToken ct)
+    {
+        var userId = currentUserService.UserId;
+        if (userId == Guid.Empty)
+            return ApiResponse.Failure(AppError.Unauthorized());
+
+        if (!await ProfileExistsAsync(userId, requireDeveloperProfile, ct))
+            return ApiResponse.Failure(AppError.NotFound(
+                requireDeveloperProfile ? nameof(DeveloperProfile) : nameof(ClientProfile),
+                userId));
+
+        var categoryIds = dto.CategoryIds.Distinct().ToList();
+        var validationError = await ValidateCategoriesAsync(categoryIds, ct);
+        if (validationError is not null)
+            return validationError;
+
+        var developerProfileRepository = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
+        await developerProfileRepository.AddInterestsAsync(userId, categoryIds, ct);
+
+        return ApiResponse.Success("Interests added successfully.");
+    }
+
+    private async Task<ApiResponse> ReplaceInterestsAsync(
+        bool requireDeveloperProfile,
+        ProfileInterestsDto dto,
+        CancellationToken ct)
+    {
+        var userId = currentUserService.UserId;
+        if (userId == Guid.Empty)
+            return ApiResponse.Failure(AppError.Unauthorized());
+
+        if (!await ProfileExistsAsync(userId, requireDeveloperProfile, ct))
+            return ApiResponse.Failure(AppError.NotFound(
+                requireDeveloperProfile ? nameof(DeveloperProfile) : nameof(ClientProfile),
+                userId));
+
+        var categoryIds = dto.CategoryIds.Distinct().ToList();
+        var validationError = await ValidateCategoriesAsync(categoryIds, ct);
+        if (validationError is not null)
+            return validationError;
+
+        var developerProfileRepository = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
+        await developerProfileRepository.ReplaceInterestsAsync(userId, categoryIds, ct);
+
+        return ApiResponse.Success("Interests updated successfully.");
+    }
+
+    private async Task<bool> ProfileExistsAsync(Guid userId, bool developerProfile, CancellationToken ct)
+    {
+        if (developerProfile)
+        {
+            var developerProfileRepository = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
+            return await developerProfileRepository.ExistsForUserAsync(userId, ct);
+        }
+
+        var clientProfileRepository = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
+        return await clientProfileRepository.ExistsForUserAsync(userId, ct);
+    }
+
+    private async Task<ApiResponse?> ValidateCategoriesAsync(IReadOnlyList<Guid> categoryIds, CancellationToken ct)
+    {
+        var categoryRepository = unitOfWork.Repository<ICategoryRepository, Category>();
+
+        foreach (var categoryId in categoryIds)
+        {
+            if (!await categoryRepository.ExistsAsync(categoryId, ct))
+                return ApiResponse.Failure(AppError.NotFound(nameof(Category), categoryId));
+        }
+
+        return null;
+    }
+
+    private async Task<string> SaveImage(IFormFile file, string type)
+    {
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), $"wwwroot/Images/{type}");
+        if (!Directory.Exists(uploadsFolder))
+            Directory.CreateDirectory(uploadsFolder);
+        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+        using (var fileStream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(fileStream);
+        }
+        return $"/Images/{type}/{uniqueFileName}";
     }
 }
-
