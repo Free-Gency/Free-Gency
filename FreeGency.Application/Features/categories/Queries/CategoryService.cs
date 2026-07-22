@@ -7,55 +7,57 @@ using FreeGency.Application.Features.categories.Dtos;
 using FreeGency.Application.Features.skills.Dtos;
 using FreeGency.Application.Features.specialties.Dtos;
 
-namespace FreeGency.Application.Features.categories;
-
-public partial class CategoryService
+namespace FreeGency.Application.Features.categories.Commands
 {
-    public async Task<ApiResponse<PaginatedResult<CategoryDto>>> BrowseAsync(
-        FilterCategoriesRequestDto filter,
-        CancellationToken ct = default)
+    // Queries
+    public partial class CategoryService
     {
-        var query = _categoryRepository.Query()
-            .ApplyFilters(filter)
-            .ApplySearch(filter.Search)
-            .ApplySorting(filter);
+        public async Task<ApiResponse<PaginatedResult<CategoryDto>>> BrowseAsync(
+            FilterCategoriesRequestDto filter,
+            CancellationToken ct = default)
+        {
+            var query = _categoryRepository.Query()
+                .ApplyFilters(filter)
+                .ApplySearch(filter.Search)
+                .ApplySorting(filter);
 
-        var page = await PaginatedResult<Category>.CreateAsync(query, filter.PageNumber, filter.PageSize, ct);
+            var page = await PaginatedResult<Category>.CreateAsync(query, filter.PageNumber, filter.PageSize, ct);
 
-        var mapped = PaginatedResult<CategoryDto>.FromList(
-            page.Items.Select(x => x.ToDto()).ToList(),
-            page.PageNumber,
-            page.PageSize,
-            page.TotalCount);
+            var mapped = PaginatedResult<CategoryDto>.FromList(
+                page.Items.Select(x => x.ToDto()).ToList(),
+                page.PageNumber,
+                page.PageSize,
+                page.TotalCount);
 
-        return ApiResponse.Success(mapped);
-    }
+            return ApiResponse.Success(mapped);
+        }
 
-    public async Task<ApiResponse<CategoryDto>> GetByIdAsync(Guid id, CancellationToken ct = default)
-    {
-        var category = await _categoryRepository.GetByIdAsync(id, ct);
+        public async Task<ApiResponse<CategoryDto>> GetByIdAsync(Guid id, CancellationToken ct = default)
+        {
+            var category = await _categoryRepository.GetByIdAsync(id, ct);
 
-        if (category is null)
-            return ApiResponse.Failure<CategoryDto>(AppError.NotFound(nameof(Category), id));
+            if (category is null)
+                return ApiResponse.Failure<CategoryDto>(AppError.NotFound(nameof(Category), id));
 
-        return ApiResponse.Success(category.ToDto());
-    }
+            return ApiResponse.Success(category.ToDto());
+        }
 
-    public async Task<ApiResponse<IEnumerable<SpecialtyDto>>> GetSpecialtiesAsync(Guid categoryId, CancellationToken ct = default)
-    {
-        if (!await _categoryRepository.ExistsAsync(categoryId, ct))
-            return ApiResponse.Failure<IEnumerable<SpecialtyDto>>(AppError.NotFound(nameof(Category), categoryId));
+        public async Task<ApiResponse<IEnumerable<SpecialtyDto>>> GetSpecialtiesAsync(Guid categoryId, CancellationToken ct = default)
+        {
+            if (!await _categoryRepository.ExistsAsync(categoryId, ct))
+                return ApiResponse.Failure<IEnumerable<SpecialtyDto>>(AppError.NotFound(nameof(Category), categoryId));
 
-        var specialties = await _specialtyRepository.GetByCategoryIdAsync(categoryId, ct);
-        return ApiResponse.Success(specialties.Select(x => x.ToDto()));
-    }
+            var specialties = await _specialtyRepository.GetByCategoryIdAsync(categoryId, ct);
+            return ApiResponse.Success(specialties.Select(x => x.ToDto()));
+        }
 
-    public async Task<ApiResponse<IEnumerable<SkillDto>>> GetSkillsAsync(Guid categoryId, CancellationToken ct = default)
-    {
-        if (!await _categoryRepository.ExistsAsync(categoryId, ct))
-            return ApiResponse.Failure<IEnumerable<SkillDto>>(AppError.NotFound(nameof(Category), categoryId));
+        public async Task<ApiResponse<IEnumerable<SkillDto>>> GetSkillsAsync(Guid categoryId, CancellationToken ct = default)
+        {
+            if (!await _categoryRepository.ExistsAsync(categoryId, ct))
+                return ApiResponse.Failure<IEnumerable<SkillDto>>(AppError.NotFound(nameof(Category), categoryId));
 
-        var skills = await _skillRepository.GetByCategoryIdAsync(categoryId, ct);
-        return ApiResponse.Success(skills.Select(x => x.ToDto()));
+            var skills = await _skillRepository.GetByCategoryIdAsync(categoryId, ct);
+            return ApiResponse.Success(skills.Select(x => x.ToDto()));
+        }
     }
 }

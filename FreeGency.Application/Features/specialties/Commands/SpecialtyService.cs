@@ -1,47 +1,63 @@
 using FreeGency.Application.Common.Errors;
+using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Common.Mappings.SpecialtiesMapping;
 using FreeGency.Application.Features.specialties.Dtos;
 
-namespace FreeGency.Application.Features.specialties;
-
-public partial class SpecialtyService
+namespace FreeGency.Application.Features.specialties.Commands
 {
-    public async Task<ApiResponse<Guid>> CreateAsync(CreateSpecialtyDto dto, CancellationToken ct = default)
+    // Commands
+    public partial class SpecialtyService : ISpecialtyService
     {
-        var specialty = dto.ToEntity();
+        private readonly ISpecialtyRepository _specialtyRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ISkillRepository _skillRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        await _specialtyRepository.AddAsync(specialty, ct);
-        await _unitOfWork.SaveChangesAsync(ct);
+        public SpecialtyService(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+            _specialtyRepository = _unitOfWork.Repository<ISpecialtyRepository, Specialty>();
+            _categoryRepository = _unitOfWork.Repository<ICategoryRepository, Category>();
+            _skillRepository = _unitOfWork.Repository<ISkillRepository, Skill>();
+        }
 
-        return ApiResponse.Success(specialty.Id, "Specialty created successfully.");
-    }
+        public async Task<ApiResponse<Guid>> CreateAsync(CreateSpecialtyDto dto, CancellationToken ct = default)
+        {
+            var specialty = dto.ToEntity();
 
-    public async Task<ApiResponse> UpdateAsync(UpdateSpecialtyDto dto, CancellationToken ct = default)
-    {
-        var specialty = await _specialtyRepository.GetByIdAsync(dto.Id, ct);
+            await _specialtyRepository.AddAsync(specialty, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
 
-        if (specialty is null)
-            return ApiResponse.Failure(AppError.NotFound(nameof(Specialty), dto.Id));
+            return ApiResponse.Success(specialty.Id, "Specialty created successfully.");
+        }
 
-        specialty.NameEn = dto.NameEn;
-        specialty.NameAr = dto.NameAr;
+        public async Task<ApiResponse> UpdateAsync(UpdateSpecialtyDto dto, CancellationToken ct = default)
+        {
+            var specialty = await _specialtyRepository.GetByIdAsync(dto.Id, ct);
 
-        _specialtyRepository.Update(specialty);
-        await _unitOfWork.SaveChangesAsync(ct);
+            if (specialty is null)
+                return ApiResponse.Failure(AppError.NotFound(nameof(Specialty), dto.Id));
 
-        return ApiResponse.Success("Specialty updated successfully.");
-    }
+            specialty.NameEn = dto.NameEn;
+            specialty.NameAr = dto.NameAr;
 
-    public async Task<ApiResponse> DeleteAsync(Guid id, CancellationToken ct = default)
-    {
-        var specialty = await _specialtyRepository.GetByIdAsync(id, ct);
+            _specialtyRepository.Update(specialty);
+            await _unitOfWork.SaveChangesAsync(ct);
 
-        if (specialty is null)
-            return ApiResponse.Failure(AppError.NotFound(nameof(Specialty), id));
+            return ApiResponse.Success("Specialty updated successfully.");
+        }
 
-        _specialtyRepository.Delete(specialty);
-        await _unitOfWork.SaveChangesAsync(ct);
+        public async Task<ApiResponse> DeleteAsync(Guid id, CancellationToken ct = default)
+        {
+            var specialty = await _specialtyRepository.GetByIdAsync(id, ct);
 
-        return ApiResponse.Success("Specialty deleted successfully.");
+            if (specialty is null)
+                return ApiResponse.Failure(AppError.NotFound(nameof(Specialty), id));
+
+            _specialtyRepository.Delete(specialty);
+            await _unitOfWork.SaveChangesAsync(ct);
+
+            return ApiResponse.Success("Specialty deleted successfully.");
+        }
     }
 }

@@ -1,52 +1,68 @@
 using FreeGency.Application.Common.Errors;
+using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Common.Mappings.SkillsMapping;
 using FreeGency.Application.Features.skills.Dtos;
 
-namespace FreeGency.Application.Features.skills;
-
-public partial class SkillService
+namespace FreeGency.Application.Features.skills.Commands
 {
-    public async Task<ApiResponse<Guid>> CreateAsync(CreateSkillDto dto, CancellationToken ct = default)
+    // Commands
+    public partial class SkillService : ISkillService
     {
-        if (await _skillRepository.ExistsByNameAsync(dto.Name, ct: ct))
-            return ApiResponse.Failure<Guid>(AppError.SkillNameAlreadyExists(dto.Name));
+        private readonly ISkillRepository _skillRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ISpecialtyRepository _specialtyRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        var skill = dto.ToEntity();
+        public SkillService(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+            _skillRepository = _unitOfWork.Repository<ISkillRepository, Skill>();
+            _categoryRepository = _unitOfWork.Repository<ICategoryRepository, Category>();
+            _specialtyRepository = _unitOfWork.Repository<ISpecialtyRepository, Specialty>();
+        }
 
-        await _skillRepository.AddAsync(skill, ct);
-        await _unitOfWork.SaveChangesAsync(ct);
+        public async Task<ApiResponse<Guid>> CreateAsync(CreateSkillDto dto, CancellationToken ct = default)
+        {
+            if (await _skillRepository.ExistsByNameAsync(dto.Name, ct: ct))
+                return ApiResponse.Failure<Guid>(AppError.SkillNameAlreadyExists(dto.Name));
 
-        return ApiResponse.Success(skill.Id, "Skill created successfully.");
-    }
+            var skill = dto.ToEntity();
 
-    public async Task<ApiResponse> UpdateAsync(UpdateSkillDto dto, CancellationToken ct = default)
-    {
-        var skill = await _skillRepository.GetByIdAsync(dto.Id, ct);
+            await _skillRepository.AddAsync(skill, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
 
-        if (skill is null)
-            return ApiResponse.Failure(AppError.NotFound(nameof(Skill), dto.Id));
+            return ApiResponse.Success(skill.Id, "Skill created successfully.");
+        }
 
-        if (await _skillRepository.ExistsByNameAsync(dto.Name, dto.Id, ct))
-            return ApiResponse.Failure(AppError.SkillNameAlreadyExists(dto.Name));
+        public async Task<ApiResponse> UpdateAsync(UpdateSkillDto dto, CancellationToken ct = default)
+        {
+            var skill = await _skillRepository.GetByIdAsync(dto.Id, ct);
 
-        skill.Name = dto.Name;
+            if (skill is null)
+                return ApiResponse.Failure(AppError.NotFound(nameof(Skill), dto.Id));
 
-        _skillRepository.Update(skill);
-        await _unitOfWork.SaveChangesAsync(ct);
+            if (await _skillRepository.ExistsByNameAsync(dto.Name, dto.Id, ct))
+                return ApiResponse.Failure(AppError.SkillNameAlreadyExists(dto.Name));
 
-        return ApiResponse.Success("Skill updated successfully.");
-    }
+            skill.Name = dto.Name;
 
-    public async Task<ApiResponse> DeleteAsync(Guid id, CancellationToken ct = default)
-    {
-        var skill = await _skillRepository.GetByIdAsync(id, ct);
+            _skillRepository.Update(skill);
+            await _unitOfWork.SaveChangesAsync(ct);
 
-        if (skill is null)
-            return ApiResponse.Failure(AppError.NotFound(nameof(Skill), id));
+            return ApiResponse.Success("Skill updated successfully.");
+        }
 
-        _skillRepository.Delete(skill);
-        await _unitOfWork.SaveChangesAsync(ct);
+        public async Task<ApiResponse> DeleteAsync(Guid id, CancellationToken ct = default)
+        {
+            var skill = await _skillRepository.GetByIdAsync(id, ct);
 
-        return ApiResponse.Success("Skill deleted successfully.");
+            if (skill is null)
+                return ApiResponse.Failure(AppError.NotFound(nameof(Skill), id));
+
+            _skillRepository.Delete(skill);
+            await _unitOfWork.SaveChangesAsync(ct);
+
+            return ApiResponse.Success("Skill deleted successfully.");
+        }
     }
 }
