@@ -14,7 +14,12 @@ namespace FreeGency.Application.Features.Account.Queries
 {
     public partial class AccountService (ICurrentUserService currentUserService, IUnitOfWork unitOfWork, IStorageService storageService): IAccountService
     {
-        
+
+        private readonly IClientProfileRepository _profileRepository = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
+        private readonly IDeveloperProfileRepository _developerProfileRepository = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
+        private readonly IUserRepository _userRepository = unitOfWork.Repository<IUserRepository, User>();
+
+
         public async Task<Result<ClientAccountResponseDto>> GetClientProfile()
         {
             var userId = currentUserService.UserId;
@@ -25,6 +30,18 @@ namespace FreeGency.Application.Features.Account.Queries
             if(clientAccount==null)return Result.Failure<ClientAccountResponseDto>(UserErrors.UserNotFound);
             var response = clientAccount.ToDto();
             response.ProfileImage = ResolveProfileImageUrl(clientAccount.ProfileImage);
+            return Result.Success(response);
+        }
+
+        public async Task<Result<DeveloperAccountResponseDto>> GetDeveloperProfile()
+        {
+            var userId = currentUserService.UserId;
+            if (userId == Guid.Empty) return Result.Failure<DeveloperAccountResponseDto>(UserErrors.UserNotFound);
+            var spec = new DeveloperAccountSpecification(userId, true);
+            var developerProfile = await _developerProfileRepository.GetEntityWithSpec(spec);
+
+            var response = developerProfile!.ToDto();
+            response.ProfileImage = ResolveProfileImageUrl(developerProfile.ProfileImage);
             return Result.Success(response);
         }
 

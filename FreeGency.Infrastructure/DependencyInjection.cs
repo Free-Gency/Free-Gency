@@ -34,7 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IStorageService, CloudinaryStorageService>();
         services.AddScoped<AuditInterceptor>();
         services.AddScoped<SoftDeleteInterceptor>();
-
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
         services.AddScoped<ITeamJobRepository, TeamJobRepository>();

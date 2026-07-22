@@ -4,6 +4,7 @@ using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FreeGency.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260722173048_AddTableUserSpecialty")]
+    partial class AddTableUserSpecialty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,21 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("CategorySpecialty", b =>
+                {
+                    b.Property<Guid>("CategoriesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SpecialtiesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("CategoriesId", "SpecialtiesId");
+
+                    b.HasIndex("SpecialtiesId");
+
+                    b.ToTable("CategorySpecialty", "catalog");
+                });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Category", b =>
                 {
@@ -2974,16 +2992,31 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.ToTable("UserTokens", "identity");
                 });
 
+            modelBuilder.Entity("CategorySpecialty", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.Specialty", null)
+                        .WithMany()
+                        .HasForeignKey("SpecialtiesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.CategorySpecialty", b =>
                 {
                     b.HasOne("FreeGency.Domain.Entities.Category", "Category")
-                        .WithMany("CategorySpecialties")
+                        .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FreeGency.Domain.Entities.Specialty", "Specialty")
-                        .WithMany("CategorySpecialties")
+                        .WithMany()
                         .HasForeignKey("SpecialtyId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -3814,8 +3847,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Category", b =>
                 {
-                    b.Navigation("CategorySpecialties");
-
                     b.Navigation("PortfolioProjects");
 
                     b.Navigation("Projects");
@@ -3901,8 +3932,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Specialty", b =>
                 {
-                    b.Navigation("CategorySpecialties");
-
                     b.Navigation("ProjectSpecialties");
 
                     b.Navigation("SpecialtySkills");
