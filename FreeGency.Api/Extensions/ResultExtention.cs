@@ -1,5 +1,4 @@
 ﻿using FreeGency.Application.Common.Results;
-using Microsoft.AspNetCore.Mvc;
 
 namespace FreeGency.Api.Extensions
 {
