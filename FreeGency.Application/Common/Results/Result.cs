@@ -1,7 +1,4 @@
-﻿using FoundIt.Application.Common.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using FreeGency.Application.Common.Models;
 
 namespace FreeGency.Application.Common.Results
 {

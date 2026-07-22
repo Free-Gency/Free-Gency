@@ -1,7 +1,5 @@
-﻿using FreeGency.Application.Common.Interfaces;
-using FreeGency.Domain.Entities;
+﻿using FreeGency.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 using System.Text.Json;

@@ -1,9 +1,4 @@
-﻿using FoundIt.Application.Common.Models;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿using FreeGency.Application.Common.Models;
 namespace FreeGency.Application.Common.Errors
 {
     public static class UserErrors

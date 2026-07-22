@@ -1,11 +1,4 @@
-﻿using FreeGency.Application.Common.Errors;
-using FreeGency.Application.Common.Interfaces;
-using FreeGency.Application.Common.Results;
-using FreeGency.Application.Features.EmailFeature.Dtos;
-using FreeGency.Infrastructure.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using FreeGency.Application.Features.EmailFeature.Dtos;
 
 namespace FreeGency.Application.Features.EmailFeature.Commands
 {

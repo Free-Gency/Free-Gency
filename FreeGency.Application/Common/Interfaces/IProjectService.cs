@@ -3,17 +3,19 @@
     public interface IProjectService
     {
         // Reads
-        Task<Result<ProjectDto>> BrowseAsync(FilterProjectsRequestDto filterRequest, CancellationToken ct = default);
-        Task<Result<ProjectDto>> GetDetailsAsync(Guid id, CancellationToken ct = default);
-
+        Task<ApiResponse<ProjectDto>> BrowseAsync(FilterProjectsRequestDto filterRequest, CancellationToken ct = default);
+        Task<ApiResponse<ProjectDto>> GetDetailsAsync(Guid id, CancellationToken ct = default);
+        Task<ApiResponse<IEnumerable<SavedProjectsDto>>> GetSavedProjectsAsync(CancellationToken ct = default);
+        Task<ApiResponse<IEnumerable<SavedProjectsDto>>> GetMyProjectsAsync(string role, CancellationToken ct = default);
 
 
         // Writes
-        Task<Result> CreateAsync(CreateProjectDto newProject, CancellationToken ct = default);
-        Task<Result> DeleteAsync(Guid id, CancellationToken ct = default);
-        Task<Result> EditAsync(ProjectDto updatedProject, CancellationToken ct = default);
-
-
-
+        Task<ApiResponse<Guid>> CreateAsync(CreateProjectRequestDto newProject, CancellationToken ct = default);
+        Task<ApiResponse> DeleteAsync(Guid id, CancellationToken ct = default);
+        Task<ApiResponse> EditAsync(UpdateProjectRequestDto updatedProject, CancellationToken ct = default);
+        Task<ApiResponse> PublishAsync(Guid id, CancellationToken ct = default);
+        Task<ApiResponse> SaveAsync(Guid id, CancellationToken ct = default);
+        Task<ApiResponse> UnSaveAsync(Guid id, CancellationToken ct = default);
+        Task<ApiResponse> ReplaceSkillsAsync(Guid id, IEnumerable<Guid> skillIds, CancellationToken ct = default);
     }
 }

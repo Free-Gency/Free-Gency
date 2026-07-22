@@ -835,7 +835,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioImage", b =>
