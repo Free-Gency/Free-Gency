@@ -4,7 +4,12 @@ using System.Text;
 
 namespace FreeGency.Application.Features.specialties.Dtos
 {
-    internal class UpdateSpecialtyDto
+    public sealed class UpdateSpecialtyDto
     {
+        public Guid Id { get; set; }
+
+        public string NameEn { get; set; } = string.Empty;
+
+        public string NameAr { get; set; } = string.Empty;
     }
 }
