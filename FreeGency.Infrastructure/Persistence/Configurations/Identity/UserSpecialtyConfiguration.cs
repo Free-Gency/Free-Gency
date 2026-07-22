@@ -30,13 +30,13 @@ public class UserSpecialtyConfiguration : IEntityTypeConfiguration<UserSpecialty
             .WithMany(cp => cp.UserSpecialties)
             .HasForeignKey(us => us.ClientProfileId)
             .HasPrincipalKey(cp => cp.Id)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(us => us.DeveloperProfile)
             .WithMany(dp => dp.UserSpecialties)
             .HasForeignKey(us => us.DeveloperProfileId)
             .HasPrincipalKey(dp => dp.Id)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(us => us.Specialty)
             .WithMany(s => s.UserSpecialties)

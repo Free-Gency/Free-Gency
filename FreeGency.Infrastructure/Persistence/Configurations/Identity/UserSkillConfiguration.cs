@@ -30,13 +30,13 @@ public class UserSkillConfiguration : IEntityTypeConfiguration<UserSkill>
             .WithMany(cp => cp.UserSkills)
             .HasForeignKey(us => us.ClientProfileId)
             .HasPrincipalKey(cp => cp.Id)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(us => us.DeveloperProfile)
             .WithMany(dp => dp.UserSkills)
             .HasForeignKey(us => us.DeveloperProfileId)
             .HasPrincipalKey(dp => dp.Id)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(us => us.Skill)
             .WithMany(s => s.UserSkills)

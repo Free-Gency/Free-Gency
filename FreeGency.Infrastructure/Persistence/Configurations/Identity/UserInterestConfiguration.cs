@@ -30,13 +30,13 @@ public class UserInterestConfiguration : IEntityTypeConfiguration<UserInterest>
             .WithMany(cp => cp.UserInterests)
             .HasForeignKey(ui => ui.ClientProfileId)
             .HasPrincipalKey(cp => cp.Id)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(ui => ui.DeveloperProfile)
             .WithMany(dp => dp.UserInterests)
             .HasForeignKey(ui => ui.DeveloperProfileId)
             .HasPrincipalKey(dp => dp.Id)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(ui => ui.Category)
             .WithMany(c => c.UserInterests)

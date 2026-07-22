@@ -251,7 +251,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 principalSchema: "identity",
                 principalTable: "ClientProfiles",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_UserInterests_DeveloperProfiles_DeveloperProfileId",
@@ -261,7 +261,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 principalSchema: "identity",
                 principalTable: "DeveloperProfiles",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_UserSkills_ClientProfiles_ClientProfileId",
@@ -271,7 +271,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 principalSchema: "identity",
                 principalTable: "ClientProfiles",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_UserSkills_DeveloperProfiles_DeveloperProfileId",
@@ -281,7 +281,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 principalSchema: "identity",
                 principalTable: "DeveloperProfiles",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_UserSpecialties_ClientProfiles_ClientProfileId",
@@ -291,7 +291,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 principalSchema: "identity",
                 principalTable: "ClientProfiles",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_UserSpecialties_DeveloperProfiles_DeveloperProfileId",
@@ -301,7 +301,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 principalSchema: "identity",
                 principalTable: "DeveloperProfiles",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_UserSpecialties_Specialties_SpecialtyId",

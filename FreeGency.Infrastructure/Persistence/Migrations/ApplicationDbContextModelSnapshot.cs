@@ -3752,13 +3752,13 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .WithMany("UserInterests")
                         .HasForeignKey("ClientProfileId")
                         .HasPrincipalKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("FreeGency.Domain.Entities.DeveloperProfile", "DeveloperProfile")
                         .WithMany("UserInterests")
                         .HasForeignKey("DeveloperProfileId")
                         .HasPrincipalKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Category");
 
@@ -3773,13 +3773,13 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .WithMany("UserSkills")
                         .HasForeignKey("ClientProfileId")
                         .HasPrincipalKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("FreeGency.Domain.Entities.DeveloperProfile", "DeveloperProfile")
                         .WithMany("UserSkills")
                         .HasForeignKey("DeveloperProfileId")
                         .HasPrincipalKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("FreeGency.Domain.Entities.Skill", "Skill")
                         .WithMany("UserSkills")
@@ -3800,13 +3800,13 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .WithMany("UserSpecialties")
                         .HasForeignKey("ClientProfileId")
                         .HasPrincipalKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("FreeGency.Domain.Entities.DeveloperProfile", "DeveloperProfile")
                         .WithMany("UserSpecialties")
                         .HasForeignKey("DeveloperProfileId")
                         .HasPrincipalKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("FreeGency.Domain.Entities.Specialty", "Specialty")
                         .WithMany("UserSpecialties")
