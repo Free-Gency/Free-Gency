@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Domain.Interfaces.Repositories
+namespace FreeGency.Domain.Interfaces.Repositories
 {
     public interface IGenericRepository<T> where T : class
     {
@@ -9,6 +9,7 @@
         Task<T?> GetEntityWithSpec(ISpecifiaction<T> spec);
         Task<List<T>> ListAsync(ISpecifiaction<T> spec);
         Task<int> CountAsync(ISpecifiaction<T> Spec);
+        IQueryable<T> Query();
         // Writes
         Task AddAsync(T entity, CancellationToken ct = default);
         Task AddRangeAsync(IEnumerable<T> entities, CancellationToken ct = default);

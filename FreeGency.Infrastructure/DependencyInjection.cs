@@ -1,4 +1,4 @@
-﻿
+
 using System.Reflection;
 using EntityFrameworkCore.EncryptColumn.Interfaces;
 using EntityFrameworkCore.EncryptColumn.Util;
@@ -39,6 +39,9 @@ public static class DependencyInjection
         services.AddScoped<IChatRoomRepository, ChatRoomRepository>();
         services.AddScoped<IClientProfileRepository, ClientProfileRepository>();
         services.AddScoped<IDeveloperProfileRepository, DeveloperProfileRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<ISpecialtyRepository, SpecialtyRepository>();
+        services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 

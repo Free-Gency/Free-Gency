@@ -1,4 +1,4 @@
-﻿using FreeGency.Domain.Abstractions;
+using FreeGency.Domain.Abstractions;
 using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -57,6 +57,10 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity>
         query = Spec.ApplyCriteria(query);
         return await query.CountAsync();
     }
+
+    public IQueryable<TEntity> Query()
+        => _dbSet.AsNoTracking();
+
     private IQueryable<TEntity> ApplySpecification(ISpecifiaction<TEntity> spec)
     {
         return SpecificationEvaluator<TEntity>.GetQuery(_dbSet.AsQueryable(), spec);

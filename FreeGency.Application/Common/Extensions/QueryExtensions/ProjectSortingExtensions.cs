@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using FreeGency.Application.Features.Projects.DTOs;
 
 namespace FreeGency.Application.Common.Extensions.QueryExtensions

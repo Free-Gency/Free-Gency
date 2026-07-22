@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Common.Errors
+namespace FreeGency.Application.Common.Errors
 {
     public record AppError(
         string code,
@@ -144,6 +144,27 @@
             new("File.NoFileProvided",
                 "No file was provided. Please attach a file and try again.",
                 StatusCodes.Status400BadRequest);
+        #endregion
+
+
+        #region SPECIALTIES ERRORs
+        public static AppError SpecialtyNameAlreadyExists(string name) =>
+            new("Specialty.NameAlreadyExists",
+                $"A specialty with the name '{name}' already exists.",
+                StatusCodes.Status409Conflict);
+
+        public static AppError SpecialtyInvalidCategory(Guid categoryId) =>
+            new("Specialty.InvalidCategory",
+                $"Category '{categoryId}' was not found.",
+                StatusCodes.Status404NotFound);
+        #endregion
+
+
+        #region SKILLS ERRORs
+        public static AppError SkillNameAlreadyExists(string name) =>
+            new("Skill.NameAlreadyExists",
+                $"A skill with the name '{name}' already exists.",
+                StatusCodes.Status409Conflict);
         #endregion
 
     }

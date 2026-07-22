@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace FreeGency.Application.Features.specialties.Dtos;
 
-namespace FreeGency.Application.Features.specialties.Dtos
+public sealed class SpecialtyDto
 {
-    internal class SpecialtyDto
-    {
-    }
+    public Guid Id { get; set; }
+    public string NameEn { get; set; } = string.Empty;
+    public string NameAr { get; set; } = string.Empty;
 }
