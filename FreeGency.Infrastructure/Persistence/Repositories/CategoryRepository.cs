@@ -27,5 +27,27 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
             category.Specialties = specialties;
             return category;
         }
+
+        public async Task<IEnumerable<Category>> GetAllWithSpecialtiesAsync(CancellationToken ct = default)
+        {
+            var categories = await _dbSet
+                .AsNoTracking()
+                .ToListAsync(ct);
+
+            var categorySpecialties = await _context.Set<CategorySpecialty>()
+                .AsNoTracking()
+                .Include(cs => cs.Specialty)
+                .ToListAsync(ct);
+
+            foreach (var category in categories)
+            {
+                category.Specialties = categorySpecialties
+                    .Where(cs => cs.CategoryId == category.Id)
+                    .Select(cs => cs.Specialty)
+                    .ToList();
+            }
+
+            return categories;
+        }
     }
 }

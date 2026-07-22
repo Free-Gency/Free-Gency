@@ -16,17 +16,17 @@ namespace FreeGency.Api.Controllers
             return Ok("asd");
         }
         
-        [HttpGet("test-ai")]
-        [AllowAnonymous]
-        public async Task<IActionResult> TestAi([FromServices] IChatCompletionService chat)
-        {
-            var history = new ChatHistory();
-            history.AddSystemMessage("You are a concise teaching assistant.");
-            history.AddUserMessage("Explain binary search in simple terms in a sentence containing maximum 20 words.");
-
-            var result = await chat.GetChatMessageContentsAsync(history);
-
-            return Ok(result[0].Content);
-        }
+        // [HttpGet("test-ai")]
+        // [AllowAnonymous]
+        // public async Task<IActionResult> TestAi([FromServices] IChatCompletionService chat)
+        // {
+        //     var history = new ChatHistory();
+        //     history.AddSystemMessage("You are a concise teaching assistant.");
+        //     history.AddUserMessage("Explain binary search in simple terms in a sentence containing maximum 20 words.");
+        //
+        //     var result = await chat.GetChatMessageContentsAsync(history);
+        //
+        //     return Ok(result[0].Content);
+        // }
     }
 }
