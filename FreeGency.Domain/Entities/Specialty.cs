@@ -20,4 +20,5 @@ public class Specialty : ISoftDeletableEntity
     public virtual ICollection<SpecialtySkill> SpecialtySkills { get; set; } = [];
     public virtual ICollection<TeamSpecialty> TeamSpecialties { get; set; } = [];
     public virtual ICollection<ProjectSpecialty> ProjectSpecialties { get; set; } = [];
+    public virtual ICollection<UserSpecialty> UserSpecialties { get; set; } = [];
 }

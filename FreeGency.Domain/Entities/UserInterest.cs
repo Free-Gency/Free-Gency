@@ -1,5 +1,3 @@
-using FreeGency.Domain.Abstractions;
-
 namespace FreeGency.Domain.Entities;
 
 public class UserInterest : ISoftDeletableEntity
@@ -13,9 +11,11 @@ public class UserInterest : ISoftDeletableEntity
     public DateTime? DeletedAt { get; set; }
     public string? DeletedBy { get; set; }
 
-    public Guid UserId { get; set; }
+    public Guid? ClientProfileId { get; set; }
+    public Guid? DeveloperProfileId { get; set; }
     public Guid CategoryId { get; set; }
 
-    public virtual User User { get; set; } = null!;
+    public virtual ClientProfile? ClientProfile { get; set; }
+    public virtual DeveloperProfile? DeveloperProfile { get; set; }
     public virtual Category Category { get; set; } = null!;
 }

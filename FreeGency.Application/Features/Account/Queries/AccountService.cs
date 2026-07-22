@@ -1,4 +1,4 @@
-﻿using FreeGency.Application.Common.Errors;
+using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Features.Account.Dtos;
 using FreeGency.Application.Features.Account.Mapping;
 using FreeGency.Domain.Entities;
@@ -39,8 +39,10 @@ namespace FreeGency.Application.Features.Account.Queries
             if (userId == Guid.Empty) return Result.Failure<DeveloperAccountResponseDto>(UserErrors.UserNotFound);
             var spec = new DeveloperAccountSpecification(userId, true);
             var developerProfile = await _developerProfileRepository.GetEntityWithSpec(spec);
+            if (developerProfile is null)
+                return Result.Failure<DeveloperAccountResponseDto>(UserErrors.UserNotFound);
 
-            var response = developerProfile!.ToDto();
+            var response = developerProfile.ToDto();
             response.ProfileImage = ResolveProfileImageUrl(developerProfile.ProfileImage);
             return Result.Success(response);
         }

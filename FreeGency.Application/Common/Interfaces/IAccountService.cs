@@ -1,4 +1,5 @@
-﻿using FreeGency.Application.Features.Account.Dtos;
+﻿using FreeGency.Application.Common.Interfaces;
+using FreeGency.Application.Features.Account.Dtos;
 
 namespace FreeGency.Application.Common.Interfaces;
 
@@ -14,4 +15,10 @@ public interface IAccountService
     Task<ApiResponse> ReplaceClientInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default);
     Task<ApiResponse> AddDeveloperInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default);
     Task<ApiResponse> ReplaceDeveloperInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default);
+    Task<ApiResponse> AddClientSpecialtiesAsync(ProfileSpecialtiesDto dto, CancellationToken ct = default);
+    Task<ApiResponse> ReplaceClientSpecialtiesAsync(ProfileSpecialtiesDto dto, CancellationToken ct = default);
+    Task<ApiResponse> AddDeveloperSpecialtiesAsync(ProfileSpecialtiesDto dto, CancellationToken ct = default);
+    Task<ApiResponse> ReplaceDeveloperSpecialtiesAsync(ProfileSpecialtiesDto dto, CancellationToken ct = default);
+    Task<ApiResponse> ReplaceClientSkillsAsync(ProfileSkillsDto dto, CancellationToken ct = default);
+    Task<ApiResponse> ReplaceDeveloperSkillsAsync(ProfileSkillsDto dto, CancellationToken ct = default);
 }

@@ -18,13 +18,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Specialty> Specialties => Set<Specialty>();
     public DbSet<CategorySpecialty> CategorySpecialties => Set<CategorySpecialty>();
     public DbSet<SpecialtySkill> SpecialtySkills => Set<SpecialtySkill>();
-    public DbSet<UserSpecialty> UserSpecialties => Set<UserSpecialty>();
 
     // Identity / profiles
     public DbSet<ClientProfile> ClientProfiles => Set<ClientProfile>();
     public DbSet<DeveloperProfile> DeveloperProfiles => Set<DeveloperProfile>();
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();
     public DbSet<UserInterest> UserInterests => Set<UserInterest>();
+    public DbSet<UserSpecialty> UserSpecialties => Set<UserSpecialty>();
     public DbSet<SocialLink> SocialLinks => Set<SocialLink>();
 
     // Teams
