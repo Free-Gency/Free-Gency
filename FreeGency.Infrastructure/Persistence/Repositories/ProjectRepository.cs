@@ -1,15 +1,12 @@
-﻿
-using FreeGency.Domain.Interfaces.Repositories;
-using Microsoft.EntityFrameworkCore;
+﻿namespace FreeGency.Infrastructure.Persistence.Repositories;
 
-namespace FreeGency.Infrastructure.Persistence.Repositories;
-
-public class ProjectRepository : GenericRepository<Project>,IProjectRepository
+public class ProjectRepository : GenericRepository<Project>, IProjectRepository
 {
-    public ProjectRepository(ApplicationDbContext context):base(context) 
-    {            
-    }
-    public async Task<IEnumerable<Project>> GetByClientIdAsync(Guid clientId,ProjectStatus? status = null,CancellationToken ct = default)
+    public ProjectRepository(ApplicationDbContext context) : base(context) { }
+
+
+
+    public async Task<IEnumerable<Project>> GetByClientIdAsync(Guid clientId, ProjectStatus? status = null, CancellationToken ct = default)
     {
         IQueryable<Project> query = _dbSet.AsNoTracking().Where(p => p.ClientId == clientId);
 
@@ -20,7 +17,7 @@ public class ProjectRepository : GenericRepository<Project>,IProjectRepository
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync(ct);
     }
-    public async Task<IEnumerable<Project>> SearchOpenAsync(string? keyword, Guid? categoryId,Guid? specialtyId,decimal? minBudget,decimal? maxBudget,CancellationToken ct = default)
+    public async Task<IEnumerable<Project>> SearchOpenAsync(string? keyword, Guid? categoryId, Guid? specialtyId, decimal? minBudget, decimal? maxBudget, CancellationToken ct = default)
     {
         IQueryable<Project> query = _dbSet.AsNoTracking().Where(p => p.Status == ProjectStatus.Open);
         if (!string.IsNullOrWhiteSpace(keyword))
@@ -40,7 +37,7 @@ public class ProjectRepository : GenericRepository<Project>,IProjectRepository
 
         return await query.OrderByDescending(p => p.CreatedAt).ToListAsync(ct);
     }
-    public async Task AddWithSkillsAsync(Project project,IEnumerable<Guid> skillIds,CancellationToken ct = default)
+    public async Task AddWithSkillsAsync(Project project, IEnumerable<Guid> skillIds, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(project);
 
@@ -63,7 +60,7 @@ public class ProjectRepository : GenericRepository<Project>,IProjectRepository
 
         await _context.Set<ProjectSkill>().AddRangeAsync(projectSkills, ct);
     }
-    public async Task UpdateStatusAsync(Guid id,ProjectStatus status,CancellationToken ct = default)
+    public async Task UpdateStatusAsync(Guid id, ProjectStatus status, CancellationToken ct = default)
     {
         var project = await _dbSet.FirstOrDefaultAsync(p => p.Id == id, ct);
         if (project is null)
@@ -75,7 +72,7 @@ public class ProjectRepository : GenericRepository<Project>,IProjectRepository
         }
         _dbSet.Update(project);
     }
-    public async Task SetAssigneeAsync(Guid id,Guid? userId,Guid? teamId,CancellationToken ct = default)
+    public async Task SetAssigneeAsync(Guid id, Guid? userId, Guid? teamId, CancellationToken ct = default)
     {
         var project = await _dbSet.FirstOrDefaultAsync(p => p.Id == id, ct);
         if (project is null)
@@ -85,10 +82,8 @@ public class ProjectRepository : GenericRepository<Project>,IProjectRepository
         project.Status = ProjectStatus.InProgress;
         _dbSet.Update(project);
     }
-    public async Task ReplaceSkillsAsync(Guid projectId,IEnumerable<Guid> skillIds,CancellationToken ct = default)
+    public async Task ReplaceSkillsAsync(Guid projectId, IEnumerable<Guid> skillIds, CancellationToken ct = default)
     {
-        if (!await ExistsAsync(projectId, ct))
-            throw new KeyNotFoundException("Project not found.");
         var oldSkills = await _context
             .Set<ProjectSkill>().Where(ps => ps.ProjectId == projectId).ToListAsync(ct);
         if (oldSkills.Count > 0)
@@ -107,28 +102,29 @@ public class ProjectRepository : GenericRepository<Project>,IProjectRepository
         });
         await _context.Set<ProjectSkill>().AddRangeAsync(newSkills, ct);
     }
-    public async Task SaveProjectAsync(Guid projectId,Guid userId,CancellationToken ct = default)
+    public async Task SaveProjectAsync(Guid projectId, Guid userId, CancellationToken ct = default)
     {
-        if (!await ExistsAsync(projectId, ct))
-            throw new KeyNotFoundException("Project not found.");
-        var exists = await _context.Set<SavedProject>().AsNoTracking().AnyAsync(x =>x.ProjectId == projectId &&x.UserId == userId,ct);
-        if (exists)
-            return;
+        var exists = await _context.Set<SavedProject>()
+            .AsNoTracking()
+            .AnyAsync(x => x.ProjectId == projectId && x.UserId == userId, ct);
+
+        if (exists) return;
+
         await _context.Set<SavedProject>().AddAsync(new SavedProject
-            {
-                Id = Guid.NewGuid(),
-                ProjectId = projectId,
-                UserId = userId
-            }, ct);
+        {
+            Id = Guid.NewGuid(),
+            ProjectId = projectId,
+            UserId = userId
+        }, ct);
     }
-    public async Task UnsaveProjectAsync(Guid projectId,Guid userId,CancellationToken ct = default)
+    public async Task UnsaveProjectAsync(Guid projectId, Guid userId, CancellationToken ct = default)
     {
-        var savedProject = await _context.Set<SavedProject>().FirstOrDefaultAsync(x=>x.ProjectId == projectId&&x.UserId == userId,ct);
+        var savedProject = await _context.Set<SavedProject>().FirstOrDefaultAsync(x => x.ProjectId == projectId && x.UserId == userId, ct);
         if (savedProject is null)
             return;
         _context.Set<SavedProject>().Remove(savedProject);
     }
-    public async Task<IEnumerable<Project>> GetSavedByUserAsync(Guid userId,CancellationToken ct = default)
+    public async Task<IEnumerable<Project>> GetSavedByUserAsync(Guid userId, CancellationToken ct = default)
     {
         return await _context.Set<SavedProject>().AsNoTracking().Where(x => x.UserId == userId).Select(x => x.Project).OrderByDescending(x => x.CreatedAt).ToListAsync(ct);
     }

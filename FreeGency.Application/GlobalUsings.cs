@@ -1,6 +1,14 @@
-﻿global using FreeGency.Application.Common.Interfaces;
+﻿global using FluentValidation;
+global using FreeGency.Application.Common.Interfaces;
 global using FreeGency.Application.Common.Pagination;
 global using FreeGency.Application.Common.Results;
 global using FreeGency.Application.Features.Projects.DTOs;
+global using FreeGency.Domain.Constants;
+global using FreeGency.Domain.Entities;
 global using FreeGency.Domain.Enums;
+global using FreeGency.Domain.Interfaces;
+global using FreeGency.Domain.Interfaces.Repositories;
+global using FreeGency.Infrastructure.Interfaces;
+global using Microsoft.AspNetCore.Http;
 global using Microsoft.EntityFrameworkCore;
+global using System.Text.Json.Serialization;

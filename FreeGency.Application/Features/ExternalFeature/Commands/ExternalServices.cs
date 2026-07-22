@@ -1,21 +1,13 @@
 ﻿using FreeGency.Application.Common.DTOs.AuthenticationDtos;
 using FreeGency.Application.Common.Errors;
-using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Common.Mappings.AuthenticationMapping;
-using FreeGency.Application.Common.Results;
-using FreeGency.Application.Features.Authentication;
-using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace FreeGency.Application.Features.ExternalFeature.Commands
 {
-    public class ExternalServices (SignInManager<User> signInManager,UserManager<User> userManager,IJwtProvider jwtProvider,IAuthServices authServices): IExternalServices
+    public class ExternalServices(SignInManager<User> signInManager, UserManager<User> userManager, IJwtProvider jwtProvider, IAuthServices authServices) : IExternalServices
     {
         public async Task<Result<AuthResponseDto>> LoginWithGoogleAsync()
         {
