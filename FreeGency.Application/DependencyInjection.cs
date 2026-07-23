@@ -19,6 +19,7 @@ using Microsoft.IdentityModel.Tokens;
 using MimeKit;
 using System.Reflection;
 using System.Text;
+using FreeGency.Application.Features.SocialLinks.Commands;
 
 namespace FreeGency.Application
 {
@@ -26,7 +27,7 @@ namespace FreeGency.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-     
+            services.AddScoped<ISocialLinkService, SocialLinkService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IExternalServices, ExternalServices>();
             services.AddSingleton<IJwtProvider, JwtProvider>();
