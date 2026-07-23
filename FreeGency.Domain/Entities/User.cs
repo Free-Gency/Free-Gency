@@ -29,8 +29,6 @@ public class User : IdentityUser<Guid>, ISoftDeletableEntity
     public virtual ICollection<Project> PostedProjects { get; set; } = [];
     public virtual ICollection<TeamMember> TeamMemberships { get; set; } = [];
     public virtual ICollection<ProjectProposal> ProjectProposals { get; set; } = [];
-    public virtual ICollection<UserSkill> UserSkills { get; set; } = [];
-    public virtual ICollection<UserInterest> UserInterests { get; set; } = [];
     public virtual ICollection<SavedProject> SavedProjects { get; set; } = [];
     public virtual ICollection<TeamJoinRequest> TeamJoinRequests { get; set; } = [];
     public virtual ICollection<SocialLink> SocialLinks { get; set; } = [];

@@ -20,4 +20,7 @@ public class DeveloperProfile : ISoftDeletableEntity
     public int RatingCount { get; set; } = 0;
 
     public virtual User User { get; set; } = null!;
+    public virtual ICollection<UserInterest> UserInterests { get; set; } = [];
+    public virtual ICollection<UserSpecialty> UserSpecialties { get; set; } = [];
+    public virtual ICollection<UserSkill> UserSkills { get; set; } = [];
 }

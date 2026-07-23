@@ -13,12 +13,12 @@ public static class CategoryMapping
             ImageCover = category.ImageCover
         };
 
-    public static Category ToEntity(this CreateCategoryDto dto)
+    public static Category ToEntity(this CreateCategoryDto dto, string? imageCoverUrl = null)
         => new()
         {
             Id = Guid.NewGuid(),
             Name = dto.Name,
             NameEn = dto.NameEn,
-            ImageCover = dto.ImageCover
+            ImageCover = imageCoverUrl
         };
 }

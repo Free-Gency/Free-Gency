@@ -1,12 +1,18 @@
-
-using System.Reflection;
+using CloudinaryDotNet;
 using EntityFrameworkCore.EncryptColumn.Interfaces;
 using EntityFrameworkCore.EncryptColumn.Util;
 using FreeGency.Domain.Interfaces.Repositories;
+using FreeGency.Infrastructure.Implementations;
+using FreeGency.Infrastructure.Integrations.Cloudinary;
+using FreeGency.Infrastructure.Interfaces;
+using FreeGency.Infrastructure.Persistence.Context;
+using FreeGency.Infrastructure.Persistence.Interceptors;
 using FreeGency.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using CloudinaryClient = CloudinaryDotNet.Cloudinary;
 
 namespace FreeGency.Infrastructure;
 
@@ -20,9 +26,15 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IEmailService,EmailService>();
+        services.AddSingleton<CloudinaryClient>(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<CloudinaryOptions>>().Value;
+            return new CloudinaryClient(new Account(options.CloudName, options.ApiKey, options.ApiSecret));
+        });
+        services.AddScoped<IStorageService, CloudinaryStorageService>();
         services.AddScoped<AuditInterceptor>();
         services.AddScoped<SoftDeleteInterceptor>();
-
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
         services.AddScoped<ITeamJobRepository, TeamJobRepository>();
@@ -55,6 +67,10 @@ public static class DependencyInjection
         });
         services.AddOptions<EmailBinding>()
                .BindConfiguration(EmailBinding.NameSection)
+               .ValidateDataAnnotations()
+               .ValidateOnStart();
+        services.AddOptions<CloudinaryOptions>()
+               .BindConfiguration(CloudinaryOptions.NameSection)
                .ValidateDataAnnotations()
                .ValidateOnStart();
         return services;

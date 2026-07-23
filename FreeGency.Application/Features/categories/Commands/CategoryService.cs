@@ -2,6 +2,8 @@ using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Common.Mappings.CategoriesMapping;
 using FreeGency.Application.Features.categories.Dtos;
+using FreeGency.Infrastructure.Integrations.Cloudinary;
+using FreeGency.Infrastructure.Interfaces;
 
 namespace FreeGency.Application.Features.categories.Commands
 {
@@ -12,10 +14,12 @@ namespace FreeGency.Application.Features.categories.Commands
         private readonly ISpecialtyRepository _specialtyRepository;
         private readonly ISkillRepository _skillRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStorageService _storageService;
 
-        public CategoryService(IUnitOfWork unitOfWork)
+        public CategoryService(IUnitOfWork unitOfWork, IStorageService storageService)
         {
             _unitOfWork = unitOfWork;
+            _storageService = storageService;
             _categoryRepository = _unitOfWork.Repository<ICategoryRepository, Category>();
             _specialtyRepository = _unitOfWork.Repository<ISpecialtyRepository, Specialty>();
             _skillRepository = _unitOfWork.Repository<ISkillRepository, Skill>();
@@ -26,7 +30,20 @@ namespace FreeGency.Application.Features.categories.Commands
             if (await _categoryRepository.ExistsByNameAsync(dto.Name, ct: ct))
                 return ApiResponse.Failure<Guid>(AppError.CategoryNameAlreadyExists(dto.Name));
 
-            var category = dto.ToEntity();
+            string? imageCoverUrl = null;
+            if (dto.ImageCover is not null)
+            {
+                try
+                {
+                    imageCoverUrl = (await _storageService.UploadAsync(dto.ImageCover, StorageFolders.Category, ct)).Url;
+                }
+                catch (Exception)
+                {
+                    return ApiResponse.Failure<Guid>(AppError.FileUploadFailed(dto.ImageCover.FileName));
+                }
+            }
+
+            var category = dto.ToEntity(imageCoverUrl);
 
             await _categoryRepository.AddAsync(category, ct);
             await _unitOfWork.SaveChangesAsync(ct);
@@ -46,7 +63,18 @@ namespace FreeGency.Application.Features.categories.Commands
 
             category.Name = dto.Name;
             category.NameEn = dto.NameEn;
-            category.ImageCover = dto.ImageCover;
+
+            if (dto.ImageCover is not null)
+            {
+                try
+                {
+                    category.ImageCover = (await _storageService.UploadAsync(dto.ImageCover, StorageFolders.Category, ct)).Url;
+                }
+                catch (Exception)
+                {
+                    return ApiResponse.Failure(AppError.FileUploadFailed(dto.ImageCover.FileName));
+                }
+            }
 
             _categoryRepository.Update(category);
             await _unitOfWork.SaveChangesAsync(ct);
