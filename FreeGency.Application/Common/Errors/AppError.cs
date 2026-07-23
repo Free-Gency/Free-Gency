@@ -167,6 +167,18 @@ namespace FreeGency.Application.Common.Errors
                 StatusCodes.Status409Conflict);
         #endregion
 
+        #region TEAM JOBS ERRORs
+        public static AppError TeamJobAlreadyClosed(Guid jobId) =>
+            new("TeamJob.AlreadyClosed",
+                $"Team job '{jobId}' is already closed.",
+                StatusCodes.Status409Conflict);
+
+        public static AppError TeamJobInvalidTeam(Guid teamId) =>
+            new("TeamJob.InvalidTeam",
+                $"Team '{teamId}' was not found.",
+                StatusCodes.Status404NotFound);
+        #endregion
+
     }
 
 }
