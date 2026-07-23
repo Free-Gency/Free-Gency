@@ -16,6 +16,7 @@ public static class ClientAccountMapping
             AverageRating = clientProfile.AverageRating,
             Bio = clientProfile.Bio,
             Country = clientProfile.User.Country,
+            ProfileImage = clientProfile.ProfileImage,
             IsVerified = clientProfile.User.IsVerified,
             ProjectsCompletedCount = 0,
             TotalSpent = 0,
@@ -34,7 +35,10 @@ public static class ClientAccountMapping
     {
         client.User.FristName = dto.FirstName;
         client.User.LastName = dto.LastName;
-        client.User.Country = dto.Country;
+        if (dto.Country != null)
+        {
+            client.User.Country = dto.Country;
+        }
         client.Bio = dto.Bio;
     }
 }

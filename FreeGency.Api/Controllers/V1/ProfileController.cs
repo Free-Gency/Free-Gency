@@ -18,7 +18,7 @@ public class ProfileController(IAccountService accountService) : BaseApiControll
     }
 
     [HttpPut("client/me")]
-    public async Task<IActionResult> UpdateClientProfile(UpdateClientAccountDto dto)
+    public async Task<IActionResult> UpdateClientProfile([FromForm] UpdateClientAccountDto dto)
     {
         var result = await accountService.UpdateClientProfileAsync(dto);
         return result.IsSuccess ? Ok() : result.ToProblem();
