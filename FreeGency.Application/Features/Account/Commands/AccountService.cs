@@ -64,6 +64,22 @@ public partial class AccountService
         return Result.Success();
     }
 
+    public async Task<Result> CompleteOnboardingAsync()
+    {
+        var userId = currentUserService.UserId;
+        if (userId == Guid.Empty) return Result.Failure(UserErrors.UserNotFound);
+
+        var user = await _userRepository.GetEntityWithSpec(new UserSpecification(userId));
+        if (user is null) return Result.Failure(UserErrors.UserNotFound);
+        if (user.HasCompletedOnboarding) return Result.Success();
+
+        user.HasCompletedOnboarding = true;
+        user.UpdatedAt = DateTime.UtcNow;
+        _userRepository.Update(user);
+        await unitOfWork.SaveChangesAsync();
+        return Result.Success();
+    }
+
     public async Task<Result<string>> SwitchModeAsync()
     {
         var userId = currentUserService.UserId;

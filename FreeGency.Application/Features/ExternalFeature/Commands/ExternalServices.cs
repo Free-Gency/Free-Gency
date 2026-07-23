@@ -48,6 +48,7 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
                     UserName = email,
                     EmailConfirmed = true,
                     ActiveProfileMode = profileModeValue,
+                    HasCompletedOnboarding = false,
                     FristName = !string.IsNullOrWhiteSpace(givenName)
                         ? givenName
                         : fullName?.Split(' ', 2)[0] ?? string.Empty,
@@ -56,6 +57,7 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
                         : fullName?.Contains(' ') == true
                             ? fullName.Split(' ', 2)[1]
                             : string.Empty,
+                    refreshTokens = [],
                 };
 
                 var result = await userManager.CreateAsync(user);
@@ -63,20 +65,44 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
                 if (!result.Succeeded)
                     return Result.Failure<AuthResponseDto>(ExternalErrors.ExternalLoginFailed);
 
-                await userManager.AddLoginAsync(user, info);
+                var loginResult = await userManager.AddLoginAsync(user, info);
+                if (!loginResult.Succeeded)
+                    return Result.Failure<AuthResponseDto>(ExternalErrors.ExternalLoginFailed);
+
                 await EnsureProfileForModeAsync(user.Id, profileModeValue);
+            }
+            else
+            {
+                // Returning Google user — ensure login link + profile exist for their mode
+                var logins = await userManager.GetLoginsAsync(user);
+                if (logins.All(l => l.LoginProvider != info.LoginProvider))
+                {
+                    var loginResult = await userManager.AddLoginAsync(user, info);
+                    if (!loginResult.Succeeded)
+                        return Result.Failure<AuthResponseDto>(ExternalErrors.ExternalLoginFailed);
+                }
+
+                if (user.ActiveProfileMode is profileMode mode)
+                    await EnsureProfileForModeAsync(user.Id, mode);
             }
 
             var (token, expiresIn) = jwtProvider.GenerateToken(user);
             var refreshToken = GenerateRefreshToken();
-            var refreshTokenEXpirationDays = DateTime.UtcNow.AddDays(14);
+            var refreshTokenExpiration = DateTime.UtcNow.AddDays(14);
+
+            // EF often materializes navigation collections as null when not included
+            user.refreshTokens ??= [];
             user.refreshTokens.Add(new RefreshToken
             {
                 Token = refreshToken,
-                ExpiresOn = refreshTokenEXpirationDays
+                ExpiresOn = refreshTokenExpiration,
             });
-            await userManager.UpdateAsync(user);
-            var authResponse = user.ToDto(token, expiresIn, refreshToken, refreshTokenEXpirationDays);
+
+            var updateResult = await userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+                return Result.Failure<AuthResponseDto>(ExternalErrors.ExternalLoginFailed);
+
+            var authResponse = user.ToDto(token, expiresIn, refreshToken, refreshTokenExpiration);
             return Result.Success(authResponse);
         }
 
@@ -85,25 +111,33 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
             if (mode == profileMode.Developer)
             {
                 var repo = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
-                var existing = await repo.GetByUserIdAsync(userId);
-                if (existing == null)
+                if (!await repo.ExistsForUserAsync(userId))
                 {
-                    await repo.AddAsync(new DeveloperProfile { UserId = userId });
+                    await repo.AddAsync(new DeveloperProfile
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = userId,
+                        CreatedAt = DateTime.UtcNow,
+                    });
                     await unitOfWork.SaveChangesAsync();
                 }
                 return;
             }
 
             var clientRepo = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
-            var clientExisting = await clientRepo.GetByUserIdAsync(userId);
-            if (clientExisting == null)
+            if (!await clientRepo.ExistsForUserAsync(userId))
             {
-                await clientRepo.AddAsync(new ClientProfile { UserId = userId });
+                await clientRepo.AddAsync(new ClientProfile
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    CreatedAt = DateTime.UtcNow,
+                });
                 await unitOfWork.SaveChangesAsync();
             }
         }
 
-        private static string ResolveIntent(Microsoft.AspNetCore.Identity.ExternalLoginInfo? info)
+        private static string ResolveIntent(ExternalLoginInfo? info)
         {
             if (info?.AuthenticationProperties?.Items.TryGetValue("intent", out var intent) == true
                 && intent == "signup")
@@ -112,7 +146,7 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
             return "login";
         }
 
-        private static profileMode ResolveSignupMode(Microsoft.AspNetCore.Identity.ExternalLoginInfo? info)
+        private static profileMode ResolveSignupMode(ExternalLoginInfo? info)
         {
             if (info?.AuthenticationProperties?.Items.TryGetValue("signupMode", out var mode) != true)
                 return profileMode.Client;

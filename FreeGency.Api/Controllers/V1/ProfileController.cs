@@ -38,6 +38,13 @@ public class ProfileController(IAccountService accountService) : BaseApiControll
         return result.IsSuccess ? Ok() : result.ToProblem();
     }
 
+    [HttpPost("onboarding/complete")]
+    public async Task<IActionResult> CompleteOnboarding()
+    {
+        var result = await accountService.CompleteOnboardingAsync();
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
+
     [HttpPost("switch-profile")]
     public async Task<IActionResult> SwitchProfile()
     {

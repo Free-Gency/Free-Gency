@@ -25,35 +25,51 @@ namespace FreeGency.Application.Features.Authentication
             var user = dto.ToEntity();
             var result = await userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded) return Result.Failure(new Error(result.Errors.First().Code, result.Errors.First().Description, StatusCodes.Status400BadRequest));
-            // generate profiles
+
+            // Create profile for the selected mode
             if (dto.Mode == "Client")
             {
                 var repo = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
-                var clientprofile = new ClientProfile
+                await repo.AddAsync(new ClientProfile
                 {
-                    UserId = user.Id
-                };
-                await repo.AddAsync(clientprofile);
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    CreatedAt = DateTime.UtcNow,
+                });
                 await unitOfWork.SaveChangesAsync();
             }
             else
             {
-                var repo = unitOfWork.Repository<DeveloperProfileRepository, DeveloperProfile>();
-                var devProfile = new DeveloperProfile { UserId = user.Id };
-                await repo.AddAsync(devProfile);
+                var repo = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
+                await repo.AddAsync(new DeveloperProfile
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    CreatedAt = DateTime.UtcNow,
+                });
                 await unitOfWork.SaveChangesAsync();
             }
-            //send comfirmaion email
-            var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(
-                               Encoding.UTF8.GetBytes(code));
-            var frontendUrl = configuration["FrontendUrl"]?.TrimEnd('/')
-                ?? "http://localhost:4200";
-            var ReturnUrl = $"{frontendUrl}/auth/confirm-email?userId={user.Id}&code={code}";
-            //body
-            var resultOfConfirmEmail = await emailService.SendMassege(user.Email!, ReturnUrl, "Confirm Your Email");
-            if (!resultOfConfirmEmail)
-                return Result.Failure<string>(AuthenticationErrors.ConfirmEmail);
+
+            // Confirmation email must not fail/hang the registration response —
+            // user+profile are already persisted (retry would hit EmailAlreadyExists).
+            try
+            {
+                var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                var frontendUrl = configuration["FrontendUrl"]?.TrimEnd('/')
+                    ?? "http://localhost:4200";
+                var returnUrl = $"{frontendUrl}/auth/confirm-email?userId={user.Id}&code={code}";
+
+                var emailTask = emailService.SendMassege(user.Email!, returnUrl, "Confirm Your Email");
+                var finished = await Task.WhenAny(emailTask, Task.Delay(TimeSpan.FromSeconds(15)));
+                if (finished == emailTask)
+                    await emailTask;
+            }
+            catch
+            {
+                // Swallow — account is created; user can resend confirmation later.
+            }
+
             return Result.Success();
         }
 
