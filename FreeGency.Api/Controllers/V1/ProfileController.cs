@@ -17,6 +17,13 @@ public class ProfileController(IAccountService accountService) : BaseApiControll
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
+    [HttpGet("client/me/interests")]
+    public async Task<IActionResult> GetClientInterests()
+    {
+        var result = await accountService.GetClientInterests();
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
     [HttpPut("client/me")]
     public async Task<IActionResult> UpdateClientProfile([FromForm] UpdateClientAccountDto dto)
     {

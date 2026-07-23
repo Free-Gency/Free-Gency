@@ -24,11 +24,17 @@ public static class ClientAccountMapping
             Email = clientProfile.User.Email!,
             ProjectsPostedCount = 0,
             ProfileMode = clientProfile.User.ActiveProfileMode.ToString(),
-            Interests = ProfileCatalogMapping.ToNestedCatalog(
-                clientProfile.UserInterests,
-                clientProfile.UserSpecialties,
-                clientProfile.UserSkills)
+            // Interests tree is loaded via GET client/me/interests — keep profile payload light.
+            Interests = [],
         };
+    }
+
+    public static List<ProfileInterestDto> ToInterestCatalog(this ClientProfile clientProfile)
+    {
+        return ProfileCatalogMapping.ToNestedCatalog(
+            clientProfile.UserInterests ?? [],
+            clientProfile.UserSpecialties ?? [],
+            clientProfile.UserSkills ?? []);
     }
 
     public static void UpdateToEntity(this ClientProfile client, UpdateClientAccountDto dto)
