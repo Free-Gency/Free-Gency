@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Features.Projects.Commands.Validators
+﻿namespace FreeGency.Application.Features.Projects.Validators
 {
     public sealed class UpdateProjectRequestValidator : AbstractValidator<UpdateProjectRequestDto>
     {

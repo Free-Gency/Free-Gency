@@ -76,9 +76,14 @@ namespace FreeGency.Application.Common.Errors
                 $"A category with the name '{name}' already exists.",
                 StatusCodes.Status409Conflict);
 
-        public static AppError SubcategoryDoesNotBelongToCategory(Guid subcategoryId, Guid categoryId) =>
-            new("Subcategory.DoesNotBelongToCategory",
-                $"Subcategory '{subcategoryId}' does not belong to category '{categoryId}'.",
+        public static AppError SpecialtyDoesNotBelongToCategory(Guid specialtyId, Guid categoryId) =>
+            new("Specialty.DoesNotBelongToCategory",
+                $"Specialty '{specialtyId}' does not belong to category '{categoryId}'.",
+                StatusCodes.Status400BadRequest);
+
+        public static AppError SkillDoesNotBelongToSpecialty(Guid skillId) =>
+            new("Skill.DoesNotBelongToSpecialty",
+                $"Skill '{skillId}' does not belong to any Specialty.",
                 StatusCodes.Status400BadRequest);
 
         public static AppError SubcategoryNameAlreadyExists(string name, string categoryName) =>

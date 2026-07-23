@@ -1,22 +1,16 @@
-using FluentValidation;
 using FluentValidation.AspNetCore;
 using FreeGency.Application.Common.Helpers;
-using FreeGency.Application.Common.Interfaces;
+using FreeGency.Application.Common.Mappings.ProjectMappings;
 using FreeGency.Application.Features.Account.Queries;
 using FreeGency.Application.Features.Authentication;
+using FreeGency.Application.Features.categories.Commands;
 using FreeGency.Application.Features.EmailFeature.Commands;
 using FreeGency.Application.Features.ExternalFeature.Commands;
-using FreeGency.Application.Features.categories.Commands;
 using FreeGency.Application.Features.Projects.Commands;
 using FreeGency.Application.Features.skills.Commands;
 using FreeGency.Application.Features.specialties.Commands;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using MimeKit;
 using System.Reflection;
 using System.Text;
 using FreeGency.Application.Features.SocialLinks.Commands;
@@ -28,6 +22,10 @@ namespace FreeGency.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<ISocialLinkService, SocialLinkService>();
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddMaps(typeof(ProjectMapping).Assembly);
+            });
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IExternalServices, ExternalServices>();
             services.AddSingleton<IJwtProvider, JwtProvider>();
