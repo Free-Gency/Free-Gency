@@ -1,5 +1,4 @@
 ﻿using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
 
 namespace FreeGency.Domain.Interfaces.Repositories
 {
@@ -22,5 +21,12 @@ namespace FreeGency.Domain.Interfaces.Repositories
         Task UnsaveProjectAsync(Guid projectId, Guid userId, CancellationToken ct = default);
 
         Task<IEnumerable<Project>> GetSavedByUserAsync(Guid userId, CancellationToken ct = default);
+
+        Task<IEnumerable<Project>> GetMineAsync(
+            Guid userId,
+            bool asClient,
+            CancellationToken ct = default);
+
+        IQueryable<Project> GetProjectsQuery();
     }
 }
