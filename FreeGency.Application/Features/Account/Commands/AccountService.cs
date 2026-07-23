@@ -45,7 +45,7 @@ public partial class AccountService
         var spec = new ClientAccountSpecifiaction(userId, false);
         var profile = await _profileRepository.GetEntityWithSpec(spec);
         if (profile != null) return Result.Failure(ProfileErrors.ClientProfileAlreadyExists);
-        var clientProfile = new ClientProfile { UserId = userId };
+        var clientProfile = new ClientProfile { Id=Guid.NewGuid(),UserId = userId };
         await _profileRepository.AddAsync(clientProfile);
         await unitOfWork.SaveChangesAsync();
         return Result.Success();
@@ -58,7 +58,7 @@ public partial class AccountService
         var spec = new DeveloperAccountSpecification(userId);
         var profile = await _developerProfileRepository.GetEntityWithSpec(spec);
         if (profile != null) return Result.Failure(ProfileErrors.DeveloperProfileAlreadyExists);
-        var developerProfile = new DeveloperProfile { UserId = userId };
+        var developerProfile = new DeveloperProfile { Id = Guid.NewGuid(), UserId = userId };
         await _developerProfileRepository.AddAsync(developerProfile);
         await unitOfWork.SaveChangesAsync();
         return Result.Success();
@@ -78,7 +78,7 @@ public partial class AccountService
             var profile = await _profileRepository.GetEntityWithSpec(specClient);
             if (profile == null)
             {
-                var clientProfile = new ClientProfile { UserId = userId };
+                var clientProfile = new ClientProfile { Id = Guid.NewGuid(), UserId = userId };
                 await _profileRepository.AddAsync(clientProfile);
                 await unitOfWork.SaveChangesAsync();
             }
@@ -90,7 +90,7 @@ public partial class AccountService
             var profile = await _developerProfileRepository.GetEntityWithSpec(specDev);
             if (profile == null)
             {
-                var developerProfile = new DeveloperProfile { UserId = userId };
+                var developerProfile = new DeveloperProfile { Id = Guid.NewGuid(), UserId = userId };
                 await _developerProfileRepository.AddAsync(developerProfile);
                 await unitOfWork.SaveChangesAsync();
             }

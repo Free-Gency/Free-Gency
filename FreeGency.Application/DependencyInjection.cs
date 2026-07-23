@@ -12,6 +12,8 @@ using FreeGency.Application.Features.specialties.Commands;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using System.Text;
+using FreeGency.Application.Features.SocialLinks.Commands;
 
 namespace FreeGency.Application
 {
@@ -19,6 +21,7 @@ namespace FreeGency.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            services.AddScoped<ISocialLinkService, SocialLinkService>();
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddMaps(typeof(ProjectMapping).Assembly);
