@@ -21,6 +21,9 @@
     <Folder Include="Common\Exceptions\" />
     <Folder Include="Features\Account\Commands\" />
     <Folder Include="Features\Account\Validator\" />
+    <Folder Include="Features\Portfolio\Commands\" />
+    <Folder Include="Features\Portfolio\Queries\" />
+    <Folder Include="Features\Portfolio\Validators\" />
   </ItemGroup>
 
   <ItemGroup>
