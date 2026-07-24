@@ -12,8 +12,9 @@ using FreeGency.Application.Features.specialties.Commands;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using System.Text;
 using FreeGency.Application.Features.SocialLinks.Commands;
+using FreeGency.Application.Features.Proposals.Commands;
+using FreeGency.Application.Common.Mappings.ProposalsMapping;
 
 namespace FreeGency.Application
 {
@@ -25,6 +26,7 @@ namespace FreeGency.Application
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddMaps(typeof(ProjectMapping).Assembly);
+                cfg.AddMaps(typeof(ProposalMapping).Assembly);
             });
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IExternalServices, ExternalServices>();
@@ -35,6 +37,9 @@ namespace FreeGency.Application
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<ISpecialtyService, SpecialtyService>();
+            services.AddScoped<IProposalService, ProposalService>();
+
+
             services.AddFluentValidationAutoValidation()
                     .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddOptions<JwtOptions>()
