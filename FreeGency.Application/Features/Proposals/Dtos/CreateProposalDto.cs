@@ -1,0 +1,18 @@
+﻿
+
+namespace FreeGency.Application.Features.Proposals.Dtos;
+
+public class CreateProposalDto
+{
+    public Guid ProjectId { get; init; }
+
+    public ApplicantType ApplicantType { get; init; }
+
+    public Guid? TeamId { get; init; }
+
+    public string CoverLetter { get; init; } = default!;
+
+    public decimal ProposedBudget { get; init; }
+
+    public IEnumerable<string> AttachmentUrls { get; init; } = [];
+}
