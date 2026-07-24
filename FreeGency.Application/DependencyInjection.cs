@@ -1,5 +1,6 @@
 using FluentValidation.AspNetCore;
 using FreeGency.Application.Common.Helpers;
+using FreeGency.Application.Common.Mappings.PortfolioMappings;
 using FreeGency.Application.Common.Mappings.ProjectMappings;
 using FreeGency.Application.Features.Account.Queries;
 using FreeGency.Application.Features.Authentication;
@@ -22,6 +23,7 @@ namespace FreeGency.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
+
             services.AddScoped<ISocialLinkService, SocialLinkService>();
             services.AddAutoMapper(cfg =>
             {
@@ -53,6 +55,12 @@ namespace FreeGency.Application
                 options.User.RequireUniqueEmail = true;
             });
             services.AddHttpContextAccessor();
+
+            services.AddAutoMapper(cgf =>
+            {
+                cgf.AddMaps(typeof(PortfolioMappingProfile));
+            });
+
 
             return services;
         }

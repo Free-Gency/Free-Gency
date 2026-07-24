@@ -1,5 +1,3 @@
-using FreeGency.Domain.Abstractions;
-
 namespace FreeGency.Domain.Entities;
 
 public class PortfolioSkill : ISoftDeletableEntity

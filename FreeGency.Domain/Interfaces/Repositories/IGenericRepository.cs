@@ -10,6 +10,8 @@ namespace FreeGency.Domain.Interfaces.Repositories
         Task<List<T>> ListAsync(ISpecifiaction<T> spec);
         Task<int> CountAsync(ISpecifiaction<T> Spec);
         IQueryable<T> Query();
+
+
         // Writes
         Task AddAsync(T entity, CancellationToken ct = default);
         Task AddRangeAsync(IEnumerable<T> entities, CancellationToken ct = default);
