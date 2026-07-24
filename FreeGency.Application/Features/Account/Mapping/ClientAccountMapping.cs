@@ -16,6 +16,7 @@ public static class ClientAccountMapping
             AverageRating = clientProfile.AverageRating,
             Bio = clientProfile.Bio,
             Country = clientProfile.User.Country,
+            ProfileImage = clientProfile.ProfileImage,
             IsVerified = clientProfile.User.IsVerified,
             ProjectsCompletedCount = 0,
             TotalSpent = 0,
@@ -23,18 +24,27 @@ public static class ClientAccountMapping
             Email = clientProfile.User.Email!,
             ProjectsPostedCount = 0,
             ProfileMode = clientProfile.User.ActiveProfileMode.ToString(),
-            Interests = ProfileCatalogMapping.ToNestedCatalog(
-                clientProfile.UserInterests,
-                clientProfile.UserSpecialties,
-                clientProfile.UserSkills)
+            // Interests tree is loaded via GET client/me/interests — keep profile payload light.
+            Interests = [],
         };
+    }
+
+    public static List<ProfileInterestDto> ToInterestCatalog(this ClientProfile clientProfile)
+    {
+        return ProfileCatalogMapping.ToNestedCatalog(
+            clientProfile.UserInterests ?? [],
+            clientProfile.UserSpecialties ?? [],
+            clientProfile.UserSkills ?? []);
     }
 
     public static void UpdateToEntity(this ClientProfile client, UpdateClientAccountDto dto)
     {
         client.User.FristName = dto.FirstName;
         client.User.LastName = dto.LastName;
-        client.User.Country = dto.Country;
+        if (dto.Country != null)
+        {
+            client.User.Country = dto.Country;
+        }
         client.Bio = dto.Bio;
     }
 }

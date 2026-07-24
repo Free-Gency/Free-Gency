@@ -13,6 +13,8 @@ namespace FreeGency.Application.Common.Mappings.AuthenticationMapping
                 Email = user.Email!,
                 FirstName = user.FristName,
                 LastName = user.LastName,
+                ActiveProfileMode = user.ActiveProfileMode?.ToString(),
+                HasCompletedOnboarding = user.HasCompletedOnboarding,
                 Token = token,
                 ExpiresIn = expiresIn,
                 RefreshToken = refreshToken,
@@ -29,7 +31,8 @@ namespace FreeGency.Application.Common.Mappings.AuthenticationMapping
                 LastName = dto.LastName,
                 ActiveProfileMode = dto.Mode == "Client" ? profileMode.Client : profileMode.Developer,
                 PhoneNumber = dto.PhoneNumber,
-                Country = dto.Country
+                Country = dto.Country,
+                HasCompletedOnboarding = false,
             };
         }
     }

@@ -8,6 +8,7 @@ namespace FreeGency.Domain.Enums
     {
         Pending=0,
         Accepted=1,
-        Rejected=2
+        Rejected=2,
+        Withdrawn=3
     }
 }

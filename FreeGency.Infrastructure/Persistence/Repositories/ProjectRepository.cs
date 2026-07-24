@@ -96,7 +96,6 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             return;
         var newSkills = skills.Select(skillId => new ProjectSkill
         {
-            Id = Guid.NewGuid(),
             ProjectId = projectId,
             SkillId = skillId
         });
@@ -129,4 +128,19 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
         return await _context.Set<SavedProject>().AsNoTracking().Where(x => x.UserId == userId).Select(x => x.Project).OrderByDescending(x => x.CreatedAt).ToListAsync(ct);
     }
 
+    public IQueryable<Project> GetProjectsQuery()
+        => _dbSet.AsNoTracking();
+
+    public async Task<IEnumerable<Project>> GetMineAsync(Guid userId, bool asClient, CancellationToken ct = default)
+    {
+        IQueryable<Project> query = _dbSet.AsNoTracking();
+
+        query = asClient
+            ? query.Where(p => p.ClientId == userId)
+            : query.Where(p => p.AssignedUserId == userId || p.AssignedTeamId == userId);
+
+        return await query
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync(ct);
+    }
 }

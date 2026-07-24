@@ -1,6 +1,9 @@
 ﻿global using AutoMapper;
+global using AutoMapper.QueryableExtensions;
 global using FluentValidation;
 global using FreeGency.Application.Common.Errors;
+global using FreeGency.Application.Common.Exceptions;
+global using FreeGency.Application.Common.Extensions.QueryExtensions.Projects;
 global using FreeGency.Application.Common.Interfaces;
 global using FreeGency.Application.Common.Pagination;
 global using FreeGency.Application.Common.Results;

@@ -33,6 +33,21 @@ namespace FreeGency.Application.Features.Account.Queries
             return Result.Success(response);
         }
 
+        public async Task<Result<List<ProfileInterestDto>>> GetClientInterests()
+        {
+            var userId = currentUserService.UserId;
+            if (userId == Guid.Empty)
+                return Result.Failure<List<ProfileInterestDto>>(UserErrors.UserNotFound);
+
+            var spec = ClientAccountSpecifiaction.ForInterestCatalog(userId);
+            var repo = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
+            var clientAccount = await repo.GetEntityWithSpec(spec);
+            if (clientAccount is null)
+                return Result.Failure<List<ProfileInterestDto>>(UserErrors.UserNotFound);
+
+            return Result.Success(clientAccount.ToInterestCatalog());
+        }
+
         public async Task<Result<DeveloperAccountResponseDto>> GetDeveloperProfile()
         {
             var userId = currentUserService.UserId;
