@@ -16,17 +16,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Constants\" />
     <Folder Include="Common\Models\" />
     <Folder Include="Common\Exceptions\" />
     <Folder Include="Features\Account\Commands\" />
     <Folder Include="Features\Account\Validator\" />
-    <Folder Include="Features\Portfolio\Commands\" />
-    <Folder Include="Features\Portfolio\Queries\" />
-    <Folder Include="Features\Portfolio\Validators\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.2.0" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
