@@ -173,6 +173,9 @@
             if (project == null)
                 return ApiResponse.Failure(AppError.NotFound(nameof(Project), id));
 
+            if (project.ClientId != _currentUser.UserId)
+                return ApiResponse.Failure(AppError.Forbidden("You do not own this project."));
+
             project.Status = ProjectStatus.Open;
             await _unitOfWork.SaveChangesAsync(ct);
 

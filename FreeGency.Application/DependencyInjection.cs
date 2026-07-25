@@ -7,6 +7,7 @@ using FreeGency.Application.Features.Authentication;
 using FreeGency.Application.Features.categories.Commands;
 using FreeGency.Application.Features.EmailFeature.Commands;
 using FreeGency.Application.Features.ExternalFeature.Commands;
+using FreeGency.Application.Features.ProjectFiles.Commands;
 using FreeGency.Application.Features.Projects.Commands;
 using FreeGency.Application.Features.skills.Commands;
 using FreeGency.Application.Features.specialties.Commands;
@@ -37,6 +38,7 @@ namespace FreeGency.Application
             services.AddScoped<IAuthServices, AuthServices>();
             services.AddScoped<IEmailAuthService, EmailAuthService>();
             services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<IProjectFileService, ProjectFileService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<ISpecialtyService, SpecialtyService>();
