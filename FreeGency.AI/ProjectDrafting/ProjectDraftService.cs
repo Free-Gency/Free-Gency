@@ -9,9 +9,9 @@ public class ProjectDraftService
     private readonly IChatCompletionService _chat;
     private readonly ICategoryRepository _categoryRepository;
     private readonly ISpecialtyRepository _specialtyRepository;
-    
+
     private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };
-    
+
     public ProjectDraftService(
         IChatCompletionService chat,
         ICategoryRepository categoryRepo,
@@ -38,25 +38,27 @@ public class ProjectDraftService
 
             Client input: {{userInput}}
             """);
-        
+
         var step1 = JsonSerializer.Deserialize<Step1Result>(step1Json, JsonOpts)!;
-        
-        var matchedCategory = categories.FirstOrDefault(c => c.NameEn == step1.CategoryName);
+
+        var matchedCategory = categories.FirstOrDefault(c =>
+            string.Equals(c.NameEn, step1.CategoryName, StringComparison.OrdinalIgnoreCase));
+
         var matchedSpecialties = matchedCategory?.CategorySpecialties
             .Select(cs => cs.Specialty)
-            .Where(s => step1.SpecialtyNames.Contains(s.NameEn))
-            .ToList() ?? new List<Domain.Entities.Specialty>();
-        
-        if (!matchedSpecialties.Any())
+            .Where(s => step1.SpecialtyNames.Any(n =>
+                string.Equals(n, s.NameEn, StringComparison.OrdinalIgnoreCase)))
+            .ToList() ?? [];
+
+        if (matchedSpecialties.Count == 0)
         {
             return new ProjectDraftResponse
             {
                 Title = step1.Title,
                 Description = step1.Description,
                 CategoryId = matchedCategory?.Id,
+                CategoryName = matchedCategory?.NameEn,
                 NeedsManualCategoryReview = matchedCategory is null,
-                SpecialtyIds = new List<Guid>(),
-                SkillIds = new List<Guid>()
             };
         }
 
@@ -66,24 +68,24 @@ public class ProjectDraftService
             var skills = await _specialtyRepository.GetSkillsForSpecialtyAsync(specialty.Id);
             specialtySkillLists.AddRange(skills);
         }
-        var availableSkills = specialtySkillLists.DistinctBy(s => s.Id).ToList();
 
+        var availableSkills = specialtySkillLists.DistinctBy(s => s.Id).ToList();
         var skillsBlock = string.Join(", ", availableSkills.Select(s => s.Name));
 
         var step2Json = await AskAsync($$"""
-                                         Given this project idea, category "{{matchedCategory?.NameEn}}", and specialties "{{string.Join(", ", matchedSpecialties.Select(s => s.NameEn))}}",
-                                         pick 3-6 relevant skill names from this exact list only, copied exactly:
-                                         {{skillsBlock}}
-                                         Respond ONLY as JSON: {"skillNames": []}
+            Given this project idea, category "{{matchedCategory?.NameEn}}", and specialties "{{string.Join(", ", matchedSpecialties.Select(s => s.NameEn))}}",
+            pick 3-6 relevant skill names from this exact list only, copied exactly:
+            {{skillsBlock}}
+            Respond ONLY as JSON: {"skillNames": []}
 
-                                         Client input: {{userInput}}
-                                         """);
+            Client input: {{userInput}}
+            """);
 
         var step2 = JsonSerializer.Deserialize<Step2Result>(step2Json, JsonOpts)!;
 
-        var matchedSkillIds = availableSkills
-            .Where(s => step2.SkillNames.Contains(s.Name, StringComparer.OrdinalIgnoreCase))
-            .Select(s => s.Id)
+        var matchedSkills = availableSkills
+            .Where(s => step2.SkillNames.Any(n =>
+                string.Equals(n, s.Name, StringComparison.OrdinalIgnoreCase)))
             .ToList();
 
         return new ProjectDraftResponse
@@ -91,12 +93,15 @@ public class ProjectDraftService
             Title = step1.Title,
             Description = step1.Description,
             CategoryId = matchedCategory?.Id,
+            CategoryName = matchedCategory?.NameEn,
             NeedsManualCategoryReview = matchedCategory is null,
             SpecialtyIds = matchedSpecialties.Select(s => s.Id).ToList(),
-            SkillIds = matchedSkillIds
+            SpecialtyNames = matchedSpecialties.Select(s => s.NameEn).ToList(),
+            SkillIds = matchedSkills.Select(s => s.Id).ToList(),
+            SkillNames = matchedSkills.Select(s => s.Name).ToList(),
         };
     }
-    
+
     private async Task<string> AskAsync(string prompt)
     {
         var history = new ChatHistory();
