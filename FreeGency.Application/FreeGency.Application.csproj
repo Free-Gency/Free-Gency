@@ -18,7 +18,6 @@
   <ItemGroup>
     <Folder Include="Common\Models\" />
     <Folder Include="Features\Account\Commands\" />
-    <Folder Include="Features\Account\Validator\" />
     <Folder Include="Features\SocialLinks\Queries\" />
     <Folder Include="Features\TeamJoinRequests\Validations\" />
   </ItemGroup>

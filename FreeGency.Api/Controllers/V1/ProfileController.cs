@@ -10,6 +10,16 @@ namespace FreeGency.Api.Controllers.V1;
 [Route("api/v1/profiles")]
 public class ProfileController(IAccountService accountService) : BaseApiController
 {
+    [HttpPost("ChangePassword")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequestDto dto)
+    {
+        var result = await accountService.ChangePasswordAsync(dto);
+
+        return result.IsSuccess
+            ? Ok(result)
+            : result.ToProblem();
+    }
+
     [HttpGet("client/me")]
     public async Task<IActionResult> GetClientProfile()
     {
