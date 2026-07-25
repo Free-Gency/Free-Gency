@@ -28,4 +28,6 @@ public interface ITeamRepository : IGenericRepository<Team>
 
 
     Task<bool> TeamCodeExistsAsync(string teamCode, CancellationToken ct = default);
+    
+    Task ReplaceSpecialtiesAsync(Guid teamId, IEnumerable<Guid> specialtyIds, CancellationToken ct = default);
 }

@@ -16,6 +16,7 @@ using System.Reflection;
 using FreeGency.Application.Features.SocialLinks.Commands;
 using FreeGency.Application.Features.Proposals.Commands;
 using FreeGency.Application.Common.Mappings.ProposalsMapping;
+using FreeGency.Application.Features.Teams.Commands;
 
 namespace FreeGency.Application
 {
@@ -40,6 +41,7 @@ namespace FreeGency.Application
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<ISpecialtyService, SpecialtyService>();
             services.AddScoped<IProposalService, ProposalService>();
+            services.AddScoped<ITeamService, TeamService>();
 
 
             services.AddFluentValidationAutoValidation()

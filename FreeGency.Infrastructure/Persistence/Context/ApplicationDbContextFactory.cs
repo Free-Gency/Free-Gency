@@ -15,6 +15,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
             .SetBasePath(basePath)
             .AddJsonFile("appsettings.json", optional: false)
             .AddJsonFile("appsettings.Development.json", optional: true)
+            .AddUserSecrets("43d0e6ba-6566-4aa5-ac13-8bcffb423cec")
             .AddEnvironmentVariables()
             .Build();
 

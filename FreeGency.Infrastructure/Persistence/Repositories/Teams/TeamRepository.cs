@@ -136,13 +136,27 @@ public sealed class TeamRepository : GenericRepository<Team>, ITeamRepository
                     .SetProperty(t => t.RatingCount, ratingCount),
                 ct);
     }
-
-
-
-
+    
     public Task<bool> TeamCodeExistsAsync(string teamCode, CancellationToken ct = default)
     {
         return _dbSet.AsNoTracking().AnyAsync(t => t.TeamCode == teamCode, ct);
     }
 
+    public async Task ReplaceSpecialtiesAsync(Guid teamId, IEnumerable<Guid> specialtyIds, CancellationToken ct = default)
+    {
+        await _context.Set<TeamSpecialty>()
+            .Where(ts => ts.TeamId == teamId)
+            .IgnoreQueryFilters()
+            .ExecuteDeleteAsync(ct);
+
+        foreach (var specialtyId in specialtyIds)
+        {
+            await _context.Set<TeamSpecialty>().AddAsync(new TeamSpecialty
+            {
+                Id = Guid.NewGuid(),
+                TeamId = teamId,
+                SpecialtyId = specialtyId
+            }, ct);
+        }
+    }
 }
