@@ -1,4 +1,4 @@
-﻿using FreeGency.Domain.Entities;
+using FreeGency.Domain.Entities;
 using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -10,44 +10,29 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
         public CategoryRepository(ApplicationDbContext context) : base(context) { }
 
         public async Task<Category?> GetWithSpecialtiesAsync(Guid id, CancellationToken ct = default)
-        {
-            var category = await _dbSet
+            => await _dbSet
                 .AsNoTracking()
+                .Include(c => c.CategorySpecialties)
+                    .ThenInclude(cs => cs.Specialty)
                 .FirstOrDefaultAsync(c => c.Id == id, ct);
 
-            if (category is null)
-                return null;
+        public async Task<bool> ExistsByNameAsync(string name, Guid? excludeId = null, CancellationToken ct = default)
+        {
+            var query = _dbSet.AsNoTracking().Where(c => c.Name == name || c.NameEn == name);
 
-            var specialties = await _context.Set<CategorySpecialty>()
-                .AsNoTracking()
-                .Where(cs => cs.CategoryId == id)
-                .Select(cs => cs.Specialty)
-                .ToListAsync(ct);
+            if (excludeId.HasValue)
+                query = query.Where(c => c.Id != excludeId.Value);
 
-            category.Specialties = specialties;
-            return category;
+            return await query.AnyAsync(ct);
         }
 
         public async Task<IEnumerable<Category>> GetAllWithSpecialtiesAsync(CancellationToken ct = default)
         {
-            var categories = await _dbSet
+            return await _dbSet
                 .AsNoTracking()
+                .Include(c => c.CategorySpecialties)
+                .ThenInclude(cs => cs.Specialty)
                 .ToListAsync(ct);
-
-            var categorySpecialties = await _context.Set<CategorySpecialty>()
-                .AsNoTracking()
-                .Include(cs => cs.Specialty)
-                .ToListAsync(ct);
-
-            foreach (var category in categories)
-            {
-                category.Specialties = categorySpecialties
-                    .Where(cs => cs.CategoryId == category.Id)
-                    .Select(cs => cs.Specialty)
-                    .ToList();
-            }
-
-            return categories;
         }
     }
 }

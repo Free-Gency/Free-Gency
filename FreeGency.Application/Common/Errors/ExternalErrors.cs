@@ -1,26 +1,20 @@
-﻿using FoundIt.Application.Common.Models;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using FreeGency.Application.Common.Models;
+namespace FreeGency.Application.Common.Errors;
 
-namespace FreeGency.Application.Common.Errors
+public static class ExternalErrors
 {
-    public static class ExternalErrors
-    {
-        public static readonly Error ExternalLoginFailed = new(
-                          "External.LoginFailed",
-                          "Failed to retrieve external login information.",
-                          StatusCodes.Status400BadRequest);
+    public static readonly Error ExternalLoginFailed = new(
+                      "External.LoginFailed",
+                      "Failed to retrieve external login information.",
+                      StatusCodes.Status400BadRequest);
 
-        public static readonly Error ExternalEmailNotFound = new(
-                "External.EmailNotFound",
-                "The external provider did not return an email address.",
-                StatusCodes.Status400BadRequest);
+    public static readonly Error ExternalEmailNotFound = new(
+            "External.EmailNotFound",
+            "The external provider did not return an email address.",
+            StatusCodes.Status400BadRequest);
 
-        public static readonly Error ExternalAccountNotFound = new(
-                "External.AccountNotFound",
-                "No account found. Please sign up first.",
-                StatusCodes.Status404NotFound);
-    }
+    public static readonly Error ExternalAccountNotFound = new(
+            "External.AccountNotFound",
+            "No account found. Please sign up first.",
+            StatusCodes.Status404NotFound);
 }

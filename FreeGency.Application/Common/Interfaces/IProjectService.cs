@@ -2,8 +2,20 @@
 {
     public interface IProjectService
     {
-        Task<Result> CreateProjectAsync(CreateProjectDto newProject, CancellationToken ct = default);
-        Task<Result<ProjectDto>> BrowseProjects();
-        Task<Result<ProjectDto>> GetProjectDetailsAsync(Guid id, CancellationToken ct = default);
+        // Reads
+        Task<ApiResponse<PaginatedResult<ProjectDto>>> BrowseAsync(FilterProjectsRequestDto filterRequest, CancellationToken ct = default);
+        Task<ApiResponse<ProjectDto>> GetDetailsAsync(Guid id, CancellationToken ct = default);
+        Task<ApiResponse<IEnumerable<ProjectDto>>> GetSavedProjectsAsync(CancellationToken ct = default);
+        Task<ApiResponse<IEnumerable<ProjectDto>>> GetMyProjectsAsync(string role, CancellationToken ct = default);
+
+
+        // Writes
+        Task<ApiResponse<Guid>> CreateAsync(CreateProjectRequestDto newProject, CancellationToken ct = default);
+        Task<ApiResponse> DeleteAsync(Guid id, CancellationToken ct = default);
+        Task<ApiResponse> EditAsync(UpdateProjectRequestDto updatedProject, CancellationToken ct = default);
+        Task<ApiResponse> PublishAsync(Guid id, CancellationToken ct = default);
+        Task<ApiResponse> SaveAsync(Guid id, CancellationToken ct = default);
+        Task<ApiResponse> UnSaveAsync(Guid id, CancellationToken ct = default);
+        Task<ApiResponse> ReplaceSkillsAsync(Guid id, IEnumerable<Guid> skillIds, CancellationToken ct = default);
     }
 }

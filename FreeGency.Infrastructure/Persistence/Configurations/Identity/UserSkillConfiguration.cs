@@ -9,14 +9,34 @@ public class UserSkillConfiguration : IEntityTypeConfiguration<UserSkill>
 {
     public void Configure(EntityTypeBuilder<UserSkill> builder)
     {
-        builder.ToTable("UserSkills", DbSchemas.Identity);
-        builder.HasKey(us => new { us.Id, us.UserId, us.SkillId });
-        builder.HasIndex(us => new { us.UserId, us.SkillId }).IsUnique();
+        builder.ToTable("UserSkills", DbSchemas.Identity, t =>
+        {
+            t.HasCheckConstraint(
+                "CK_UserSkills_ProfileScope",
+                "(ClientProfileId IS NOT NULL AND DeveloperProfileId IS NULL) OR (ClientProfileId IS NULL AND DeveloperProfileId IS NOT NULL)");
+        });
 
-        builder.HasOne(us => us.User)
-            .WithMany(u => u.UserSkills)
-            .HasForeignKey(us => us.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasKey(us => us.Id);
+
+        builder.HasIndex(us => new { us.ClientProfileId, us.SkillId })
+            .IsUnique()
+            .HasFilter("[ClientProfileId] IS NOT NULL");
+
+        builder.HasIndex(us => new { us.DeveloperProfileId, us.SkillId })
+            .IsUnique()
+            .HasFilter("[DeveloperProfileId] IS NOT NULL");
+
+        builder.HasOne(us => us.ClientProfile)
+            .WithMany(cp => cp.UserSkills)
+            .HasForeignKey(us => us.ClientProfileId)
+            .HasPrincipalKey(cp => cp.Id)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(us => us.DeveloperProfile)
+            .WithMany(dp => dp.UserSkills)
+            .HasForeignKey(us => us.DeveloperProfileId)
+            .HasPrincipalKey(dp => dp.Id)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(us => us.Skill)
             .WithMany(s => s.UserSkills)

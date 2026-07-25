@@ -1,7 +1,5 @@
-﻿using FreeGency.Application.Common.Interfaces;
 using FreeGency.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 using System.Text.Json;
@@ -35,24 +33,34 @@ namespace FreeGency.Api.Controllers.V1
 
             return Challenge(properties, "Google");
         }
+
         [HttpGet("google-response")]
         public async Task<IActionResult> GoogleResponse()
         {
-            var result = await externalServices.LoginWithGoogleAsync();
             var frontendUrl = configuration["FrontendUrl"]?.TrimEnd('/')
                 ?? "http://localhost:4200";
 
-            if (!result.IsSuccess)
+            try
             {
-                var error = Uri.EscapeDataString(result.error.Discription);
+                var result = await externalServices.LoginWithGoogleAsync();
+
+                if (!result.IsSuccess)
+                {
+                    var error = Uri.EscapeDataString(result.error.Discription ?? "Google sign-in failed.");
+                    return Redirect($"{frontendUrl}/auth/google/callback?error={error}");
+                }
+
+                var json = JsonSerializer.Serialize(
+                    result.Value,
+                    new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                var encoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(json));
+                return Redirect($"{frontendUrl}/auth/google/callback?session={encoded}");
+            }
+            catch (Exception ex)
+            {
+                var error = Uri.EscapeDataString(ex.Message);
                 return Redirect($"{frontendUrl}/auth/google/callback?error={error}");
             }
-
-            var json = JsonSerializer.Serialize(
-                result.Value,
-                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-            var encoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(json));
-            return Redirect($"{frontendUrl}/auth/google/callback?session={encoded}");
         }
     }
 }

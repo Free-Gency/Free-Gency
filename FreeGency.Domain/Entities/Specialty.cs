@@ -16,8 +16,9 @@ public class Specialty : ISoftDeletableEntity
     public string NameEn { get; set; } = string.Empty;
     public string NameAr { get; set; } = string.Empty;
 
-    public virtual ICollection<Category> Categories { get; set; } = [];
+    public virtual ICollection<CategorySpecialty> CategorySpecialties { get; set; } = [];
     public virtual ICollection<SpecialtySkill> SpecialtySkills { get; set; } = [];
     public virtual ICollection<TeamSpecialty> TeamSpecialties { get; set; } = [];
     public virtual ICollection<ProjectSpecialty> ProjectSpecialties { get; set; } = [];
+    public virtual ICollection<UserSpecialty> UserSpecialties { get; set; } = [];
 }

@@ -1,4 +1,4 @@
-﻿using FreeGency.Domain.Entities;
+using FreeGency.Domain.Entities;
 using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -23,5 +23,36 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
                 .OrderBy(s => s.Name)
                 .Take(limit)
                 .ToListAsync(ct);
+
+        public async Task<IEnumerable<Skill>> GetBySpecialtyIdAsync(Guid specialtyId, CancellationToken ct = default)
+            => await _context.Set<SpecialtySkill>()
+                .AsNoTracking()
+                .Where(ss => ss.SpecialtyId == specialtyId)
+                .Select(ss => ss.Skill)
+                .OrderBy(s => s.Name)
+                .ToListAsync(ct);
+
+        public async Task<IEnumerable<Skill>> GetByCategoryIdAsync(Guid categoryId, CancellationToken ct = default)
+            => await _context.Set<CategorySpecialty>()
+                .AsNoTracking()
+                .Where(cs => cs.CategoryId == categoryId)
+                .Join(
+                    _context.Set<SpecialtySkill>().AsNoTracking(),
+                    cs => cs.SpecialtyId,
+                    ss => ss.SpecialtyId,
+                    (_, ss) => ss.Skill)
+                .Distinct()
+                .OrderBy(s => s.Name)
+                .ToListAsync(ct);
+
+        public async Task<bool> ExistsByNameAsync(string name, Guid? excludeId = null, CancellationToken ct = default)
+        {
+            var query = _dbSet.AsNoTracking().Where(s => s.Name == name);
+
+            if (excludeId.HasValue)
+                query = query.Where(s => s.Id != excludeId.Value);
+
+            return await query.AnyAsync(ct);
+        }
     }
 }

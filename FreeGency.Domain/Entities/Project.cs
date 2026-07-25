@@ -1,11 +1,8 @@
-using FreeGency.Domain.Abstractions;
-using FreeGency.Domain.Enums;
-
 namespace FreeGency.Domain.Entities;
 
 public class Project : ISoftDeletableEntity
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public DateTime CreatedAt { get; set; }
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime? UpdatedAt { get; set; }

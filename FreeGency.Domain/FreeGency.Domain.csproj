@@ -7,11 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ValueObjects\**" />
+    <EmbeddedResource Remove="ValueObjects\**" />
+    <None Remove="ValueObjects\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Exceptions\" />
-    <Folder Include="Constants\" />
     <Folder Include="Events\" />
-    <Folder Include="ValueObjects\" />
-    <Folder Include="Specifications\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,14 +9,34 @@ public class UserInterestConfiguration : IEntityTypeConfiguration<UserInterest>
 {
     public void Configure(EntityTypeBuilder<UserInterest> builder)
     {
-        builder.ToTable("UserInterests", DbSchemas.Identity);
-        builder.HasKey(ui => new { ui.Id, ui.UserId, ui.CategoryId });
-        builder.HasIndex(ui => new { ui.UserId, ui.CategoryId }).IsUnique();
+        builder.ToTable("UserInterests", DbSchemas.Identity, t =>
+        {
+            t.HasCheckConstraint(
+                "CK_UserInterests_ProfileScope",
+                "(ClientProfileId IS NOT NULL AND DeveloperProfileId IS NULL) OR (ClientProfileId IS NULL AND DeveloperProfileId IS NOT NULL)");
+        });
 
-        builder.HasOne(ui => ui.User)
-            .WithMany(u => u.UserInterests)
-            .HasForeignKey(ui => ui.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasKey(ui => ui.Id);
+
+        builder.HasIndex(ui => new { ui.ClientProfileId, ui.CategoryId })
+            .IsUnique()
+            .HasFilter("[ClientProfileId] IS NOT NULL");
+
+        builder.HasIndex(ui => new { ui.DeveloperProfileId, ui.CategoryId })
+            .IsUnique()
+            .HasFilter("[DeveloperProfileId] IS NOT NULL");
+
+        builder.HasOne(ui => ui.ClientProfile)
+            .WithMany(cp => cp.UserInterests)
+            .HasForeignKey(ui => ui.ClientProfileId)
+            .HasPrincipalKey(cp => cp.Id)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(ui => ui.DeveloperProfile)
+            .WithMany(dp => dp.UserInterests)
+            .HasForeignKey(ui => ui.DeveloperProfileId)
+            .HasPrincipalKey(dp => dp.Id)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(ui => ui.Category)
             .WithMany(c => c.UserInterests)

@@ -11,6 +11,7 @@ public class ClientProfileConfiguration : IEntityTypeConfiguration<ClientProfile
     {
         builder.ToTable("ClientProfiles", DbSchemas.Identity);
         builder.HasKey(p => new { p.Id, p.UserId });
+        builder.HasAlternateKey(p => p.Id);
         builder.HasIndex(p => p.UserId).IsUnique();
 
         builder.Property(p => p.ProfileImage).HasMaxLength(500);

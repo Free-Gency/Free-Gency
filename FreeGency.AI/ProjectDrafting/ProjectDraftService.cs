@@ -26,7 +26,7 @@ public class ProjectDraftService
     {
         var categories = (await _categoryRepository.GetAllWithSpecialtiesAsync()).ToList();
         var taxonomyBlock = string.Join("\n", categories.Select(c =>
-            $"- {c.NameEn} → specialties: [{string.Join(", ", c.Specialties.Select(s => s.NameEn))}]"));
+            $"- {c.NameEn} → specialties: [{string.Join(", ", c.CategorySpecialties.Select(cs => cs.Specialty.NameEn))}]"));
 
         var step1Json = await AskAsync($$"""
             You turn a client's rough project idea into a structured job post.
@@ -42,7 +42,8 @@ public class ProjectDraftService
         var step1 = JsonSerializer.Deserialize<Step1Result>(step1Json, JsonOpts)!;
         
         var matchedCategory = categories.FirstOrDefault(c => c.NameEn == step1.CategoryName);
-        var matchedSpecialties = matchedCategory?.Specialties
+        var matchedSpecialties = matchedCategory?.CategorySpecialties
+            .Select(cs => cs.Specialty)
             .Where(s => step1.SpecialtyNames.Contains(s.NameEn))
             .ToList() ?? new List<Domain.Entities.Specialty>();
         

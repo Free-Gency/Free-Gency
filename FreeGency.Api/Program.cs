@@ -65,15 +65,18 @@ namespace FreeGency.Api
             {
                 options.AddPolicy("Frontend", policy =>
                 {
-                    policy.WithOrigins(
-                            builder.Configuration["FrontendUrl"] ?? "http://localhost:4200")
+                    var origins = builder.Configuration
+                        .GetSection("FrontendUrls")
+                        .Get<string[]>() ?? [builder.Configuration["FrontendUrl"] ?? "http://localhost:4200"];
+
+                    policy.WithOrigins(origins)
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
             });
            
             var app = builder.Build();
-
+            app.UseStaticFiles();
             DatabaseInitializer.InitializeAsync(app.Services).GetAwaiter().GetResult();
 
             // Configure the HTTP request pipeline.

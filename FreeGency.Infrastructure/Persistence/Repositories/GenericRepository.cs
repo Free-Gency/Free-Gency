@@ -1,11 +1,12 @@
-﻿using FreeGency.Domain.Abstractions;
+using FreeGency.Domain.Abstractions;
 using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1;
 
 namespace FreeGency.Infrastructure.Persistence.Repositories;
 
-public class GenericRepository<TEntity> : IGenericRepository<TEntity>
+public class GenericRepository<TEntity> : IGenericRepository<TEntity> 
     where TEntity : class, IBaseEntity
 {
     protected readonly ApplicationDbContext _context;
@@ -39,4 +40,30 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity>
 
     public void UpdateRange(IEnumerable<TEntity> entities)
         => _dbSet.UpdateRange(entities);
+
+    //---------------------------------------------------------------------
+    public async Task<TEntity?> GetEntityWithSpec(ISpecifiaction<TEntity> spec)
+    {
+        return await ApplySpecification(spec).FirstOrDefaultAsync();
+    }
+
+    public async Task<List<TEntity>> ListAsync(ISpecifiaction<TEntity> spec)
+    {
+        return await ApplySpecification(spec).ToListAsync();
+    }
+    public async Task<int> CountAsync(ISpecifiaction<TEntity> Spec)
+    {
+        var query = _dbSet.AsQueryable();
+        query = Spec.ApplyCriteria(query);
+        return await query.CountAsync();
+    }
+
+    public IQueryable<TEntity> Query()
+        => _dbSet.AsNoTracking();
+
+    private IQueryable<TEntity> ApplySpecification(ISpecifiaction<TEntity> spec)
+    {
+        return SpecificationEvaluator<TEntity>.GetQuery(_dbSet.AsQueryable(), spec);
+
+    }
 }

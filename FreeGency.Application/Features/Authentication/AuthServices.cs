@@ -1,52 +1,75 @@
 using EntityFrameworkCore.EncryptColumn.Interfaces;
-using FoundIt.Application.Common.Models;
 using FreeGency.Application.Common.DTOs.AuthenticationDtos;
 using FreeGency.Application.Common.Errors;
-using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Common.Mappings.AuthenticationMapping;
-using FreeGency.Application.Common.Results;
+using FreeGency.Application.Common.Models;
 using FreeGency.Application.Features.Authentication.Dtos;
-using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
-using FreeGency.Infrastructure.Interfaces;
-using Microsoft.AspNetCore.Http;
+using FreeGency.Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace FreeGency.Application.Features.Authentication
 {
-    public class AuthServices(UserManager<User> userManager,IJwtProvider jwtProvider
-                              ,IHttpContextAccessor httpContextAccessor,IEmailService emailService,IEncryptionProvider encryptionProvider
-                              ,Microsoft.Extensions.Configuration.IConfiguration configuration) : IAuthServices
+    public class AuthServices(UserManager<User> userManager, IJwtProvider jwtProvider
+                              , IHttpContextAccessor httpContextAccessor, IEmailService emailService, IEncryptionProvider encryptionProvider
+                              , Microsoft.Extensions.Configuration.IConfiguration configuration, IUnitOfWork unitOfWork) : IAuthServices
     {
         private readonly int _refreshTokenExpiryDays = 14;
 
         public async Task<Result> RegisterAsync(RegisterRequestDto dto)
         {
-            var emailIsExist = await userManager.Users.AnyAsync(x=>x.Email==dto.Email);
+            var emailIsExist = await userManager.Users.AnyAsync(x => x.Email == dto.Email);
             if (emailIsExist) return Result.Failure(UserErrors.EmailAlreadyExists);
             var user = dto.ToEntity();
             var result = await userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded) return Result.Failure(new Error(result.Errors.First().Code, result.Errors.First().Description, StatusCodes.Status400BadRequest));
-            // generate profiles
-            //send comfirmaion email
-            var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(
-                               Encoding.UTF8.GetBytes(code));
-            var frontendUrl = configuration["FrontendUrl"]?.TrimEnd('/')
-                ?? $"{httpContextAccessor.HttpContext!.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}";
-            var ReturnUrl = $"{frontendUrl}/auth/confirm-email?userId={user.Id}&code={code}";
-            //body
-            var resultOfConfirmEmail = await emailService.SendMassege(user.Email!, ReturnUrl, "Confirm Your Email");
-            if (!resultOfConfirmEmail)
-                return Result.Failure<string>(AuthenticationErrors.ConfirmEmail);
+
+            // Create profile for the selected mode
+            if (dto.Mode == "Client")
+            {
+                var repo = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
+                await repo.AddAsync(new ClientProfile
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    CreatedAt = DateTime.UtcNow,
+                });
+                await unitOfWork.SaveChangesAsync();
+            }
+            else
+            {
+                var repo = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
+                await repo.AddAsync(new DeveloperProfile
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    CreatedAt = DateTime.UtcNow,
+                });
+                await unitOfWork.SaveChangesAsync();
+            }
+
+            // Confirmation email must not fail/hang the registration response —
+            // user+profile are already persisted (retry would hit EmailAlreadyExists).
+            try
+            {
+                var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                var frontendUrl = configuration["FrontendUrl"]?.TrimEnd('/')
+                    ?? "http://localhost:4200";
+                var returnUrl = $"{frontendUrl}/auth/confirm-email?userId={user.Id}&code={code}";
+
+                var emailTask = emailService.SendMassege(user.Email!, returnUrl, "Confirm Your Email");
+                var finished = await Task.WhenAny(emailTask, Task.Delay(TimeSpan.FromSeconds(15)));
+                if (finished == emailTask)
+                    await emailTask;
+            }
+            catch
+            {
+                // Swallow — account is created; user can resend confirmation later.
+            }
+
             return Result.Success();
         }
 
@@ -61,8 +84,8 @@ namespace FreeGency.Application.Features.Authentication
                 return Result.Failure<AuthResponseDto>(UserErrors.InvalidCredentials);
             if (!user.EmailConfirmed) return Result.Failure<AuthResponseDto>(AuthenticationErrors.EmailUserNotConfirmed);
             var authResponse = await GetAuthResponseDto(user);
-            
-            return Result.Success(authResponse);   
+
+            return Result.Success(authResponse);
         }
 
 
@@ -128,7 +151,7 @@ namespace FreeGency.Application.Features.Authentication
             Random geerator = new Random();
             string randomNumber = geerator.Next(0, 1000000).ToString("D6");
             user.code = randomNumber;
-            var result =await userManager.UpdateAsync(user);
+            var result = await userManager.UpdateAsync(user);
             if (!result.Succeeded) return Result.Failure<string>(new Error(result.Errors.First().Code, result.Errors.First().Description, StatusCodes.Status400BadRequest));
             var message = "Code to Reset Password : " + randomNumber;
             await emailService.SendMassege(user.Email!, message, "Reset Password Code");

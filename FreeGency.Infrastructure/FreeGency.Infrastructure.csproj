@@ -13,6 +13,7 @@
     <Folder Include="Services\Authentication\" />
     <Folder Include="Integrations\Jira\" />
     <Folder Include="Integrations\GitHub\" />
+    <Folder Include="Integrations\Cloudinary\" />
     <Folder Include="Persistence\Configurations\" />
     <Folder Include="Persistence\Context\" />
     <Folder Include="Persistence\Extensions\" />
@@ -31,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CloudinaryDotNet" Version="1.29.2" />
     <PackageReference Include="MailKit" Version="4.17.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.10" />
@@ -39,7 +41,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.10" />
   </ItemGroup>
 
   <ItemGroup>

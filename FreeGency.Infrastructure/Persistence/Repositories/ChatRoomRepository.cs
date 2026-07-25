@@ -1,4 +1,4 @@
-﻿using FreeGency.Domain.Entities;
+using FreeGency.Domain.Entities;
 using FreeGency.Domain.Enums;
 using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Infrastructure.Persistence.Context;
@@ -85,16 +85,5 @@ public class ChatRoomRepository:GenericRepository<ChatRoom>, IChatRoomRepository
             throw new KeyNotFoundException("Chat room member not found.");
         member.LastReadAt = DateTime.UtcNow;
         _context.Set<ChatRoomMember>().Update(member);
-    }
-
-    public async Task SetReadOnlyAsync(Guid roomId, CancellationToken ct = default)
-    {
-        var room = await _dbSet.FirstOrDefaultAsync(x => x.Id == roomId, ct);
-        if (room is null)
-            throw new KeyNotFoundException("Chat room not found.");
-
-        // IsReadOnly is configured as a shadow property in the EF model.
-        _context.Entry(room).Property<bool>("IsReadOnly").CurrentValue = true;
-        _dbSet.Update(room);
     }
 }

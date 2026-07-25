@@ -24,6 +24,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<DeveloperProfile> DeveloperProfiles => Set<DeveloperProfile>();
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();
     public DbSet<UserInterest> UserInterests => Set<UserInterest>();
+    public DbSet<UserSpecialty> UserSpecialties => Set<UserSpecialty>();
     public DbSet<SocialLink> SocialLinks => Set<SocialLink>();
 
     // Teams
