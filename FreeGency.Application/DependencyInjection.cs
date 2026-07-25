@@ -11,6 +11,9 @@ using FreeGency.Application.Features.ProjectFiles.Commands;
 using FreeGency.Application.Features.Projects.Commands;
 using FreeGency.Application.Features.skills.Commands;
 using FreeGency.Application.Features.specialties.Commands;
+using FreeGency.Application.Features.TeamJobs.Commands;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -42,6 +45,7 @@ namespace FreeGency.Application
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<ISpecialtyService, SpecialtyService>();
+            services.AddScoped<ITeamJobService, TeamJobService>();
             services.AddScoped<IProposalService, ProposalService>();
             services.AddScoped<ITeamService, TeamService>();
 
