@@ -10,6 +10,7 @@ public class User : IdentityUser<Guid>, ISoftDeletableEntity
     public string FristName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public bool IsVerified { get; set; } = false;
+    public bool HasCompletedOnboarding { get; set; } = false;
     public profileMode? ActiveProfileMode { get; set; }
     public string? Country { get; set; }
     [EncryptColumn]
@@ -38,6 +39,7 @@ public class User : IdentityUser<Guid>, ISoftDeletableEntity
     public virtual ICollection<Review> ReviewsWritten { get; set; } = [];
     public virtual ICollection<Review> ReviewsReceived { get; set; } = [];
     public virtual ICollection<PortfolioProject> PortfolioProjects { get; set; } = [];
+    public virtual Wallet? Wallet { get; set; }
     public virtual ICollection<TeamPayoutSplit> TeamPayoutSplits { get; set; } = [];
     public virtual ICollection<TeamJob> CreatedTeamJobs { get; set; } = [];
     public virtual ICollection<ChatRoom> CreatedChatRooms { get; set; } = [];

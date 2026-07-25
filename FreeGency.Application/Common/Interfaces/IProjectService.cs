@@ -3,10 +3,10 @@
     public interface IProjectService
     {
         // Reads
-        Task<ApiResponse<ProjectDto>> BrowseAsync(FilterProjectsRequestDto filterRequest, CancellationToken ct = default);
+        Task<ApiResponse<PaginatedResult<ProjectDto>>> BrowseAsync(FilterProjectsRequestDto filterRequest, CancellationToken ct = default);
         Task<ApiResponse<ProjectDto>> GetDetailsAsync(Guid id, CancellationToken ct = default);
-        Task<ApiResponse<IEnumerable<SavedProjectsDto>>> GetSavedProjectsAsync(CancellationToken ct = default);
-        Task<ApiResponse<IEnumerable<SavedProjectsDto>>> GetMyProjectsAsync(string role, CancellationToken ct = default);
+        Task<ApiResponse<IEnumerable<ProjectDto>>> GetSavedProjectsAsync(CancellationToken ct = default);
+        Task<ApiResponse<IEnumerable<ProjectDto>>> GetMyProjectsAsync(string role, CancellationToken ct = default);
 
 
         // Writes

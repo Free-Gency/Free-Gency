@@ -1,3 +1,4 @@
+using FreeGency.AI.ProjectDrafting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -13,6 +14,8 @@ public static class DependencyInjection
         services.AddSingleton<IChatCompletionService, BedrockGatewayChatService>();
 
         services.AddKernel();
+        
+        services.AddScoped<ProjectDraftService>();
 
         return services;
     }

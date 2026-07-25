@@ -1,12 +1,13 @@
-using FluentValidation;
 using FluentValidation.AspNetCore;
 using FreeGency.Application.Common.Helpers;
-using FreeGency.Application.Common.Interfaces;
+using FreeGency.Application.Common.Mappings.PortfolioMappings;
+using FreeGency.Application.Common.Mappings.ProjectMappings;
 using FreeGency.Application.Features.Account.Queries;
 using FreeGency.Application.Features.Authentication;
+using FreeGency.Application.Features.categories.Commands;
 using FreeGency.Application.Features.EmailFeature.Commands;
 using FreeGency.Application.Features.ExternalFeature.Commands;
-using FreeGency.Application.Features.categories.Commands;
+using FreeGency.Application.Features.ProjectFiles.Commands;
 using FreeGency.Application.Features.Projects.Commands;
 using FreeGency.Application.Features.skills.Commands;
 using FreeGency.Application.Features.specialties.Commands;
@@ -14,12 +15,12 @@ using FreeGency.Application.Features.TeamJobs.Commands;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using MimeKit;
 using System.Reflection;
-using System.Text;
+using FreeGency.Application.Features.SocialLinks.Commands;
+using FreeGency.Application.Features.Proposals.Commands;
+using FreeGency.Application.Common.Mappings.ProposalsMapping;
+using FreeGency.Application.Features.Teams.Commands;
 
 namespace FreeGency.Application
 {
@@ -27,17 +28,28 @@ namespace FreeGency.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-     
+
+            services.AddScoped<ISocialLinkService, SocialLinkService>();
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddMaps(typeof(ProjectMapping).Assembly);
+                cfg.AddMaps(typeof(ProposalMapping).Assembly);
+            });
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IExternalServices, ExternalServices>();
             services.AddSingleton<IJwtProvider, JwtProvider>();
             services.AddScoped<IAuthServices, AuthServices>();
             services.AddScoped<IEmailAuthService, EmailAuthService>();
             services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<IProjectFileService, ProjectFileService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<ISpecialtyService, SpecialtyService>();
             services.AddScoped<ITeamJobService, TeamJobService>();
+            services.AddScoped<IProposalService, ProposalService>();
+            services.AddScoped<ITeamService, TeamService>();
+
+
             services.AddFluentValidationAutoValidation()
                     .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddOptions<JwtOptions>()
@@ -51,6 +63,12 @@ namespace FreeGency.Application
                 options.User.RequireUniqueEmail = true;
             });
             services.AddHttpContextAccessor();
+
+            services.AddAutoMapper(cgf =>
+            {
+                cgf.AddMaps(typeof(PortfolioMappingProfile));
+            });
+
 
             return services;
         }

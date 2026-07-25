@@ -1,5 +1,4 @@
 using FreeGency.Application.Common.Errors;
-using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Common.Results;
 using FreeGency.Application.Features.specialties.Dtos;
 

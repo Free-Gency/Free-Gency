@@ -2543,6 +2543,11 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<bool>("HasCompletedOnboarding")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -2846,13 +2851,16 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<Guid>("OwnerId")
+                    b.Property<Guid?>("OwnerTeamId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("OwnerType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("OwnerUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Pending")
                         .ValueGeneratedOnAdd()
@@ -2873,10 +2881,18 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerType", "OwnerId", "Currency")
-                        .IsUnique();
+                    b.HasIndex("OwnerTeamId")
+                        .IsUnique()
+                        .HasFilter("[OwnerTeamId] IS NOT NULL");
 
-                    b.ToTable("Wallets", "finance");
+                    b.HasIndex("OwnerUserId")
+                        .IsUnique()
+                        .HasFilter("[OwnerUserId] IS NOT NULL");
+
+                    b.ToTable("Wallets", "finance", t =>
+                        {
+                            t.HasCheckConstraint("CK_Wallets_OwnerScope", "(OwnerType = N'User' AND OwnerUserId IS NOT NULL AND OwnerTeamId IS NULL) OR (OwnerType = N'Team' AND OwnerTeamId IS NOT NULL AND OwnerUserId IS NULL)");
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -3821,6 +3837,23 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("Specialty");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.Wallet", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.Team", "OwnerTeam")
+                        .WithOne("Wallet")
+                        .HasForeignKey("FreeGency.Domain.Entities.Wallet", "OwnerTeamId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("FreeGency.Domain.Entities.User", "OwnerUser")
+                        .WithOne("Wallet")
+                        .HasForeignKey("FreeGency.Domain.Entities.Wallet", "OwnerUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("OwnerTeam");
+
+                    b.Navigation("OwnerUser");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -4017,6 +4050,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("TeamSkills");
 
                     b.Navigation("TeamSpecialties");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.TeamJob", b =>
@@ -4069,6 +4104,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("TeamPayoutSplits");
 
                     b.Navigation("UploadedProjectFiles");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Wallet", b =>

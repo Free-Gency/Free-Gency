@@ -15,11 +15,14 @@ public class Wallet : ISoftDeletableEntity
     public string? DeletedBy { get; set; }
 
     public owner OwnerType { get; set; }
-    public Guid OwnerId { get; set; }
+    public Guid? OwnerUserId { get; set; }
+    public Guid? OwnerTeamId { get; set; }
     public string Currency { get; set; } = string.Empty;
     public decimal Available { get; set; } = 0;
     public decimal Reserved { get; set; } = 0;
     public decimal Pending { get; set; } = 0;
 
+    public virtual User? OwnerUser { get; set; }
+    public virtual Team? OwnerTeam { get; set; }
     public virtual ICollection<LedgerEntry> LedgerEntries { get; set; } = [];
 }

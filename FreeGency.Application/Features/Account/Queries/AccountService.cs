@@ -6,13 +6,14 @@ using FreeGency.Domain.Interfaces;
 using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Domain.Specifications;
 using FreeGency.Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace FreeGency.Application.Features.Account.Queries
 {
-    public partial class AccountService (ICurrentUserService currentUserService, IUnitOfWork unitOfWork, IStorageService storageService): IAccountService
+    public partial class AccountService (ICurrentUserService currentUserService, IUnitOfWork unitOfWork, IStorageService storageService,UserManager<User> userManager): IAccountService
     {
 
         private readonly IClientProfileRepository _profileRepository = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
@@ -31,6 +32,21 @@ namespace FreeGency.Application.Features.Account.Queries
             var response = clientAccount.ToDto();
             response.ProfileImage = ResolveProfileImageUrl(clientAccount.ProfileImage);
             return Result.Success(response);
+        }
+
+        public async Task<Result<List<ProfileInterestDto>>> GetClientInterests()
+        {
+            var userId = currentUserService.UserId;
+            if (userId == Guid.Empty)
+                return Result.Failure<List<ProfileInterestDto>>(UserErrors.UserNotFound);
+
+            var spec = ClientAccountSpecifiaction.ForInterestCatalog(userId);
+            var repo = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
+            var clientAccount = await repo.GetEntityWithSpec(spec);
+            if (clientAccount is null)
+                return Result.Failure<List<ProfileInterestDto>>(UserErrors.UserNotFound);
+
+            return Result.Success(clientAccount.ToInterestCatalog());
         }
 
         public async Task<Result<DeveloperAccountResponseDto>> GetDeveloperProfile()
@@ -56,5 +72,7 @@ namespace FreeGency.Application.Features.Account.Queries
                 ? profileImage
                 : currentUserService.origin + profileImage;
         }
+
+      
     }
 }

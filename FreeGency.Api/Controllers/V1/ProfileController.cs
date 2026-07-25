@@ -10,6 +10,16 @@ namespace FreeGency.Api.Controllers.V1;
 [Route("api/v1/profiles")]
 public class ProfileController(IAccountService accountService) : BaseApiController
 {
+    [HttpPost("ChangePassword")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequestDto dto)
+    {
+        var result = await accountService.ChangePasswordAsync(dto);
+
+        return result.IsSuccess
+            ? Ok(result)
+            : result.ToProblem();
+    }
+
     [HttpGet("client/me")]
     public async Task<IActionResult> GetClientProfile()
     {
@@ -17,8 +27,15 @@ public class ProfileController(IAccountService accountService) : BaseApiControll
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
+    [HttpGet("client/me/interests")]
+    public async Task<IActionResult> GetClientInterests()
+    {
+        var result = await accountService.GetClientInterests();
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
     [HttpPut("client/me")]
-    public async Task<IActionResult> UpdateClientProfile(UpdateClientAccountDto dto)
+    public async Task<IActionResult> UpdateClientProfile([FromForm] UpdateClientAccountDto dto)
     {
         var result = await accountService.UpdateClientProfileAsync(dto);
         return result.IsSuccess ? Ok() : result.ToProblem();
@@ -35,6 +52,13 @@ public class ProfileController(IAccountService accountService) : BaseApiControll
     public async Task<IActionResult> CreateDeveloperProfile()
     {
         var result = await accountService.CreateProfileDeveloperAsync();
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
+
+    [HttpPost("onboarding/complete")]
+    public async Task<IActionResult> CompleteOnboarding()
+    {
+        var result = await accountService.CompleteOnboardingAsync();
         return result.IsSuccess ? Ok() : result.ToProblem();
     }
 

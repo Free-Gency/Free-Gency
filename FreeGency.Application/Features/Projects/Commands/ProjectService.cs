@@ -1,28 +1,35 @@
-﻿using FreeGency.Application.Common.Errors;
-
-namespace FreeGency.Application.Features.Projects.Commands
+﻿namespace FreeGency.Application.Features.Projects.Commands
 {
     // Commands
     public partial class ProjectService : IProjectService
     {
         private readonly IProjectRepository _projectRepo;
+        private readonly ICategoryRepository _categoryRepo;
         private readonly ISpecialtyRepository _specialtyRepo;
         private readonly ISkillRepository _skillRepo;
         private readonly ICurrentUserService _currentUser;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public ProjectService(ICurrentUserService currentUser, IUnitOfWork unitOfWork)
+        public ProjectService(ICurrentUserService currentUser, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _currentUser = currentUser;
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
             _projectRepo = _unitOfWork.Repository<IProjectRepository, Project>();
             _specialtyRepo = _unitOfWork.Repository<ISpecialtyRepository, Specialty>();
             _skillRepo = _unitOfWork.Repository<ISkillRepository, Skill>();
+            _categoryRepo = _unitOfWork.Repository<ICategoryRepository, Category>();
         }
 
 
         public async Task<ApiResponse<Guid>> CreateAsync(CreateProjectRequestDto request, CancellationToken ct = default)
         {
+            if (!await _categoryRepo.ExistsAsync(request.CategoryId))
+                return ApiResponse.Failure<Guid>(AppError.NotFound(nameof(Category), request.CategoryId));
+
+            var allowedSpecialties = await _specialtyRepo.GetByCategoryIdAsync(request.CategoryId, ct);
+
             var project = new Project
             {
                 Title = request.Title,
@@ -38,7 +45,7 @@ namespace FreeGency.Application.Features.Projects.Commands
 
             foreach (var specialtyId in request.SpecialtyIds.Distinct())
             {
-                if (await _specialtyRepo.ExistsAsync(specialtyId, ct))
+                if (allowedSpecialties.Any(s => s.Id == specialtyId))
                 {
                     project.ProjectSpecialties.Add(new ProjectSpecialty
                     {
@@ -47,13 +54,20 @@ namespace FreeGency.Application.Features.Projects.Commands
                 }
                 else
                 {
-                    return ApiResponse.Failure<Guid>(AppError.NotFound(nameof(Specialty), specialtyId));
+                    return ApiResponse.Failure<Guid>(AppError.SpecialtyDoesNotBelongToCategory(specialtyId, request.CategoryId));
                 }
+            }
+
+            var allowedSkills = new List<Skill>();
+
+            foreach (var specialty in allowedSpecialties)
+            {
+                allowedSkills.AddRange(await _skillRepo.GetBySpecialtyIdAsync(specialty.Id));
             }
 
             foreach (var skillId in request.SkillIds.Distinct())
             {
-                if (await _skillRepo.ExistsAsync(skillId, ct))
+                if (allowedSkills.Any(s => s.Id == skillId))
                 {
                     project.ProjectSkills.Add(new ProjectSkill
                     {
@@ -62,7 +76,7 @@ namespace FreeGency.Application.Features.Projects.Commands
                 }
                 else
                 {
-                    return ApiResponse.Failure<Guid>(AppError.NotFound(nameof(Skill), skillId));
+                    return ApiResponse.Failure<Guid>(AppError.SkillDoesNotBelongToSpecialty(skillId));
                 }
             }
 
@@ -159,6 +173,9 @@ namespace FreeGency.Application.Features.Projects.Commands
             if (project == null)
                 return ApiResponse.Failure(AppError.NotFound(nameof(Project), id));
 
+            if (project.ClientId != _currentUser.UserId)
+                return ApiResponse.Failure(AppError.Forbidden("You do not own this project."));
+
             project.Status = ProjectStatus.Open;
             await _unitOfWork.SaveChangesAsync(ct);
 
@@ -167,9 +184,13 @@ namespace FreeGency.Application.Features.Projects.Commands
 
         public async Task<ApiResponse> ReplaceSkillsAsync(Guid id, IEnumerable<Guid> skillIds, CancellationToken ct = default)
         {
+            if (!await _projectRepo.ExistsAsync(id, ct))
+                return ApiResponse.Failure(AppError.NotFound(nameof(Project), id));
+
             if (skillIds.Count() > 0)
             {
                 await _projectRepo.ReplaceSkillsAsync(id, skillIds, ct);
+                await _unitOfWork.SaveChangesAsync(ct);
             }
             else
             {
@@ -178,5 +199,6 @@ namespace FreeGency.Application.Features.Projects.Commands
 
             return ApiResponse.Success("Project's skills has been replaced successfully.");
         }
+
     }
 }

@@ -5,10 +5,13 @@ namespace FreeGency.Application.Common.Interfaces;
 
 public interface IAccountService
 {
+    Task<Result> ChangePasswordAsync(ChangePasswordRequestDto dto);
     Task<Result<ClientAccountResponseDto>> GetClientProfile();
+    Task<Result<List<ProfileInterestDto>>> GetClientInterests();
     Task<Result> UpdateClientProfileAsync(UpdateClientAccountDto dto);
     Task<Result> CreateProfileClientAsync();
     Task<Result> CreateProfileDeveloperAsync();
+    Task<Result> CompleteOnboardingAsync();
     Task<Result<string>> SwitchModeAsync();
     Task<Result<DeveloperAccountResponseDto>> GetDeveloperProfile();
     Task<ApiResponse> AddClientInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default);

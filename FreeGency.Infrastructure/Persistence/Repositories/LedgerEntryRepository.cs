@@ -13,6 +13,7 @@ public class LedgerEntryRepository : GenericRepository<LedgerEntry>, ILedgerEntr
         return await _dbSet
             .AsNoTracking()
             .Where(le => le.WalletId == walletId)
+            .OrderByDescending(le => le.CreatedAt)
             .ToListAsync(cancellationToken);
     }
 
@@ -21,7 +22,22 @@ public class LedgerEntryRepository : GenericRepository<LedgerEntry>, ILedgerEntr
         return await _dbSet
             .AsNoTracking()
             .Where(le => le.ProjectId == projectId)
+            .OrderByDescending(le => le.CreatedAt)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> ExistsByIdempotencyKeyAsync(string idempotencyKey, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .AnyAsync(le => le.IdempotencyKey == idempotencyKey, cancellationToken);
+    }
+
+    public async Task<LedgerEntry?> GetByIdempotencyKeyAsync(string idempotencyKey, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .FirstOrDefaultAsync(le => le.IdempotencyKey == idempotencyKey, cancellationToken);
     }
 
 }

@@ -14,6 +14,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.FristName).IsRequired().HasMaxLength(200);
         builder.Property(u => u.LastName).IsRequired().HasMaxLength(200);
         builder.Property(u => u.IsVerified).HasDefaultValue(false);
+        builder.Property(u => u.HasCompletedOnboarding).HasDefaultValue(false);
         builder.Property(u => u.ActiveProfileMode)
             .HasConversion<string>()
             .HasMaxLength(50)

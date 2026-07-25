@@ -25,5 +25,14 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
 
             return await query.AnyAsync(ct);
         }
+
+        public async Task<IEnumerable<Category>> GetAllWithSpecialtiesAsync(CancellationToken ct = default)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(c => c.CategorySpecialties)
+                .ThenInclude(cs => cs.Specialty)
+                .ToListAsync(ct);
+        }
     }
 }

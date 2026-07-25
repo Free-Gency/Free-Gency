@@ -1,8 +1,4 @@
-﻿using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
-using FreeGency.Domain.Interfaces.Repositories;
-using FreeGency.Infrastructure.Persistence.Context;
-using Microsoft.EntityFrameworkCore;
+﻿
 
 namespace FreeGency.Infrastructure.Persistence.Repositories;
 
@@ -22,6 +18,17 @@ public class ProjectProposalRepository
         }
         return await query.OrderByDescending(p => p.AppliedAt).ToListAsync(ct);
     }
+
+
+    public async Task<IEnumerable<ProjectProposal>> GetPendingByProjectIdAsync(Guid projectId, CancellationToken ct = default)
+    {
+        return await _dbSet.AsNoTracking()
+            .Where(p => p.ProjectId == projectId && p.Status == ProposalStatus.Pending)
+            .OrderByDescending(p => p.AppliedAt)
+            .ToListAsync(ct);
+    }
+
+
     public async Task<IEnumerable<ProjectProposal>> GetByApplicantAsync(ApplicantType applicantType,Guid applicantId,ProposalStatus? status = null,CancellationToken ct = default)
     {
         IQueryable<ProjectProposal> query = _dbSet.AsNoTracking();
@@ -101,4 +108,5 @@ public class ProjectProposalRepository
             throw new KeyNotFoundException("Attachment not found.");
         _context.Set<ProposalAttachment>().Remove(attachment);
     }
+
 }

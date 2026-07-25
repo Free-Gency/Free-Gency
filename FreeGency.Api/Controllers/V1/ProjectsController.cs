@@ -36,12 +36,30 @@
 
         [Authorize]
         [HttpPut("{id}/skills")]
-        public async Task<IActionResult> ReplaceSkills([FromQuery] Guid id, IEnumerable<Guid> skillsIds, CancellationToken ct)
+        public async Task<IActionResult> ReplaceSkills([FromRoute] Guid id, [FromBody] IEnumerable<Guid> skillsIds, CancellationToken ct)
             => HandleResult(await _projectService.ReplaceSkillsAsync(id, skillsIds, ct));
         #endregion
 
 
         #region Queries
+        [HttpGet]
+        public async Task<IActionResult> Browse([FromQuery] FilterProjectsRequestDto request, CancellationToken ct)
+            => HandleResult(await _projectService.BrowseAsync(request, ct));
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetDetails([FromRoute] Guid id, CancellationToken ct)
+            => HandleResult(await _projectService.GetDetailsAsync(id, ct));
+
+        [Authorize]
+        [HttpGet("mine")]
+        public async Task<IActionResult> GetMyProjects([FromQuery] string role, CancellationToken ct)
+            => HandleResult(await _projectService.GetMyProjectsAsync(role, ct));
+
+        [Authorize]
+        [HttpGet("saved")]
+        public async Task<IActionResult> GetMySavedProjects(CancellationToken ct)
+            => HandleResult(await _projectService.GetSavedProjectsAsync(ct));
+
 
         #endregion
     }
