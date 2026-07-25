@@ -1,11 +1,13 @@
 using FreeGency.AI.ProjectDrafting;
 using FreeGency.Application.Common.DTOs.AIDtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FreeGency.Api.Controllers;
+namespace FreeGency.Api.Controllers.V1;
 
+[Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/project-drafts")]
 public class ProjectDraftsController : ControllerBase
 {
     private readonly ProjectDraftService _draftService;
@@ -17,7 +19,8 @@ public class ProjectDraftsController : ControllerBase
 
     [HttpPost("generate")]
     public async Task<ActionResult<ProjectDraftResponse>> Generate(
-        [FromBody] GenerateProjectDraftRequest request)
+        [FromBody] GenerateProjectDraftRequest request,
+        CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.UserInput))
             return BadRequest("userInput is required.");
