@@ -15,5 +15,14 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
                 .Where(cs => cs.CategoryId == categoryId)
                 .Select(cs => cs.Specialty)
                 .ToListAsync(ct);
+        
+        public async Task<IEnumerable<Skill>> GetSkillsForSpecialtyAsync(Guid specialtyId, CancellationToken ct = default)
+        {
+            return await _context.Set<SpecialtySkill>()
+                .AsNoTracking()
+                .Where(ss => ss.SpecialtyId == specialtyId)
+                .Select(ss => ss.Skill)
+                .ToListAsync(ct);
+        }
     }
 }
