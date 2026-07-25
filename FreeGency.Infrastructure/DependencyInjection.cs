@@ -55,6 +55,8 @@ public static class DependencyInjection
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ISpecialtyRepository, SpecialtyRepository>();
         services.AddScoped<ISkillRepository, SkillRepository>();
+        services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<ILedgerEntryRepository, LedgerEntryRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
