@@ -1,15 +1,36 @@
 using FreeGency.Application.Common.Errors;
+using FreeGency.Application.Common.Models;
 using FreeGency.Application.Features.Account.Dtos;
 using FreeGency.Application.Features.Account.Mapping;
 using FreeGency.Domain.Entities;
 using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Domain.Specifications;
 using FreeGency.Infrastructure.Integrations.Cloudinary;
+using Microsoft.AspNetCore.Identity;
 
 namespace FreeGency.Application.Features.Account.Queries;
 
 public partial class AccountService
 {
+    public async Task<Result> ChangePasswordAsync(ChangePasswordRequestDto dto)
+    {
+        var userId =currentUserService.UserId;
+
+        if (userId ==Guid.Empty)
+            return Result.Failure(UserErrors.UserNotFound);
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        var result = await userManager.ChangePasswordAsync(
+            user!,
+            dto.CurrentPassword,
+            dto.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            return Result.Failure(new Error ( result.Errors.First().Code, result.Errors.First().Description, StatusCodes.Status409Conflict ));
+        }
+
+        return Result.Success();
+    }
     public async Task<Result> UpdateClientProfileAsync(UpdateClientAccountDto dto)
     {
         var userId = currentUserService.UserId;

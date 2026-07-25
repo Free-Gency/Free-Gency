@@ -5,6 +5,7 @@ namespace FreeGency.Application.Common.Interfaces;
 
 public interface IAccountService
 {
+    Task<Result> ChangePasswordAsync(ChangePasswordRequestDto dto);
     Task<Result<ClientAccountResponseDto>> GetClientProfile();
     Task<Result<List<ProfileInterestDto>>> GetClientInterests();
     Task<Result> UpdateClientProfileAsync(UpdateClientAccountDto dto);

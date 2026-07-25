@@ -6,13 +6,14 @@ using FreeGency.Domain.Interfaces;
 using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Domain.Specifications;
 using FreeGency.Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace FreeGency.Application.Features.Account.Queries
 {
-    public partial class AccountService (ICurrentUserService currentUserService, IUnitOfWork unitOfWork, IStorageService storageService): IAccountService
+    public partial class AccountService (ICurrentUserService currentUserService, IUnitOfWork unitOfWork, IStorageService storageService,UserManager<User> userManager): IAccountService
     {
 
         private readonly IClientProfileRepository _profileRepository = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
@@ -71,5 +72,7 @@ namespace FreeGency.Application.Features.Account.Queries
                 ? profileImage
                 : currentUserService.origin + profileImage;
         }
+
+      
     }
 }
