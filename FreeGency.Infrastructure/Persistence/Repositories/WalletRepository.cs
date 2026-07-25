@@ -10,7 +10,7 @@ public class WalletRepository : GenericRepository<Wallet>, IWalletRepository
     {
         return await _dbSet
             .AsNoTracking()
-            .FirstOrDefaultAsync(w => w.OwnerType == ownerType && w.OwnerId == ownerId, cancellationToken);
+            .FirstOrDefaultAsync(MatchesOwner(ownerType, ownerId), cancellationToken);
     }
 
     public async Task<Wallet?> GetByOwnerWithLedgerEntriesAsync(owner ownerType, Guid ownerId, CancellationToken cancellationToken = default)
@@ -18,7 +18,17 @@ public class WalletRepository : GenericRepository<Wallet>, IWalletRepository
         return await _dbSet
             .AsNoTracking()
             .Include(w => w.LedgerEntries)
-            .FirstOrDefaultAsync(w => w.OwnerType == ownerType && w.OwnerId == ownerId, cancellationToken);
+            .FirstOrDefaultAsync(MatchesOwner(ownerType, ownerId), cancellationToken);
+    }
+
+    private static System.Linq.Expressions.Expression<Func<Wallet, bool>> MatchesOwner(owner ownerType, Guid ownerId)
+    {
+        return ownerType switch
+        {
+            owner.User => w => w.OwnerType == owner.User && w.OwnerUserId == ownerId,
+            owner.Team => w => w.OwnerType == owner.Team && w.OwnerTeamId == ownerId,
+            _ => w => false,
+        };
     }
 
 
