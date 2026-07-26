@@ -21,6 +21,7 @@ using FreeGency.Application.Features.SocialLinks.Commands;
 using FreeGency.Application.Features.Proposals.Commands;
 using FreeGency.Application.Common.Mappings.ProposalsMapping;
 using FreeGency.Application.Features.Teams.Commands;
+using FreeGency.Application.Features.WalletFeature.Queries;
 
 namespace FreeGency.Application
 {
@@ -35,6 +36,7 @@ namespace FreeGency.Application
                 cfg.AddMaps(typeof(ProjectMapping).Assembly);
                 cfg.AddMaps(typeof(ProposalMapping).Assembly);
             });
+            services.AddScoped<IWalletService, WalletService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IExternalServices, ExternalServices>();
             services.AddSingleton<IJwtProvider, JwtProvider>();

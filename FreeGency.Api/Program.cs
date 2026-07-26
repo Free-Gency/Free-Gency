@@ -25,6 +25,7 @@ namespace FreeGency.Api
             builder.Services.AddIdentity<User, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+            builder.Services.Configure<StripeSetting>(builder.Configuration.GetSection("StripeSetting"));
             #region
             var JwtSettings = builder.Configuration.GetSection(JwtOptions.NameSection).Get<JwtOptions>();
 
