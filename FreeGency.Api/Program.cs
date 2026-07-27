@@ -1,5 +1,7 @@
+using FreeGency.AI;
 using FreeGency.Application;
 using FreeGency.Application.Common.Helpers;
+using FreeGency.Application.Common.Hubs;
 using FreeGency.Domain.Entities;
 using FreeGency.Infrastructure;
 using FreeGency.Infrastructure.Persistence.Context;
@@ -9,7 +11,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using FreeGency.AI;
 
 namespace FreeGency.Api
 {
@@ -75,7 +76,7 @@ namespace FreeGency.Api
                         .AllowAnyMethod();
                 });
             });
-           
+            builder.Services.AddSignalR();
             var app = builder.Build();
             app.UseStaticFiles();
             DatabaseInitializer.InitializeAsync(app.Services).GetAwaiter().GetResult();
@@ -98,6 +99,7 @@ namespace FreeGency.Api
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
+            app.MapHub<NotificationHub>("/hub/notifications");
             app.Run();
         }
     }

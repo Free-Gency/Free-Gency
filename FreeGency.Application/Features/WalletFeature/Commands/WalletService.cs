@@ -1,5 +1,8 @@
-﻿using FreeGency.Application.Features.WalletFeature.Dtos;
+﻿using FreeGency.Application.Common.Hubs;
+using FreeGency.Application.Features.WalletFeature.Dtos;
+using FreeGency.Application.Features.WalletFeature.Mapping;
 using FreeGency.Domain.Specifications;
+using Microsoft.AspNetCore.SignalR;
 using Stripe;
 using System;
 using System.Collections.Generic;
@@ -70,6 +73,11 @@ namespace FreeGency.Application.Features.WalletFeature.Queries
             };
             await ledgerEntryRepository.AddAsync(ledger);
             await unitOfWork.SaveChangesAsync();
+           
+            var profileId = await currentUserService.GetProfileId(wallet.OwnerUserId!.Value);
+            var connections = NotificationHub.GetConnections(profileId);
+            if(connections.Count>0)
+            await hub.Clients.Clients(connections).SendAsync("WalletUpdated", wallet.ToDto());
             return Result.Success();
         }
         public async  Task<Result> HandleCanceled(PaymentIntent @object)
