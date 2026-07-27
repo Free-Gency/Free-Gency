@@ -135,7 +135,7 @@ namespace FreeGency.Application.Features.Projects.Commands
                 "open" => query.Where(p => p.Status == ProjectStatus.Open),
                 "in-progress" => query.Where(p =>
                     p.Status == ProjectStatus.InProgress || p.Status == ProjectStatus.Open),
-                "completed" => query.Where(p => p.Status == ProjectStatus.Completed),
+                "completed" => query.Where(p     => p.Status == ProjectStatus.Completed),
                 "cancelled" => query.Where(p => p.Status == ProjectStatus.Cancelled),
                 _ => query,
             };
