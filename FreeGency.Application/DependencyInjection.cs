@@ -2,25 +2,26 @@ using FluentValidation.AspNetCore;
 using FreeGency.Application.Common.Helpers;
 using FreeGency.Application.Common.Mappings.PortfolioMappings;
 using FreeGency.Application.Common.Mappings.ProjectMappings;
+using FreeGency.Application.Common.Mappings.ProposalsMapping;
 using FreeGency.Application.Features.Account.Queries;
 using FreeGency.Application.Features.Authentication;
 using FreeGency.Application.Features.categories.Commands;
 using FreeGency.Application.Features.EmailFeature.Commands;
+using FreeGency.Application.Features.Escrow.Commands;
 using FreeGency.Application.Features.ExternalFeature.Commands;
+using FreeGency.Application.Features.Milestones.Commands;
+using FreeGency.Application.Features.ProjectEvents.Commands;
 using FreeGency.Application.Features.ProjectFiles.Commands;
 using FreeGency.Application.Features.Projects.Commands;
+using FreeGency.Application.Features.Proposals.Commands;
 using FreeGency.Application.Features.skills.Commands;
+using FreeGency.Application.Features.SocialLinks.Commands;
 using FreeGency.Application.Features.specialties.Commands;
 using FreeGency.Application.Features.TeamJobs.Commands;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http.Features;
+using FreeGency.Application.Features.Teams.Commands;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using FreeGency.Application.Features.SocialLinks.Commands;
-using FreeGency.Application.Features.Proposals.Commands;
-using FreeGency.Application.Common.Mappings.ProposalsMapping;
-using FreeGency.Application.Features.Teams.Commands;
 
 namespace FreeGency.Application
 {
@@ -48,6 +49,9 @@ namespace FreeGency.Application
             services.AddScoped<ITeamJobService, TeamJobService>();
             services.AddScoped<IProposalService, ProposalService>();
             services.AddScoped<ITeamService, TeamService>();
+            services.AddScoped<IMilestoneService, MilestoneService>();
+            services.AddScoped<IEscrowService, EscrowService>();
+            services.AddScoped<IProjectEventService, ProjectEventService>();
 
 
             services.AddFluentValidationAutoValidation()
