@@ -6,6 +6,22 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
 
 
 
+    public async Task<Project?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Where(p => p.Id == id)
+            .Include(p => p.Client)
+                .ThenInclude(c => c.ClientProfile)
+            .Include(p => p.Category)
+            .Include(p => p.ProjectSpecialties)
+                .ThenInclude(ps => ps.Specialty)
+            .Include(p => p.ProjectSkills)
+                .ThenInclude(ps => ps.Skill)
+            .Include(p => p.ProjectProposals)
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<IEnumerable<Project>> GetByClientIdAsync(Guid clientId, ProjectStatus? status = null, CancellationToken ct = default)
     {
         IQueryable<Project> query = _dbSet.AsNoTracking().Where(p => p.ClientId == clientId);
