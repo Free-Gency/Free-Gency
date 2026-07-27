@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Infrastructure.Persistence.Repositories
+namespace FreeGency.Infrastructure.Persistence.Repositories
 {
     public sealed class PortfolioRepository
     : GenericRepository<PortfolioProject>,
@@ -21,14 +21,10 @@
                     .ThenInclude(x => x.Skill);
         }
 
-        public async Task<IEnumerable<PortfolioProject>> GetInspirationAsync(
+        public IQueryable<PortfolioProject> GetInspirationQuery(
             Guid? categoryId,
-            string? search,
-            int take,
-            CancellationToken ct = default)
+            string? search)
         {
-            take = Math.Clamp(take <= 0 ? 24 : take, 1, 60);
-
             var query = _dbSet
                 .AsNoTracking()
                 .Include(x => x.Category)
@@ -47,10 +43,7 @@
                     x.Description.Contains(term));
             }
 
-            return await query
-                .OrderByDescending(x => x.CreatedAt)
-                .Take(take)
-                .ToListAsync(ct);
+            return query.OrderByDescending(x => x.CreatedAt);
         }
 
         public async Task RecordViewAsync(

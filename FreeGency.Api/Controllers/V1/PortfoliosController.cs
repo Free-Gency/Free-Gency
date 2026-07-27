@@ -42,11 +42,9 @@ namespace FreeGency.Api.Controllers.V1
         /// <summary>Public Inspiration feed for client home.</summary>
         [HttpGet("portfolio-projects/inspiration")]
         public async Task<IActionResult> GetInspiration(
-            [FromQuery] Guid? categoryId,
-            [FromQuery] string? search,
-            [FromQuery] int take = 24,
+            [FromQuery] FilterInspirationRequestDto request,
             CancellationToken ct = default)
-            => HandleResult(await _portfolioService.GetInspirationAsync(categoryId, search, take, ct));
+            => HandleResult(await _portfolioService.GetInspirationAsync(request, ct));
 
         /// <summary>Public portfolio details for Inspiration / client browse.</summary>
         [HttpGet("portfolio-projects/{id:guid}")]

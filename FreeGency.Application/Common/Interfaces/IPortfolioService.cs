@@ -32,10 +32,8 @@ namespace FreeGency.Application.Common.Interfaces
             Guid developerId,
             CancellationToken ct = default);
 
-        Task<ApiResponse<IEnumerable<PortfolioProjectDto>>> GetInspirationAsync(
-            Guid? categoryId = null,
-            string? search = null,
-            int take = 24,
+        Task<ApiResponse<PaginatedResult<PortfolioProjectDto>>> GetInspirationAsync(
+            FilterInspirationRequestDto request,
             CancellationToken ct = default);
 
         Task<ApiResponse> RecordViewAsync(

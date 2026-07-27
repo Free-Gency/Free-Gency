@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Features.Portfolio.Commands
+namespace FreeGency.Application.Features.Portfolio.Commands
 {
     // Queries
     public partial class PortfolioService
@@ -31,18 +31,25 @@
             return ApiResponse.Success(dto);
         }
 
-        public async Task<ApiResponse<IEnumerable<PortfolioProjectDto>>> GetInspirationAsync(
-            Guid? categoryId = null,
-            string? search = null,
-            int take = 24,
+        public async Task<ApiResponse<PaginatedResult<PortfolioProjectDto>>> GetInspirationAsync(
+            FilterInspirationRequestDto request,
             CancellationToken ct = default)
         {
             var repo = _unitOfWork.Repository<IPortfolioRepository, PortfolioProject>();
 
-            var portfolios = await repo.GetInspirationAsync(categoryId, search, take, ct);
+            var page = await PaginatedResult<PortfolioProject>.CreateAsync(
+                repo.GetInspirationQuery(request.CategoryId, request.Search),
+                request.PageNumber,
+                request.PageSize,
+                ct);
 
-            return ApiResponse.Success(
-                _mapper.Map<IEnumerable<PortfolioProjectDto>>(portfolios));
+            var mapped = PaginatedResult<PortfolioProjectDto>.FromList(
+                _mapper.Map<List<PortfolioProjectDto>>(page.Items),
+                page.PageNumber,
+                page.PageSize,
+                page.TotalCount);
+
+            return ApiResponse.Success(mapped);
         }
 
         public async Task<ApiResponse> RecordViewAsync(

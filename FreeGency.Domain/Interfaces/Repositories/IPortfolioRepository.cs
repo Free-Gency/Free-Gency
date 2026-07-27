@@ -1,4 +1,4 @@
-﻿using FreeGency.Domain.Entities;
+using FreeGency.Domain.Entities;
 
 namespace FreeGency.Domain.Interfaces.Repositories
 {
@@ -14,11 +14,9 @@ namespace FreeGency.Domain.Interfaces.Repositories
             Guid teamId,
             CancellationToken ct = default);
 
-        Task<IEnumerable<PortfolioProject>> GetInspirationAsync(
+        IQueryable<PortfolioProject> GetInspirationQuery(
             Guid? categoryId,
-            string? search,
-            int take,
-            CancellationToken ct = default);
+            string? search);
 
         Task RecordViewAsync(
             Guid userId,
