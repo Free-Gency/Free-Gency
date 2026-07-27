@@ -1,4 +1,4 @@
-﻿
+
 using Microsoft.EntityFrameworkCore;
 
 namespace FreeGency.Infrastructure.Persistence.Repositories.Reviews;
@@ -30,15 +30,21 @@ public class ReviewRepository : GenericRepository<Review>, IReviewRepository
 
     public async Task<IReadOnlyList<Review>> GetByRevieweeAsync(RevieweeType type, Guid id, CancellationToken cancellationToken = default)
     {
-        var query = _dbSet.AsNoTracking().AsQueryable();
+        var query = _dbSet
+            .AsNoTracking()
+            .Include(r => r.ReviewerUser)
+                .ThenInclude(u => u.ClientProfile)
+            .AsQueryable();
 
-        if (type == RevieweeType.Team) 
+        if (type == RevieweeType.Team)
             query = query.Where(r => r.RevieweeType == type && r.RevieweeTeamId == id);
-
         else if (type == RevieweeType.User)
             query = query.Where(r => r.RevieweeType == type && r.RevieweeUserId == id);
 
-        return await query.ToListAsync(cancellationToken);
+        return await query
+            .OrderByDescending(r => r.CreatedAt)
+            .Take(8)
+            .ToListAsync(cancellationToken);
     }
 
 

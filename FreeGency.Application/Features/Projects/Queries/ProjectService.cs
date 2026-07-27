@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Features.Projects.Commands
+namespace FreeGency.Application.Features.Projects.Commands
 {
     // Queries
     public partial class ProjectService
@@ -38,21 +38,24 @@
         public async Task<ApiResponse<IEnumerable<ProjectDto>>> GetMyProjectsAsync(string role, CancellationToken ct = default)
         {
             var userId = _currentUser.UserId;
+            var query = _projectRepo.GetProjectsQuery();
 
-            IEnumerable<Project> projects = role.ToLower() switch
+            query = role.ToLower() switch
             {
-                "as-client" =>
-                    await _projectRepo.GetMineAsync(userId, true, ct),
-
-                "as-assignee" =>
-                    await _projectRepo.GetMineAsync(userId, false, ct),
-
-                _ => throw new AppValidationException("Role", "Role must be either 'as-client' or 'as-assignee'.")
+                "as-client" => query.Where(p => p.ClientId == userId),
+                "as-assignee" => query.Where(p =>
+                    p.AssignedUserId == userId || p.AssignedTeamId == userId),
+                _ => throw new AppValidationException(
+                    "Role",
+                    "Role must be either 'as-client' or 'as-assignee'."),
             };
 
-            var result = _mapper.Map<IEnumerable<ProjectDto>>(projects);
+            var result = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .ProjectTo<ProjectDto>(_mapper.ConfigurationProvider)
+                .ToListAsync(ct);
 
-            return ApiResponse.Success(result);
+            return ApiResponse.Success<IEnumerable<ProjectDto>>(result);
         }
 
         public async Task<ApiResponse<IEnumerable<ProjectDto>>> GetSavedProjectsAsync(CancellationToken ct = default)

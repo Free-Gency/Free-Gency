@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Common.Interfaces
+namespace FreeGency.Application.Common.Interfaces
 {
     public interface IPortfolioService
     {
@@ -24,8 +24,31 @@
             Guid id,
             CancellationToken ct = default);
 
+        Task<ApiResponse<PortfolioProjectDetailsDto>> GetPublicDetailsAsync(
+            Guid id,
+            CancellationToken ct = default);
+
         Task<ApiResponse<IEnumerable<PortfolioProjectDto>>> GetDeveloperPortfolioAsync(
             Guid developerId,
+            CancellationToken ct = default);
+
+        Task<ApiResponse<IEnumerable<PortfolioProjectDto>>> GetInspirationAsync(
+            Guid? categoryId = null,
+            string? search = null,
+            int take = 24,
+            CancellationToken ct = default);
+
+        Task<ApiResponse> RecordViewAsync(
+            Guid portfolioProjectId,
+            CancellationToken ct = default);
+
+        Task<ApiResponse<IEnumerable<RecentlyViewedPortfolioDto>>> GetRecentlyViewedAsync(
+            int take = 5,
+            CancellationToken ct = default);
+
+        Task<ApiResponse<OwnerReviewDto>> AddFeedbackAsync(
+            Guid portfolioProjectId,
+            CreatePortfolioFeedbackRequestDto request,
             CancellationToken ct = default);
 
         Task<ApiResponse> ReplaceSkillsAsync(
