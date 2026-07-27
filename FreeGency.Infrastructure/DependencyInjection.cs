@@ -33,6 +33,7 @@ public static class DependencyInjection
             var options = sp.GetRequiredService<IOptions<CloudinaryOptions>>().Value;
             return new CloudinaryClient(new Account(options.CloudName, options.ApiKey, options.ApiSecret));
         });
+        services.AddScoped<IPaymentTransactionRepository, PaymentTransactionRepository>();
         services.AddScoped<ISocialLinkRepository, SocialLinkRepository>();
         services.AddScoped<IStorageService, CloudinaryStorageService>();
         services.AddScoped<AuditInterceptor>();
