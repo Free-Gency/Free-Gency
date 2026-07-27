@@ -26,8 +26,13 @@ namespace FreeGency.Application.Features.Projects.Commands
         {
             if (!await _projectRepo.ExistsAsync(id, ct))
                 return ApiResponse.Failure<ProjectDto>(AppError.NotFound(nameof(Project), id));
+            
+            var project = await _projectRepo.GetByIdWithDetailsAsync(id, ct);
 
-            return ApiResponse.Success(_mapper.Map<ProjectDto>(await _projectRepo.GetByIdAsync(id, ct)));
+            if (project is null)
+                return ApiResponse.Failure<ProjectDto>(AppError.NotFound(nameof(Project), id));
+
+            return ApiResponse.Success(_mapper.Map<ProjectDto>(project));
         }
 
         public async Task<ApiResponse<IEnumerable<ProjectDto>>> GetMyProjectsAsync(string role, CancellationToken ct = default)
