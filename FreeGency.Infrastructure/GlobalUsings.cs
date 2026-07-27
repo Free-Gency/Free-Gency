@@ -14,8 +14,6 @@ global using FreeGency.Infrastructure.Services;
 
 global using FreeGency.Domain.Entities;
 global using FreeGency.Domain.Enums;
-global using FreeGency.Domain.Interfaces.Repositories.Portfolio;
-global using FreeGency.Infrastructure.Persistence.Repositories.Portfolio;
 global using FreeGency.Domain.Interfaces.Repositories.Reviews;
 
 global using FreeGency.Domain.Interfaces.Repositories;

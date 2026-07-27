@@ -10,7 +10,6 @@
 
         private readonly IPortfolioRepository _portfolioRepo;
         private readonly ITeamRepository _teamRepo;
-        private readonly IGenericRepository<PortfolioImage> _imageRepository;
 
         public PortfolioService(
             IUnitOfWork unitOfWork,
@@ -25,7 +24,6 @@
 
             _portfolioRepo = unitOfWork.Repository<IPortfolioRepository, PortfolioProject>();
             _teamRepo = unitOfWork.Repository<ITeamRepository, Team>();
-            _imageRepository = unitOfWork.Repository<IGenericRepository<PortfolioImage>, PortfolioImage>();
         }
 
         public async Task<ApiResponse<Guid>> CreateAsync(
@@ -176,32 +174,7 @@
 
                 await EnsureCanEditAsync(portfolio, ct);
 
-                //----------------------------------------------------
-                // Delete Images
-                //----------------------------------------------------
-
-                foreach (var image in portfolio.PortfolioImages)
-                {
-                    _unitOfWork
-                        .Repository<IGenericRepository<PortfolioImage>, PortfolioImage>()
-                        .Delete(image);
-                }
-
-                //----------------------------------------------------
-                // Delete Skills
-                //----------------------------------------------------
-
-                foreach (var skill in portfolio.PortfolioSkills)
-                {
-                    _unitOfWork
-                        .Repository<IGenericRepository<PortfolioSkill>, PortfolioSkill>()
-                        .Delete(skill);
-                }
-
-                //----------------------------------------------------
-                // Delete Portfolio
-                //----------------------------------------------------
-
+                await _portfolioRepo.DeleteImagesAndSkillsAsync(id, ct);
                 _portfolioRepo.Delete(portfolio);
 
                 await _unitOfWork.SaveChangesAsync(ct);
@@ -514,7 +487,7 @@
             if (!await CanManageTeamAsync(teamId, ct))
                 return ApiResponse.Failure(AppError.Unauthorized());
 
-            var image = await _imageRepository.GetByIdAsync(imageId, ct);
+            var image = await _portfolioRepo.GetImageByIdAsync(imageId, ct);
 
             if (image is null)
                 return ApiResponse.Failure(AppError.NotFound(nameof(PortfolioImage), imageId));

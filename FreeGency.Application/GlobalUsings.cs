@@ -1,4 +1,4 @@
-﻿global using AutoMapper;
+global using AutoMapper;
 global using AutoMapper.QueryableExtensions;
 global using FluentValidation;
 global using FreeGency.Application.Common.Errors;
@@ -14,6 +14,7 @@ global using FreeGency.Domain.Entities;
 global using FreeGency.Domain.Enums;
 global using FreeGency.Domain.Interfaces;
 global using FreeGency.Domain.Interfaces.Repositories;
+global using FreeGency.Domain.Interfaces.Repositories.Reviews;
 global using FreeGency.Domain.Interfaces.Repositories.Teams;
 global using FreeGency.Infrastructure.Interfaces;
 global using Microsoft.AspNetCore.Http;

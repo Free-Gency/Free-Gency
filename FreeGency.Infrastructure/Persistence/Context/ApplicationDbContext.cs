@@ -54,6 +54,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PortfolioProject> PortfolioProjects => Set<PortfolioProject>();
     public DbSet<PortfolioImage> PortfolioImages => Set<PortfolioImage>();
     public DbSet<PortfolioSkill> PortfolioSkills => Set<PortfolioSkill>();
+    public DbSet<RecentlyViewedPortfolio> RecentlyViewedPortfolios => Set<RecentlyViewedPortfolio>();
+    public DbSet<PortfolioFeedback> PortfolioFeedbacks => Set<PortfolioFeedback>();
 
     // Chat
     public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();

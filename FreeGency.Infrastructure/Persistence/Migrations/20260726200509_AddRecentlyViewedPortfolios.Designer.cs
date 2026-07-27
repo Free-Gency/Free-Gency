@@ -4,6 +4,7 @@ using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FreeGency.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260726200509_AddRecentlyViewedPortfolios")]
+    partial class AddRecentlyViewedPortfolios
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -816,68 +819,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioFeedback", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Comment")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasDefaultValue("system");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedBy")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<Guid>("PortfolioProjectId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("ReviewerUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReviewerUserId");
-
-                    b.HasIndex("PortfolioProjectId", "CreatedAt");
-
-                    b.HasIndex("PortfolioProjectId", "ReviewerUserId")
-                        .IsUnique();
-
-                    b.ToTable("PortfolioFeedbacks", "portfolio");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioImage", b =>
@@ -3349,25 +3290,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioFeedback", b =>
-                {
-                    b.HasOne("FreeGency.Domain.Entities.PortfolioProject", "PortfolioProject")
-                        .WithMany("Feedbacks")
-                        .HasForeignKey("PortfolioProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FreeGency.Domain.Entities.User", "ReviewerUser")
-                        .WithMany("PortfolioFeedbacks")
-                        .HasForeignKey("ReviewerUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PortfolioProject");
-
-                    b.Navigation("ReviewerUser");
-                });
-
             modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioImage", b =>
                 {
                     b.HasOne("FreeGency.Domain.Entities.PortfolioProject", "PortfolioProject")
@@ -4112,8 +4034,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioProject", b =>
                 {
-                    b.Navigation("Feedbacks");
-
                     b.Navigation("PortfolioImages");
 
                     b.Navigation("PortfolioSkills");
@@ -4238,8 +4158,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("Notifications");
 
                     b.Navigation("OwnedTeams");
-
-                    b.Navigation("PortfolioFeedbacks");
 
                     b.Navigation("PortfolioProjects");
 
