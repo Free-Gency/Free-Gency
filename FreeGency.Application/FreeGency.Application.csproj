@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FreeGency.Domain\FreeGency.Domain.csproj" />
+    <ProjectReference Include="..\FreeGency.AI\FreeGency.AI.csproj" />
     <ProjectReference Include="..\FreeGency.Infrastructure\FreeGency.Infrastructure.csproj" />
   </ItemGroup>
 

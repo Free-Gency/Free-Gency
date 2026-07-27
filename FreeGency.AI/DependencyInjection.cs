@@ -17,6 +17,8 @@ public static class DependencyInjection
         
         services.AddScoped<ProjectDraftService>();
 
+        services.AddAIFoundation(configuration);
+
         return services;
     }
 }
