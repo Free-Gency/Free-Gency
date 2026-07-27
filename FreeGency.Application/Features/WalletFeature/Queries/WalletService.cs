@@ -3,6 +3,7 @@ using FreeGency.Application.Features.WalletFeature.Dtos;
 using FreeGency.Application.Features.WalletFeature.Mapping;
 using FreeGency.Domain.Specifications;
 using Microsoft.Extensions.Options;
+using Stripe;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,6 +13,8 @@ namespace FreeGency.Application.Features.WalletFeature.Queries
     public partial class WalletService (ICurrentUserService currentUserService,IUnitOfWork unitOfWork,IOptions<StripeSetting> options): IWalletService
     {
         private readonly IWalletRepository walletRepository = unitOfWork.Repository<IWalletRepository, Wallet>();
+        private readonly IPaymentTransactionRepository paymentTransactionRepository = unitOfWork.Repository<IPaymentTransactionRepository, PaymentTransaction>();
+        private readonly ILedgerEntryRepository ledgerEntryRepository = unitOfWork.Repository<ILedgerEntryRepository, LedgerEntry>();
         private readonly StripeSetting _options = options.Value;
 
         public async Task<Result<WalletUserDto>> GetUserWallet()
@@ -23,5 +26,7 @@ namespace FreeGency.Application.Features.WalletFeature.Queries
             var response = wallet.ToDto();
             return Result.Success(response);
         }
+
+       
     }
 }
