@@ -42,7 +42,7 @@ public class BedrockGatewayChatService : IChatCompletionService
                 }
             },
             system_prompt = systemMessage,
-            max_tokens = 800
+            max_tokens = 1500
         };
         
         var json = JsonSerializer.Serialize(payload);

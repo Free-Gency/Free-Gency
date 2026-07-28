@@ -3,7 +3,8 @@ namespace FreeGency.Api.Controllers.V1
     [Route("api/v1/projects")]
     public class ProjectsController(
         IProjectService _projectService,
-        IProposalRankingService _proposalRankingService
+        IProposalRankingService _proposalRankingService,
+        IProposalAssistantService _proposalAssistantService
     ) : BaseApiController
     {
         #region Commands
@@ -41,6 +42,14 @@ namespace FreeGency.Api.Controllers.V1
         [HttpPut("{id}/skills")]
         public async Task<IActionResult> ReplaceSkills([FromRoute] Guid id, [FromBody] IEnumerable<Guid> skillsIds, CancellationToken ct)
             => HandleResult(await _projectService.ReplaceSkillsAsync(id, skillsIds, ct));
+
+        [Authorize]
+        [HttpPost("{id}/proposal-assistant")]
+        public async Task<IActionResult> AskProposalAssistant(
+            [FromRoute] Guid id,
+            [FromBody] FreeGency.Application.Features.ProposalAssistant.Dtos.ProposalAssistantRequestDto request,
+            CancellationToken ct)
+            => HandleResult(await _proposalAssistantService.AskAsync(id, request, ct));
         #endregion
 
 
