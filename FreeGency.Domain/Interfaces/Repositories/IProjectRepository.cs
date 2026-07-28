@@ -19,6 +19,9 @@ namespace FreeGency.Domain.Interfaces.Repositories
 
         Task ReplaceSkillsAsync(Guid projectId, IEnumerable<Guid> skillIds, CancellationToken ct = default);
 
+        Task ReplaceSpecialtiesAsync(Guid projectId, IEnumerable<Guid> specialtyIds, CancellationToken ct = default);
+
+
         Task SaveProjectAsync(Guid projectId, Guid userId, CancellationToken ct = default);
 
         Task UnsaveProjectAsync(Guid projectId, Guid userId, CancellationToken ct = default);
