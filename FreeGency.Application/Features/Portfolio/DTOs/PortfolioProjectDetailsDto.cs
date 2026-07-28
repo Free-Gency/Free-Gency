@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Features.Portfolio.DTOs
+namespace FreeGency.Application.Features.Portfolio.DTOs
 {
     public sealed class PortfolioProjectDetailsDto
     {
@@ -19,6 +19,18 @@
         public Visibility Visibility { get; init; }
 
         public string? CategoryName { get; init; }
+
+        public string? OwnerName { get; init; }
+
+        public string OwnerType { get; init; } = "User";
+
+        public Guid? OwnerUserId { get; init; }
+
+        public Guid? OwnerTeamId { get; init; }
+
+        public PortfolioCreatorDto? Creator { get; init; }
+
+        public IReadOnlyList<OwnerReviewDto> OwnerReviews { get; init; } = [];
 
         public IEnumerable<PortfolioImageDto> Images { get; init; } = [];
 

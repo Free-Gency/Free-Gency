@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections;
 
@@ -25,7 +25,7 @@ namespace FreeGency.Infrastructure.Persistence
         {
             _repositories ??= new Hashtable();
 
-            var key = typeof(TRepository).Name;
+            var key = typeof(TRepository).FullName ?? typeof(TRepository).Name;
             if (!_repositories.Contains(key))
             {
                 var repository = _serviceProvider.GetRequiredService<TRepository>();

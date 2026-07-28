@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Infrastructure.Persistence.Repositories
+namespace FreeGency.Infrastructure.Persistence.Repositories
 {
     public sealed class PortfolioRepository
     : GenericRepository<PortfolioProject>,
@@ -14,10 +14,141 @@
             return _dbSet
                 .AsNoTracking()
                 .Include(x => x.Category)
+                .Include(x => x.OwnerUser)
+                .Include(x => x.OwnerTeam)
                 .Include(x => x.PortfolioImages)
                 .Include(x => x.PortfolioSkills)
                     .ThenInclude(x => x.Skill);
         }
+
+        public IQueryable<PortfolioProject> GetInspirationQuery(
+            Guid? categoryId,
+            string? search)
+        {
+            var query = _dbSet
+                .AsNoTracking()
+                .Include(x => x.Category)
+                .Include(x => x.OwnerUser)
+                .Include(x => x.OwnerTeam)
+                .Where(x => x.Visibility == Visibility.Public);
+
+            if (categoryId.HasValue)
+                query = query.Where(x => x.CategoryId == categoryId.Value);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                query = query.Where(x =>
+                    x.Title.Contains(term) ||
+                    x.Description.Contains(term));
+            }
+
+            return query.OrderByDescending(x => x.CreatedAt);
+        }
+
+        public async Task RecordViewAsync(
+            Guid userId,
+            Guid portfolioProjectId,
+            CancellationToken ct = default)
+        {
+            var now = DateTime.UtcNow;
+            var set = _context.Set<RecentlyViewedPortfolio>();
+
+            var existing = await set
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(
+                    x => x.UserId == userId && x.PortfolioProjectId == portfolioProjectId,
+                    ct);
+
+            if (existing is null)
+            {
+                await set.AddAsync(new RecentlyViewedPortfolio
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    PortfolioProjectId = portfolioProjectId,
+                    ViewedAt = now,
+                    CreatedAt = now,
+                    CreatedBy = userId.ToString(),
+                }, ct);
+            }
+            else
+            {
+                existing.ViewedAt = now;
+                existing.UpdatedAt = now;
+                existing.UpdatedBy = userId.ToString();
+                existing.IsDeleted = false;
+                existing.DeletedAt = null;
+                existing.DeletedBy = null;
+            }
+
+            var overflow = await set
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.ViewedAt)
+                .Skip(20)
+                .ToListAsync(ct);
+
+            if (overflow.Count > 0)
+                _context.RemoveRange(overflow);
+        }
+
+        public async Task<IReadOnlyList<(PortfolioProject Project, DateTime ViewedAt)>> GetRecentlyViewedByUserAsync(
+            Guid userId,
+            int take,
+            CancellationToken ct = default)
+        {
+            take = Math.Clamp(take <= 0 ? 5 : take, 1, 20);
+
+            var rows = await _context.Set<RecentlyViewedPortfolio>()
+                .AsNoTracking()
+                .Include(x => x.PortfolioProject)
+                    .ThenInclude(p => p.Category)
+                .Include(x => x.PortfolioProject)
+                    .ThenInclude(p => p.OwnerUser)
+                .Include(x => x.PortfolioProject)
+                    .ThenInclude(p => p.OwnerTeam)
+                .Where(x =>
+                    x.UserId == userId &&
+                    x.PortfolioProject.Visibility == Visibility.Public)
+                .OrderByDescending(x => x.ViewedAt)
+                .Take(take)
+                .ToListAsync(ct);
+
+            return rows
+                .Select(x => (x.PortfolioProject, x.ViewedAt))
+                .ToList();
+        }
+
+        public async Task<IReadOnlyList<PortfolioFeedback>> GetFeedbackAsync(
+            Guid portfolioProjectId,
+            int take,
+            CancellationToken ct = default)
+        {
+            take = Math.Clamp(take <= 0 ? 20 : take, 1, 50);
+
+            return await _context.Set<PortfolioFeedback>()
+                .AsNoTracking()
+                .Include(x => x.ReviewerUser!)
+                    .ThenInclude(u => u.ClientProfile)
+                .Where(x => x.PortfolioProjectId == portfolioProjectId)
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(take)
+                .ToListAsync(ct);
+        }
+
+        public Task<bool> HasFeedbackAsync(
+            Guid portfolioProjectId,
+            Guid reviewerUserId,
+            CancellationToken ct = default)
+            => _context.Set<PortfolioFeedback>().AnyAsync(
+                x => x.PortfolioProjectId == portfolioProjectId &&
+                     x.ReviewerUserId == reviewerUserId,
+                ct);
+
+        public Task AddFeedbackAsync(
+            PortfolioFeedback feedback,
+            CancellationToken ct = default)
+            => _context.Set<PortfolioFeedback>().AddAsync(feedback, ct).AsTask();
 
         public async Task<PortfolioProject?> GetDetailsAsync(
             Guid id,
@@ -25,6 +156,24 @@
         {
             return await Query()
                 .FirstOrDefaultAsync(x => x.Id == id, ct);
+        }
+
+        public async Task<PortfolioProject?> GetPublicDetailsAsync(
+            Guid id,
+            CancellationToken ct = default)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(x => x.Category)
+                .Include(x => x.PortfolioImages)
+                .Include(x => x.PortfolioSkills)
+                    .ThenInclude(x => x.Skill)
+                .Include(x => x.OwnerUser!)
+                    .ThenInclude(u => u.DeveloperProfile)
+                .Include(x => x.OwnerTeam)
+                .FirstOrDefaultAsync(
+                    x => x.Id == id && x.Visibility == Visibility.Public,
+                    ct);
         }
 
         public async Task<IEnumerable<PortfolioProject>> GetDeveloperPortfolioAsync(
@@ -176,6 +325,32 @@
             _context.Remove(image);
         }
 
+        public Task<PortfolioImage?> GetImageByIdAsync(
+            Guid imageId,
+            CancellationToken ct = default)
+            => _context
+                .Set<PortfolioImage>()
+                .FirstOrDefaultAsync(x => x.Id == imageId, ct);
 
+        public async Task DeleteImagesAndSkillsAsync(
+            Guid portfolioProjectId,
+            CancellationToken ct = default)
+        {
+            var images = await _context
+                .Set<PortfolioImage>()
+                .Where(x => x.PortfolioProjectId == portfolioProjectId)
+                .ToListAsync(ct);
+
+            if (images.Count > 0)
+                _context.RemoveRange(images);
+
+            var skills = await _context
+                .Set<PortfolioSkill>()
+                .Where(x => x.PortfolioProjectId == portfolioProjectId)
+                .ToListAsync(ct);
+
+            if (skills.Count > 0)
+                _context.RemoveRange(skills);
+        }
     }
 }

@@ -8,6 +8,8 @@
 
         public string Description { get; init; } = string.Empty;
 
+        public Guid? ClientId { get; init; }
+
         public bool IsFixedPrice { get; init; }
 
         public decimal BudgetMin { get; init; }
@@ -22,20 +24,28 @@
 
         public string Status { get; init; } = default!;
 
+        public Guid? AssignedTeamId { get; init; }
+
+        public Guid? AssignedUserId { get; init; }
+
         public DateTime CreatedAt { get; init; }
 
         public string CategoryName { get; init; } = string.Empty;
+
+        public string? CategoryId { get; init; }
 
         public string ClientName { get; init; } = string.Empty;
 
         public string? ClientAvatarUrl { get; init; }
 
+        public decimal? ClientRating { get; init; }
+
         public IEnumerable<string> Specialties { get; init; } = [];
 
         public IEnumerable<string> Skills { get; init; } = [];
 
-        public int ProposalCount { get; init; }
+        public IEnumerable<string> SkillIds { get; init; } = [];
 
-        //public bool IsSaved { get; init; }
+        public int ProposalCount { get; init; }
     }
 }

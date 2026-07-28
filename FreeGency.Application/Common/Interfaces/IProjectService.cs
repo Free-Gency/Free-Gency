@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Common.Interfaces
+namespace FreeGency.Application.Common.Interfaces
 {
     public interface IProjectService
     {
@@ -6,7 +6,8 @@
         Task<ApiResponse<PaginatedResult<ProjectDto>>> BrowseAsync(FilterProjectsRequestDto filterRequest, CancellationToken ct = default);
         Task<ApiResponse<ProjectDto>> GetDetailsAsync(Guid id, CancellationToken ct = default);
         Task<ApiResponse<IEnumerable<ProjectDto>>> GetSavedProjectsAsync(CancellationToken ct = default);
-        Task<ApiResponse<IEnumerable<ProjectDto>>> GetMyProjectsAsync(string role, CancellationToken ct = default);
+        Task<ApiResponse<PaginatedResult<ProjectDto>>> GetMyProjectsAsync(MyProjectsRequestDto request, CancellationToken ct = default);
+        Task<ApiResponse<MyProjectsSummaryDto>> GetMyProjectsSummaryAsync(string role, CancellationToken ct = default);
 
 
         // Writes

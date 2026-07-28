@@ -1,4 +1,4 @@
-﻿using FreeGency.Application.Features.Account.Dtos;
+using FreeGency.Application.Features.Account.Dtos;
 using FreeGency.Domain.Entities;
 
 namespace FreeGency.Application.Features.Account.Mapping;
@@ -18,11 +18,11 @@ public static class ClientAccountMapping
             Country = clientProfile.User.Country,
             ProfileImage = clientProfile.ProfileImage,
             IsVerified = clientProfile.User.IsVerified,
-            ProjectsCompletedCount = 0,
+            ProjectsCompletedCount = 0, // filled in GetClientProfile from live project counts
             TotalSpent = 0,
             JoinedAt = clientProfile.User.CreatedAt,
             Email = clientProfile.User.Email!,
-            ProjectsPostedCount = 0,
+            ProjectsPostedCount = 0, // filled in GetClientProfile from live project counts
             ProfileMode = clientProfile.User.ActiveProfileMode.ToString(),
             // Interests tree is loaded via GET client/me/interests — keep profile payload light.
             Interests = [],
