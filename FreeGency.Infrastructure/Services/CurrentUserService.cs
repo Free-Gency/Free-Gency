@@ -1,4 +1,6 @@
-﻿using FreeGency.Infrastructure.Interfaces;
+﻿using FreeGency.Domain.Specifications;
+using FreeGency.Infrastructure.Interfaces;
+using FreeGency.Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -8,6 +10,7 @@ namespace FreeGency.Infrastructure.Services
 {
     public class CurrentUserService(IHttpContextAccessor httpContextAccessor): ICurrentUserService
     {
+      
         public Guid UserId => Guid.TryParse(
       httpContextAccessor.HttpContext?.User?.FindFirst("uid")?.Value, out var userId) ? userId : Guid.Empty;
 
