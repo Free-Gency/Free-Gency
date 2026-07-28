@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Api.Controllers.V1
+namespace FreeGency.Api.Controllers.V1
 {
     [Route("api/v1/projects")]
     public class ProjectsController(
@@ -55,8 +55,13 @@
 
         [Authorize]
         [HttpGet("mine")]
-        public async Task<IActionResult> GetMyProjects([FromQuery] string role, CancellationToken ct)
-            => HandleResult(await _projectService.GetMyProjectsAsync(role, ct));
+        public async Task<IActionResult> GetMyProjects([FromQuery] MyProjectsRequestDto request, CancellationToken ct)
+            => HandleResult(await _projectService.GetMyProjectsAsync(request, ct));
+
+        [Authorize]
+        [HttpGet("mine/summary")]
+        public async Task<IActionResult> GetMyProjectsSummary([FromQuery] string role, CancellationToken ct)
+            => HandleResult(await _projectService.GetMyProjectsSummaryAsync(role, ct));
 
         [Authorize]
         [HttpGet("saved")]

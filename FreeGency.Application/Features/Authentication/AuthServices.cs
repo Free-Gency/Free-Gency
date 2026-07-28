@@ -1,3 +1,4 @@
+using Castle.Components.DictionaryAdapter.Xml;
 using EntityFrameworkCore.EncryptColumn.Interfaces;
 using FreeGency.Application.Common.DTOs.AuthenticationDtos;
 using FreeGency.Application.Common.Errors;
@@ -17,7 +18,7 @@ namespace FreeGency.Application.Features.Authentication
                               , Microsoft.Extensions.Configuration.IConfiguration configuration, IUnitOfWork unitOfWork) : IAuthServices
     {
         private readonly int _refreshTokenExpiryDays = 14;
-
+        private readonly IWalletRepository walletRepository = unitOfWork.Repository<IWalletRepository, Wallet>();
         public async Task<Result> RegisterAsync(RegisterRequestDto dto)
         {
             var emailIsExist = await userManager.Users.AnyAsync(x => x.Email == dto.Email);
@@ -25,7 +26,14 @@ namespace FreeGency.Application.Features.Authentication
             var user = dto.ToEntity();
             var result = await userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded) return Result.Failure(new Error(result.Errors.First().Code, result.Errors.First().Description, StatusCodes.Status400BadRequest));
-
+            var wallet = new Wallet
+            {
+                Id = Guid.NewGuid(),
+                OwnerUserId = user.Id,
+                OwnerType = owner.User,
+                Currency= "USD"
+            };
+            await walletRepository.AddAsync(wallet);
             // Create profile for the selected mode
             if (dto.Mode == "Client")
             {

@@ -128,6 +128,12 @@
             if (project is null)
                 return ApiResponse.Failure(AppError.NotFound(nameof(Project), request.Id));
 
+            if (project.ClientId != _currentUser.UserId)
+                return ApiResponse.Failure(AppError.Forbidden("You do not own this project."));
+
+            if (project.Status != ProjectStatus.Draft && project.Status != ProjectStatus.Open)
+                return ApiResponse.Failure(AppError.Validation("Only draft or open projects can be edited."));
+
             if (request.Title is not null)
                 project.Title = request.Title;
 
@@ -159,7 +165,7 @@
 
             if (request.SpecialtyIds != null)
             {
-                //await _projectRepo.Repl
+                await _projectRepo.ReplaceSpecialtiesAsync(request.Id, request.SpecialtyIds, ct);
             }
 
             await _unitOfWork.SaveChangesAsync(ct);

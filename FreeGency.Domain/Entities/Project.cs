@@ -42,4 +42,5 @@ public class Project : ISoftDeletableEntity
     public virtual ICollection<LedgerEntry> LedgerEntries { get; set; } = [];
     public virtual EscrowHold? EscrowHold { get; set; }
     public virtual ICollection<TeamPayoutSplit> TeamPayoutSplits { get; set; } = [];
+    public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; } = [];
 }

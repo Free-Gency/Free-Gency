@@ -8,6 +8,8 @@ using FreeGency.Infrastructure.Interfaces;
 using FreeGency.Infrastructure.Persistence.Context;
 using FreeGency.Infrastructure.Persistence.Interceptors;
 using FreeGency.Infrastructure.Persistence.Repositories;
+using FreeGency.Infrastructure.Persistence.Repositories.Reviews;
+using FreeGency.Domain.Interfaces.Repositories.Reviews;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +33,7 @@ public static class DependencyInjection
             var options = sp.GetRequiredService<IOptions<CloudinaryOptions>>().Value;
             return new CloudinaryClient(new Account(options.CloudName, options.ApiKey, options.ApiSecret));
         });
+        services.AddScoped<IPaymentTransactionRepository, PaymentTransactionRepository>();
         services.AddScoped<ISocialLinkRepository, SocialLinkRepository>();
         services.AddScoped<IStorageService, CloudinaryStorageService>();
         services.AddScoped<AuditInterceptor>();
@@ -40,7 +43,8 @@ public static class DependencyInjection
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
         services.AddScoped<ITeamJobRepository, TeamJobRepository>();
         services.AddScoped<ITeamJoinRequestRepository, TeamJoinRequestRepository>();
-        services.AddScoped<IPortfolioProjectRepository, PortfolioProjectRepository>();
+        services.AddScoped<IPortfolioRepository, PortfolioRepository>();
+        services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IProjectProposalRepository, ProjectProposalRepository>();
         services.AddScoped<IMilestoneRepository, MilestoneRepository>();

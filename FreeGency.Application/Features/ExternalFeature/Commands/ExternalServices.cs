@@ -18,6 +18,9 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
         IJwtProvider jwtProvider,
         IUnitOfWork unitOfWork) : IExternalServices
     {
+        private readonly IClientProfileRepository clientProfileRepository = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
+        private readonly IDeveloperProfileRepository developerProfileRepository = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
+        private readonly IWalletRepository walletRepository = unitOfWork.Repository<IWalletRepository, Wallet>();
         public async Task<Result<AuthResponseDto>> LoginWithGoogleAsync()
         {
             var info = await signInManager.GetExternalLoginInfoAsync();
@@ -64,7 +67,13 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
 
                 if (!result.Succeeded)
                     return Result.Failure<AuthResponseDto>(ExternalErrors.ExternalLoginFailed);
-
+                var clientProfile = new ClientProfile { Id = Guid.NewGuid(), UserId = user.Id };
+                var developerProfile = new DeveloperProfile { Id = Guid.NewGuid(), UserId = user.Id };
+                var wallet = new Wallet { Id = Guid.NewGuid(), OwnerUserId = user.Id, OwnerType = owner.User, Currency = "USD" };
+                await clientProfileRepository.AddAsync(clientProfile);
+                await developerProfileRepository.AddAsync(developerProfile);
+                await walletRepository.AddAsync(wallet);
+                await unitOfWork.SaveChangesAsync();
                 var loginResult = await userManager.AddLoginAsync(user, info);
                 if (!loginResult.Succeeded)
                     return Result.Failure<AuthResponseDto>(ExternalErrors.ExternalLoginFailed);

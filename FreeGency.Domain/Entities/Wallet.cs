@@ -25,4 +25,6 @@ public class Wallet : ISoftDeletableEntity
     public virtual User? OwnerUser { get; set; }
     public virtual Team? OwnerTeam { get; set; }
     public virtual ICollection<LedgerEntry> LedgerEntries { get; set; } = [];
+    public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; } = [];
+
 }

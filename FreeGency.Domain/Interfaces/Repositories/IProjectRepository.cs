@@ -4,6 +4,9 @@ namespace FreeGency.Domain.Interfaces.Repositories
 {
     public interface IProjectRepository : IGenericRepository<Project>
     {
+
+        Task<Project?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default);
+
         Task<IEnumerable<Project>> GetByClientIdAsync(Guid clientId, ProjectStatus? status = null, CancellationToken ct = default);
 
         Task<IEnumerable<Project>> SearchOpenAsync(string? keyword, Guid? categoryI, Guid? specialtyId, decimal? minBudget, decimal? maxBudget, CancellationToken ct = default);
@@ -15,6 +18,9 @@ namespace FreeGency.Domain.Interfaces.Repositories
         Task SetAssigneeAsync(Guid id, Guid? userId, Guid? teamId, CancellationToken ct = default);
 
         Task ReplaceSkillsAsync(Guid projectId, IEnumerable<Guid> skillIds, CancellationToken ct = default);
+
+        Task ReplaceSpecialtiesAsync(Guid projectId, IEnumerable<Guid> specialtyIds, CancellationToken ct = default);
+
 
         Task SaveProjectAsync(Guid projectId, Guid userId, CancellationToken ct = default);
 

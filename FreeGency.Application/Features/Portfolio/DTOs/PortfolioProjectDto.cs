@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Features.Portfolio.DTOs
+namespace FreeGency.Application.Features.Portfolio.DTOs
 {
     public sealed record PortfolioProjectDto(
         Guid Id,
@@ -9,5 +9,6 @@
         string? ProjectUrl,
         DateTime? CompletionDate,
         Visibility Visibility,
-        string? CategoryName);
+        string? CategoryName,
+        string? OwnerName);
 }

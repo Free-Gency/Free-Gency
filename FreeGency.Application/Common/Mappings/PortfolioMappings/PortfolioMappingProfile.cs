@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Common.Mappings.PortfolioMappings
+namespace FreeGency.Application.Common.Mappings.PortfolioMappings
 {
     public class PortfolioMappingProfile : Profile
     {
@@ -23,13 +23,37 @@
                         x.ProjectUrl,
                         x.CompletionDate,
                         x.Visibility,
-                        x.Category != null ? x.Category.Name : null));
+                        x.Category != null ? x.Category.NameEn : null,
+                        x.OwnerTeam != null
+                            ? x.OwnerTeam.Name
+                            : x.OwnerUser != null
+                                ? $"{x.OwnerUser.FristName} {x.OwnerUser.LastName}".Trim()
+                                : null))
+                // Prevent AutoMapper flattening Category.Name (Arabic) over NameEn
+                .ForMember(
+                    d => d.CategoryName,
+                    o => o.MapFrom(s => s.Category != null ? s.Category.NameEn : null))
+                .ForMember(
+                    d => d.OwnerName,
+                    o => o.MapFrom(s =>
+                        s.OwnerTeam != null
+                            ? s.OwnerTeam.Name
+                            : s.OwnerUser != null
+                                ? $"{s.OwnerUser.FristName} {s.OwnerUser.LastName}".Trim()
+                                : null));
 
             CreateMap<PortfolioProject, PortfolioProjectDetailsDto>()
                 .ForMember(d => d.CategoryName,
-                    o => o.MapFrom(s => s.Category != null ? s.Category.Name : null))
+                    o => o.MapFrom(s => s.Category != null ? s.Category.NameEn : null))
+                .ForMember(d => d.OwnerName,
+                    o => o.MapFrom(s =>
+                        s.OwnerTeam != null
+                            ? s.OwnerTeam.Name
+                            : s.OwnerUser != null
+                                ? $"{s.OwnerUser.FristName} {s.OwnerUser.LastName}".Trim()
+                                : null))
                 .ForMember(d => d.Images,
-                    o => o.MapFrom(s => s.PortfolioImages))
+                    o => o.MapFrom(s => s.PortfolioImages.OrderBy(i => i.SortOrder)))
                 .ForMember(d => d.Skills,
                     o => o.MapFrom(s => s.PortfolioSkills));
         }

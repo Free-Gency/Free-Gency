@@ -6,6 +6,22 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
 
 
 
+    public async Task<Project?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Where(p => p.Id == id)
+            .Include(p => p.Client)
+                .ThenInclude(c => c.ClientProfile)
+            .Include(p => p.Category)
+            .Include(p => p.ProjectSpecialties)
+                .ThenInclude(ps => ps.Specialty)
+            .Include(p => p.ProjectSkills)
+                .ThenInclude(ps => ps.Skill)
+            .Include(p => p.ProjectProposals)
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<IEnumerable<Project>> GetByClientIdAsync(Guid clientId, ProjectStatus? status = null, CancellationToken ct = default)
     {
         IQueryable<Project> query = _dbSet.AsNoTracking().Where(p => p.ClientId == clientId);
@@ -84,23 +100,74 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
     }
     public async Task ReplaceSkillsAsync(Guid projectId, IEnumerable<Guid> skillIds, CancellationToken ct = default)
     {
-        var oldSkills = await _context
-            .Set<ProjectSkill>().Where(ps => ps.ProjectId == projectId).ToListAsync(ct);
-        if (oldSkills.Count > 0)
-        {
-            _context.Set<ProjectSkill>().RemoveRange(oldSkills);
-        }
+        var desiredSkillIds = skillIds.Distinct().ToList();
 
-        var skills = skillIds.Distinct().ToList();
-        if (skills.Count == 0)
-            return;
-        var newSkills = skills.Select(skillId => new ProjectSkill
+        var existingLinks = await _context.Set<ProjectSkill>()
+            .IgnoreQueryFilters()
+            .Where(ps => ps.ProjectId == projectId)
+            .ToListAsync(ct);
+
+        var toRemove = existingLinks.Where(ps => !ps.IsDeleted && !desiredSkillIds.Contains(ps.SkillId));
+        _context.Set<ProjectSkill>().RemoveRange(toRemove);
+
+        foreach (var skillId in desiredSkillIds)
         {
-            ProjectId = projectId,
-            SkillId = skillId
-        });
-        await _context.Set<ProjectSkill>().AddRangeAsync(newSkills, ct);
+            var existing = existingLinks.FirstOrDefault(ps => ps.SkillId == skillId);
+
+            if (existing is null)
+            {
+                await _context.Set<ProjectSkill>().AddAsync(new ProjectSkill
+                {
+                    ProjectId = projectId,
+                    SkillId = skillId,
+                }, ct);
+            }
+            else if (existing.IsDeleted)
+            {
+                existing.IsDeleted = false;
+                existing.DeletedAt = null;
+                existing.DeletedBy = null;
+                _context.Set<ProjectSkill>().Update(existing);
+            }
+            // else: already active and still wanted — leave as is.
+        }
     }
+
+    public async Task ReplaceSpecialtiesAsync(Guid projectId, IEnumerable<Guid> specialtyIds, CancellationToken ct = default)
+    {
+        var desiredSpecialtyIds = specialtyIds.Distinct().ToList();
+
+        var existingLinks = await _context.Set<ProjectSpecialty>()
+            .IgnoreQueryFilters()
+            .Where(ps => ps.ProjectId == projectId)
+            .ToListAsync(ct);
+
+        var toRemove = existingLinks.Where(ps => !ps.IsDeleted && !desiredSpecialtyIds.Contains(ps.SpecialtyId));
+        _context.Set<ProjectSpecialty>().RemoveRange(toRemove);
+
+        foreach (var specialtyId in desiredSpecialtyIds)
+        {
+            var existing = existingLinks.FirstOrDefault(ps => ps.SpecialtyId == specialtyId);
+
+            if (existing is null)
+            {
+                await _context.Set<ProjectSpecialty>().AddAsync(new ProjectSpecialty
+                {
+                    ProjectId = projectId,
+                    SpecialtyId = specialtyId,
+                }, ct);
+            }
+            else if (existing.IsDeleted)
+            {
+                existing.IsDeleted = false;
+                existing.DeletedAt = null;
+                existing.DeletedBy = null;
+                _context.Set<ProjectSpecialty>().Update(existing);
+            }
+        }
+    }
+
+
     public async Task SaveProjectAsync(Guid projectId, Guid userId, CancellationToken ct = default)
     {
         var exists = await _context.Set<SavedProject>()

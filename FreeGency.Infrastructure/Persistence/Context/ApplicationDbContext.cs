@@ -54,6 +54,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PortfolioProject> PortfolioProjects => Set<PortfolioProject>();
     public DbSet<PortfolioImage> PortfolioImages => Set<PortfolioImage>();
     public DbSet<PortfolioSkill> PortfolioSkills => Set<PortfolioSkill>();
+    public DbSet<RecentlyViewedPortfolio> RecentlyViewedPortfolios => Set<RecentlyViewedPortfolio>();
+    public DbSet<PortfolioFeedback> PortfolioFeedbacks => Set<PortfolioFeedback>();
 
     // Chat
     public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();
@@ -65,6 +67,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<LedgerEntry> LedgerEntries => Set<LedgerEntry>();
     public DbSet<EscrowHold> EscrowHolds => Set<EscrowHold>();
     public DbSet<TeamPayoutSplit> TeamPayoutSplits => Set<TeamPayoutSplit>();
+    public DbSet<PaymentTransaction> paymentTransactions => Set<PaymentTransaction>();
 
     // Notifications
     public DbSet<Notification> Notifications => Set<Notification>();

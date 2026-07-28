@@ -2,11 +2,13 @@ using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Features.Account.Dtos;
 using FreeGency.Application.Features.Account.Mapping;
 using FreeGency.Domain.Entities;
+using FreeGency.Domain.Enums;
 using FreeGency.Domain.Interfaces;
 using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Domain.Specifications;
 using FreeGency.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -31,6 +33,15 @@ namespace FreeGency.Application.Features.Account.Queries
             if(clientAccount==null)return Result.Failure<ClientAccountResponseDto>(UserErrors.UserNotFound);
             var response = clientAccount.ToDto();
             response.ProfileImage = ResolveProfileImageUrl(clientAccount.ProfileImage);
+
+            var projectRepo = unitOfWork.Repository<IProjectRepository, Project>();
+            var clientProjects = projectRepo.GetProjectsQuery()
+                .Where(p => p.ClientId == userId);
+
+            response.ProjectsPostedCount = await clientProjects.CountAsync();
+            response.ProjectsCompletedCount = await clientProjects
+                .CountAsync(p => p.Status == ProjectStatus.Completed);
+
             return Result.Success(response);
         }
 

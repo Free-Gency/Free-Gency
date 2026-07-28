@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Api.Controllers.V1
+namespace FreeGency.Api.Controllers.V1
 {
     [Route("api/v1/profiles")]
     public class PortfoliosController(IPortfolioService _portfolioService)
@@ -38,6 +38,45 @@
             [FromRoute] Guid developerId,
             CancellationToken ct)
             => HandleResult(await _portfolioService.GetDeveloperPortfolioAsync(developerId, ct));
+
+        /// <summary>Public Inspiration feed for client home.</summary>
+        [HttpGet("portfolio-projects/inspiration")]
+        public async Task<IActionResult> GetInspiration(
+            [FromQuery] FilterInspirationRequestDto request,
+            CancellationToken ct = default)
+            => HandleResult(await _portfolioService.GetInspirationAsync(request, ct));
+
+        /// <summary>Public portfolio details for Inspiration / client browse.</summary>
+        [HttpGet("portfolio-projects/{id:guid}")]
+        public async Task<IActionResult> GetPublicDetails(
+            [FromRoute] Guid id,
+            CancellationToken ct)
+            => HandleResult(await _portfolioService.GetPublicDetailsAsync(id, ct));
+
+        /// <summary>Record that the current user viewed an inspiration portfolio item.</summary>
+        [Authorize]
+        [HttpPost("portfolio-projects/{id:guid}/view")]
+        public async Task<IActionResult> RecordView(
+            [FromRoute] Guid id,
+            CancellationToken ct)
+            => HandleResult(await _portfolioService.RecordViewAsync(id, ct));
+
+        /// <summary>Leave feedback on a public portfolio project.</summary>
+        [Authorize]
+        [HttpPost("portfolio-projects/{id:guid}/feedback")]
+        public async Task<IActionResult> AddFeedback(
+            [FromRoute] Guid id,
+            [FromBody] CreatePortfolioFeedbackRequestDto request,
+            CancellationToken ct)
+            => HandleResult(await _portfolioService.AddFeedbackAsync(id, request, ct));
+
+        /// <summary>Recently viewed inspiration items for the current user.</summary>
+        [Authorize]
+        [HttpGet("me/portfolio-projects/recently-viewed")]
+        public async Task<IActionResult> GetRecentlyViewed(
+            [FromQuery] int take = 5,
+            CancellationToken ct = default)
+            => HandleResult(await _portfolioService.GetRecentlyViewedAsync(take, ct));
 
         [Authorize]
         [HttpGet("developer/me/portfolio-projects/{id:guid}")]

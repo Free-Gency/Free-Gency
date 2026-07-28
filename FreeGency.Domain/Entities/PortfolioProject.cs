@@ -28,4 +28,6 @@ public class PortfolioProject : ISoftDeletableEntity
     public virtual Category? Category { get; set; }
     public virtual ICollection<PortfolioImage> PortfolioImages { get; set; } = [];
     public virtual ICollection<PortfolioSkill> PortfolioSkills { get; set; } = [];
+    public virtual ICollection<RecentlyViewedPortfolio> RecentlyViewedByUsers { get; set; } = [];
+    public virtual ICollection<PortfolioFeedback> Feedbacks { get; set; } = [];
 }
