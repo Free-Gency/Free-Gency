@@ -28,5 +28,22 @@ namespace FreeGency.Application.Common.Extensions.QueryExtensions.Projects
 
             return query;
         }
+
+        public static IQueryable<Project> ApplyFilters(this IQueryable<Project> query, MyProjectsRequestDto request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Status))
+                return query;
+
+            return request.Status.Trim().ToLowerInvariant() switch
+            {
+                "draft" => query.Where(p => p.Status == ProjectStatus.Draft),
+                "open" => query.Where(p => p.Status == ProjectStatus.Open),
+                "in-progress" => query.Where(p =>
+                    p.Status == ProjectStatus.InProgress || p.Status == ProjectStatus.Open),
+                "completed" => query.Where(p => p.Status == ProjectStatus.Completed),
+                "cancelled" => query.Where(p => p.Status == ProjectStatus.Cancelled),
+                _ => query,
+            };
+        }
     }
 }

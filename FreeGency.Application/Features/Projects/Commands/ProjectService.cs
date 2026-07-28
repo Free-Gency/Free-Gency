@@ -165,7 +165,7 @@
 
             if (request.SpecialtyIds != null)
             {
-                //await _projectRepo.Repl
+                await _projectRepo.ReplaceSpecialtiesAsync(request.Id, request.SpecialtyIds, ct);
             }
 
             await _unitOfWork.SaveChangesAsync(ct);

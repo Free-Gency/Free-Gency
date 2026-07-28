@@ -67,6 +67,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<LedgerEntry> LedgerEntries => Set<LedgerEntry>();
     public DbSet<EscrowHold> EscrowHolds => Set<EscrowHold>();
     public DbSet<TeamPayoutSplit> TeamPayoutSplits => Set<TeamPayoutSplit>();
+    public DbSet<PaymentTransaction> paymentTransactions => Set<PaymentTransaction>();
 
     // Notifications
     public DbSet<Notification> Notifications => Set<Notification>();

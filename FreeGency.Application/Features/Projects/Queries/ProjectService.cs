@@ -39,22 +39,13 @@ namespace FreeGency.Application.Features.Projects.Commands
             MyProjectsRequestDto request,
             CancellationToken ct = default)
         {
-            var query = ApplyMyProjectsRoleFilter(_projectRepo.GetProjectsQuery(), request.Role);
-
-            query = ApplyMyProjectsStatusFilter(query, request.Status);
-
-            if (!string.IsNullOrWhiteSpace(request.Search))
-            {
-                var term = request.Search.Trim();
-                query = query.Where(p =>
-                    p.Title.Contains(term) ||
-                    p.Description.Contains(term));
-            }
+            var filteredProjects = ApplyMyProjectsRoleFilter(_projectRepo.GetProjectsQuery(), request.Role)
+                .ApplyFilters(request)
+                .ApplySearch(request)
+                .ApplySorting(request);
 
             var pagedResult = await PaginatedResult<ProjectDto>.CreateAsync(
-                query
-                    .OrderByDescending(p => p.CreatedAt)
-                    .ProjectTo<ProjectDto>(_mapper.ConfigurationProvider),
+                filteredProjects.ProjectTo<ProjectDto>(_mapper.ConfigurationProvider),
                 request.PageNumber,
                 request.PageSize,
                 ct);
@@ -119,25 +110,6 @@ namespace FreeGency.Application.Features.Projects.Commands
                 _ => throw new AppValidationException(
                     "Role",
                     "Role must be either 'as-client' or 'as-assignee'."),
-            };
-        }
-
-        private static IQueryable<Project> ApplyMyProjectsStatusFilter(
-            IQueryable<Project> query,
-            string? status)
-        {
-            if (string.IsNullOrWhiteSpace(status))
-                return query;
-
-            return status.Trim().ToLowerInvariant() switch
-            {
-                "draft" => query.Where(p => p.Status == ProjectStatus.Draft),
-                "open" => query.Where(p => p.Status == ProjectStatus.Open),
-                "in-progress" => query.Where(p =>
-                    p.Status == ProjectStatus.InProgress || p.Status == ProjectStatus.Open),
-                "completed" => query.Where(p     => p.Status == ProjectStatus.Completed),
-                "cancelled" => query.Where(p => p.Status == ProjectStatus.Cancelled),
-                _ => query,
             };
         }
     }

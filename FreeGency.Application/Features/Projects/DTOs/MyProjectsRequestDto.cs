@@ -11,5 +11,9 @@ namespace FreeGency.Application.Features.Projects.DTOs
         public string? Status { get; init; }
 
         public string? Search { get; init; }
+
+        public string SortBy { get; init; } = "CreatedAt";
+
+        public string SortDirection { get; init; } = "desc";
     }
 }

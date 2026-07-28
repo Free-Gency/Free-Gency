@@ -1,5 +1,7 @@
+using FreeGency.AI;
 using FreeGency.Application;
 using FreeGency.Application.Common.Helpers;
+using FreeGency.Application.Common.Hubs;
 using FreeGency.Domain.Entities;
 using FreeGency.Infrastructure;
 using FreeGency.Infrastructure.Persistence.Context;
@@ -7,9 +9,9 @@ using FreeGency.Infrastructure.Persistence.Seeding;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using FreeGency.AI;
 
 namespace FreeGency.Api
 {
@@ -47,6 +49,23 @@ namespace FreeGency.Api
                          ValidIssuer = JwtSettings?.Issuer,
                          ValidAudience = JwtSettings?.Audience
                      };
+                     o.Events = new JwtBearerEvents
+                     {
+                         OnMessageReceived = context =>
+                         {
+                             var accessToken = context.Request.Query["access_token"];
+
+                             var path = context.HttpContext.Request.Path;
+
+                             if (!string.IsNullOrEmpty(accessToken) &&
+                                 path.StartsWithSegments("/hub/notifications"))
+                             {
+                                 context.Token = accessToken;
+                             }
+
+                             return Task.CompletedTask;
+                         }
+                     };
                  }).AddCookie().AddGoogle(options =>
                  {
                      options.ClientId =
@@ -61,7 +80,7 @@ namespace FreeGency.Api
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
-
+            builder.Services.AddSignalR();
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("Frontend", policy =>
@@ -72,7 +91,8 @@ namespace FreeGency.Api
 
                     policy.WithOrigins(origins)
                         .AllowAnyHeader()
-                        .AllowAnyMethod();
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                 });
             });
            
@@ -98,6 +118,7 @@ namespace FreeGency.Api
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
+            app.MapHub<NotificationHub>("/hub/notifications");
             app.Run();
         }
     }

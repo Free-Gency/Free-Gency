@@ -20,6 +20,13 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == email, ct);
 
+        public async Task<Guid> GetProfileId(Guid userId)
+        {
+            var user = await _dbSet.Where(x => x.Id == userId).Include(x => x.ClientProfile).Include(x => x.DeveloperProfile).FirstOrDefaultAsync();
+            if (user.ActiveProfileMode == profileMode.Client) return user.ClientProfile!.Id;
+            else return user.DeveloperProfile!.Id;
+        }
+
         public async Task UpdateActiveProfileModeAsync(Guid userId, profileMode mode, CancellationToken ct = default)
             => await _dbSet
                 .Where(u => u.Id == userId)

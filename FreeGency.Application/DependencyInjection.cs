@@ -25,6 +25,16 @@ using FreeGency.Application.Features.WalletFeature.Queries;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+<<<<<<< HEAD
+=======
+using FreeGency.Application.Features.SocialLinks.Commands;
+using FreeGency.Application.Features.Proposals.Commands;
+using FreeGency.Application.Common.Mappings.ProposalsMapping;
+using FreeGency.Application.Features.Teams.Commands;
+using FreeGency.Application.Features.ProposalRanking;
+using FreeGency.Application.Features.Portfolio.Commands;
+using FreeGency.Application.Features.WalletFeature.Queries;
+>>>>>>> a39af0e4ce5a914e2727c61293c931dedaf71ae6
 
 namespace FreeGency.Application
 {
@@ -54,17 +64,25 @@ namespace FreeGency.Application
             services.AddScoped<ITeamJobService, TeamJobService>();
             services.AddScoped<IProposalService, ProposalService>();
             services.AddScoped<ITeamService, TeamService>();
+<<<<<<< HEAD
 
             // Proposal Ranking
             services.AddScoped<IProposalRankingService, ProposalRankingService>();
 
             // Portfolio
+=======
+            services.AddScoped<IProposalRankingService, ProposalRankingService>();
+>>>>>>> a39af0e4ce5a914e2727c61293c931dedaf71ae6
             services.AddScoped<IPortfolioService, PortfolioService>();
 
             // Project
             services.AddScoped<IMilestoneService, MilestoneService>();
             services.AddScoped<IEscrowService, EscrowService>();
             services.AddScoped<IProjectEventService, ProjectEventService>();
+<<<<<<< HEAD
+=======
+
+>>>>>>> a39af0e4ce5a914e2727c61293c931dedaf71ae6
 
             services.AddFluentValidationAutoValidation()
                     .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

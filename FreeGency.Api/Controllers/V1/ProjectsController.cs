@@ -68,9 +68,13 @@ namespace FreeGency.Api.Controllers.V1
         public async Task<IActionResult> GetMySavedProjects(CancellationToken ct)
             => HandleResult(await _projectService.GetSavedProjectsAsync(ct));
 
+        [Authorize]
         [HttpGet("{id}/proposal-ranking")]
-        public async Task<IActionResult> GetProposalRanking([FromRoute] Guid id, CancellationToken ct)
-            => HandleResult(await _proposalRankingService.RankAsync(id, ct: ct));
+        public async Task<IActionResult> GetProposalRanking(
+            [FromRoute] Guid id,
+            [FromQuery] int topK = 50,
+            CancellationToken ct = default)
+            => HandleResult(await _proposalRankingService.RankAsync(id, topK, ct));
 
 
         #endregion
