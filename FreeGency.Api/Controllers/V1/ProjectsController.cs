@@ -1,7 +1,10 @@
 namespace FreeGency.Api.Controllers.V1
 {
     [Route("api/v1/projects")]
-    public class ProjectsController(IProjectService _projectService) : BaseApiController
+    public class ProjectsController(
+        IProjectService _projectService,
+        IProposalRankingService _proposalRankingService
+    ) : BaseApiController
     {
         #region Commands
         [Authorize]
@@ -64,6 +67,10 @@ namespace FreeGency.Api.Controllers.V1
         [HttpGet("saved")]
         public async Task<IActionResult> GetMySavedProjects(CancellationToken ct)
             => HandleResult(await _projectService.GetSavedProjectsAsync(ct));
+
+        [HttpGet("{id}/proposal-ranking")]
+        public async Task<IActionResult> GetProposalRanking([FromRoute] Guid id, CancellationToken ct)
+            => HandleResult(await _proposalRankingService.RankAsync(id, ct: ct));
 
 
         #endregion

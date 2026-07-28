@@ -26,6 +26,7 @@ using FreeGency.Application.Features.SocialLinks.Commands;
 using FreeGency.Application.Features.Proposals.Commands;
 using FreeGency.Application.Common.Mappings.ProposalsMapping;
 using FreeGency.Application.Features.Teams.Commands;
+using FreeGency.Application.Features.ProposalRanking;
 using FreeGency.Application.Features.Portfolio.Commands;
 using FreeGency.Application.Features.WalletFeature.Queries;
 
@@ -56,6 +57,7 @@ namespace FreeGency.Application
             services.AddScoped<ITeamJobService, TeamJobService>();
             services.AddScoped<IProposalService, ProposalService>();
             services.AddScoped<ITeamService, TeamService>();
+            services.AddScoped<IProposalRankingService, ProposalRankingService>();
             services.AddScoped<IPortfolioService, PortfolioService>();
             services.AddScoped<IMilestoneService, MilestoneService>();
             services.AddScoped<IEscrowService, EscrowService>();
