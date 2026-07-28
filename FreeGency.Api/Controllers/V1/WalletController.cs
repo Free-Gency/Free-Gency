@@ -39,7 +39,10 @@ namespace FreeGency.Api.Controllers.V1
             Result result;
             try
             {
-                var stripeEvent = ConstructStripeEvent(json, Request.Headers["Stripe-Signature"]);
+                var stripeEvent = EventUtility.ConstructEvent(
+                    json,
+                    Request.Headers["Stripe-Signature"],
+                    _options.WhSecret);
                 switch (stripeEvent.Type)
                 {
                     case "payment_intent.succeeded":
@@ -66,33 +69,6 @@ namespace FreeGency.Api.Controllers.V1
             {
                 return BadRequest(ex.Message);
             }
-        }
-
-        private Event ConstructStripeEvent(string json, string? signature)
-        {
-            StripeException? lastError = null;
-            foreach (var secret in EnumerateWebhookSecrets())
-            {
-                try
-                {
-                    return EventUtility.ConstructEvent(json, signature, secret);
-                }
-                catch (StripeException ex)
-                {
-                    lastError = ex;
-                }
-            }
-
-            throw lastError ?? new StripeException("No Stripe webhook secrets configured.");
-        }
-
-        private IEnumerable<string> EnumerateWebhookSecrets()
-        {
-            if (!string.IsNullOrWhiteSpace(_options.WhSecret))
-                yield return _options.WhSecret;
-            if (!string.IsNullOrWhiteSpace(_options.CliWhSecret)
-                && !string.Equals(_options.CliWhSecret, _options.WhSecret, StringComparison.Ordinal))
-                yield return _options.CliWhSecret;
         }
     }
 }
