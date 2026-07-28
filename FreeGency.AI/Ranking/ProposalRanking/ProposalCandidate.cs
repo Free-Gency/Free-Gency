@@ -6,6 +6,7 @@ public sealed class ProposalCandidate
     public required string Name { get; init; }
     public string? Headline { get; init; }
     public string? Bio { get; init; }
+    public string? CoverLetter { get; init; }
     public IReadOnlyList<CandidateSkill>? Skills { get; init; }
     public CandidateExperience? Experience { get; init; }
     public CandidatePricing? Pricing { get; init; }

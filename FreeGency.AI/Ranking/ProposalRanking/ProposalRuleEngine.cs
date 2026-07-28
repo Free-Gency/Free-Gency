@@ -2,7 +2,7 @@ namespace FreeGency.AI.Ranking.ProposalRanking;
 
 public sealed class ProposalRuleEngine : IProposalRuleEngine
 {
-    private const int MaxReturnCount = 20;
+    private const int MaxReturnCount = 100;
 
     private static readonly ScoringWeights DefaultWeights = new();
     private readonly ScoringWeights _weights;
@@ -224,11 +224,12 @@ public sealed class ProposalRuleEngine : IProposalRuleEngine
         double score = 0;
         int factors = 0;
 
-        if (!string.IsNullOrWhiteSpace(candidate.Headline)) { score += 0.25; factors++; }
-        if (!string.IsNullOrWhiteSpace(candidate.Bio) && candidate.Bio.Length >= 50) { score += 0.30; factors++; }
-        if (candidate.PortfolioHighlights is { Count: > 0 }) { score += 0.25; factors++; }
-        if (candidate.Reputation?.IsVerified == true) { score += 0.10; factors++; }
-        if (candidate.Reputation?.CompletionRate is >= 0.9) { score += 0.10; factors++; }
+        if (!string.IsNullOrWhiteSpace(candidate.Headline)) { score += 0.20; factors++; }
+        if (!string.IsNullOrWhiteSpace(candidate.CoverLetter) && candidate.CoverLetter.Length >= 80) { score += 0.30; factors++; }
+        else if (!string.IsNullOrWhiteSpace(candidate.Bio) && candidate.Bio.Length >= 50) { score += 0.25; factors++; }
+        if (candidate.PortfolioHighlights is { Count: > 0 }) { score += 0.20; factors++; }
+        if (candidate.Reputation?.IsVerified == true) { score += 0.15; factors++; }
+        if (candidate.Reputation?.CompletionRate is >= 0.9) { score += 0.15; factors++; }
 
         return Math.Clamp(score, 0, 1);
     }

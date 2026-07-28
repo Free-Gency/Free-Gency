@@ -13,5 +13,18 @@ namespace FreeGency.Application.Common.Extensions.QueryExtensions.Projects
 
             return query;
         }
+
+        public static IQueryable<Project> ApplySearch(this IQueryable<Project> query, MyProjectsRequestDto request)
+        {
+            if (!string.IsNullOrWhiteSpace(request.Search))
+            {
+                var term = request.Search.Trim();
+                query = query.Where(p =>
+                    p.Title.Contains(term) ||
+                    p.Description.Contains(term));
+            }
+
+            return query;
+        }
     }
 }

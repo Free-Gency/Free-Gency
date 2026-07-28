@@ -75,6 +75,7 @@ public sealed class ProposalRankingService : IProposalRankingService
             sb.AppendLine($"--- Candidate: {c.Name} (ID: {c.Id}) ---");
             if (!string.IsNullOrEmpty(c.Headline)) sb.AppendLine($"Headline: {c.Headline}");
             if (!string.IsNullOrEmpty(c.Bio)) sb.AppendLine($"Bio: {c.Bio}");
+            if (!string.IsNullOrEmpty(c.CoverLetter)) sb.AppendLine($"Cover Letter: {c.CoverLetter}");
             if (c.Skills?.Count > 0)
                 sb.AppendLine($"Skills: {string.Join(", ", c.Skills.Select(s => $"{s.Name} ({s.Proficiency})" + (s.YearsExperience.HasValue ? $" [{s.YearsExperience}yr]" : "")))}");
             if (c.Experience is not null)

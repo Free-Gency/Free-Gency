@@ -39,8 +39,10 @@ public sealed class ProposalRankingService : IApplicationProposalRankingService
         if (project is null)
             return ApiResponse.Failure<ProjectRankingResponse>(AppError.NotFound(nameof(Project), projectId));
 
+        // Rank all active proposals (Pending / Accepted / Rejected) so clients
+        // still see match scores after decisions — skip withdrawn only.
         var proposals = await _proposalRepository.Query()
-            .Where(p => p.ProjectId == projectId && p.Status == ProposalStatus.Pending)
+            .Where(p => p.ProjectId == projectId && p.Status != ProposalStatus.Withdrawn)
             .Include(p => p.Team).ThenInclude(t => t!.TeamSkills).ThenInclude(ts => ts.Skill)
             .Include(p => p.User).ThenInclude(u => u!.DeveloperProfile).ThenInclude(dp => dp!.UserSkills).ThenInclude(us => us.Skill)
             .ToListAsync(ct);
@@ -56,7 +58,7 @@ public sealed class ProposalRankingService : IApplicationProposalRankingService
                     TotalCandidatesEvaluated = 0,
                     ReturnedCount = 0,
                     ProcessingTime = TimeSpan.Zero,
-                    Warnings = ["No pending proposals found for this project."]
+                    Warnings = ["No proposals found for this project."]
                 }
             });
         }
@@ -120,6 +122,7 @@ public sealed class ProposalRankingService : IApplicationProposalRankingService
             Name = team.Name,
             Headline = team.AboutUs,
             Bio = team.AboutUs,
+            CoverLetter = proposal.CoverLetter,
             Skills = skills,
             Pricing = new CandidatePricing
             {
@@ -154,6 +157,7 @@ public sealed class ProposalRankingService : IApplicationProposalRankingService
             Name = $"{user.FristName} {user.LastName}",
             Headline = devProfile?.Bio,
             Bio = devProfile?.Bio,
+            CoverLetter = proposal.CoverLetter,
             Skills = skills,
             Pricing = new CandidatePricing
             {
@@ -176,6 +180,7 @@ public sealed class ProposalRankingService : IApplicationProposalRankingService
         {
             Id = proposal.Id.ToString(),
             Name = "Unknown Applicant",
+            CoverLetter = proposal.CoverLetter,
             Skills = [],
             Pricing = new CandidatePricing
             {

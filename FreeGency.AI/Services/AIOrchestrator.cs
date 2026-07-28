@@ -59,14 +59,15 @@ public sealed class AIOrchestrator : IAIOrchestrator
             };
         }
 
-        // ── 2. Rule Engine → Top 20 ─────────────────────────────────────
+        // ── 2. Rule Engine → TopK candidates ────────────────────────────
+        var ruleTake = Math.Clamp(request.TopK > 0 ? request.TopK : 20, 1, 100);
         var ruleResult = _ruleEngine.Rank(request);
-        var ruleTop20 = ruleResult.RankedProposals
+        var ruleTop = ruleResult.RankedProposals
             .OrderByDescending(p => p.OverallScore)
-            .Take(20)
+            .Take(ruleTake)
             .ToList();
 
-        var ruleCandidateIds = new HashSet<string>(ruleTop20.Select(p => p.CandidateId));
+        var ruleCandidateIds = new HashSet<string>(ruleTop.Select(p => p.CandidateId));
         var candidateMap = request.Candidates.ToDictionary(c => c.Id);
 
         // ── 3. Embed Project Description ────────────────────────────────
@@ -152,12 +153,12 @@ public sealed class AIOrchestrator : IAIOrchestrator
             return new ProjectRankingResponse
             {
                 ProjectId = request.ProjectId,
-                RankedProposals = ruleTop20,
+                RankedProposals = ruleTop,
                 AiSummary = null,
                 Metadata = new RankingMetadata
                 {
                     TotalCandidatesEvaluated = request.Candidates.Count,
-                    ReturnedCount = ruleTop20.Count,
+                    ReturnedCount = ruleTop.Count,
                     ProcessingTime = sw.Elapsed,
                     UsedAiEmbeddings = false,
                     ModelUsed = null,
@@ -167,7 +168,7 @@ public sealed class AIOrchestrator : IAIOrchestrator
         }
 
         // ── 7. Merge Scores ─────────────────────────────────────────────
-        var ruleResultMap = ruleTop20.ToDictionary(p => p.CandidateId, p => p);
+        var ruleResultMap = ruleTop.ToDictionary(p => p.CandidateId, p => p);
         var finalProposals = MergeScores(semanticResult.RankedProposals, ruleResultMap, request.TopK);
 
         // ── 8. Cache Result ─────────────────────────────────────────────
