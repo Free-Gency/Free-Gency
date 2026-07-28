@@ -171,6 +171,7 @@ public sealed class ProposalAssistantChatService
                 @"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b",
                 "");
             line = Regex.Replace(line, @"\bProposal\s*IDs?\b\s*:?\s*", "", RegexOptions.IgnoreCase);
+            line = line.Replace("**", "", StringComparison.Ordinal);
             line = Regex.Replace(line, @"\s{2,}", " ").Trim();
             if (line.Length > 0) kept.Add(line);
         }
@@ -397,7 +398,7 @@ public sealed class ProposalAssistantChatService
     private static string CommandPlaybook(string? command) => command switch
     {
         "summarize" =>
-            "Produce a per-proposal essentials pass. Card for every applicant. Each insight must cite a concrete signal (skill overlap, budget, letter quality).",
+            "ONE short overview sentence in reply — do NOT list people there. Card for EVERY applicant. highlights=[approach bullet, watch-out bullet]. insight=approach. Fill skills + proposedBudget.",
         "compare" =>
             "Head-to-head of exactly two applicants. Prefer focused names if provided (e.g. 'A vs B'); else the two strongest by rubric. Contrasting insights required.",
         "bestfit" =>

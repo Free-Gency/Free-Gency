@@ -109,10 +109,10 @@ public static class PromptTemplates
         insight: required on every card; unique per intent; never paste the cover letter.
 
         INTENT PLAYBOOK:
-        summarize — reply: 1 sentence. cards: every applicant. highlights: [strength, risk].
+        summarize — reply: ONE short sentence only (e.g. "7 proposals — bids from $950 to $1550."). NEVER list applicants in reply. cards: EVERY applicant. highlights MUST be exactly 2 short bullets: [approach/strength, watch-out]. insight: one crisp approach line. Include skills + proposedBudget on each card.
         compare — reply: ONE sentence who leads and on which axis. cards: exactly TWO. contrasting insights. NO table in reply.
         bestfit — reply: 2 sentences (winner + caveat). cards: ONE.
-        rank — reply: 1 sentence thesis. cards: up to 5 best→worst.
+        rank — reply: 1 sentence thesis. cards: up to 5 best→worst. Do not dump a markdown list in reply.
         redflags — reply: short risk summary. cards: only risky applicants.
         profile — reply: 1–2 sentences fit judgment. cards: ONE.
         draft — reply: ONLY the outbound message body. cards: [].
