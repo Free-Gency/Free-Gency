@@ -89,4 +89,5 @@ public sealed class TeamMemberRepository : GenericRepository<TeamMember>, ITeamM
             await _dbSet.Where(tm => tm.TeamId == teamId).ExecuteDeleteAsync(ct);
     }
 
+
 }
