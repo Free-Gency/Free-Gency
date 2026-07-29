@@ -23,4 +23,5 @@ public class ClientProfile : ISoftDeletableEntity
     public virtual ICollection<UserInterest> UserInterests { get; set; } = [];
     public virtual ICollection<UserSpecialty> UserSpecialties { get; set; } = [];
     public virtual ICollection<UserSkill> UserSkills { get; set; } = [];
+    public virtual ClientNotificationSettings ClientNotificationSettings { get; set; } = null!;
 }

@@ -71,6 +71,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     // Notifications
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<ClientNotificationSettings> clientNotificationSettings => Set<ClientNotificationSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
