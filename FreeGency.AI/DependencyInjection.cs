@@ -16,6 +16,7 @@ public static class DependencyInjection
         services.AddKernel();
         
         services.AddScoped<ProjectDraftService>();
+        services.AddScoped<FreeGency.AI.ProposalAssistant.ProposalAssistantChatService>();
 
         services.AddAIFoundation(configuration);
 

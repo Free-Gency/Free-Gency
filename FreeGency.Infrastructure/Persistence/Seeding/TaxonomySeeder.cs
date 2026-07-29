@@ -8,10 +8,32 @@ public static class TaxonomySeeder
 {
     public static async Task SeedAsync(ApplicationDbContext context, CancellationToken ct = default)
     {
-        if (await context.Categories.AnyAsync(ct))
-            return;
-
         var seededAt = DateTime.UtcNow;
+
+        var categoriesByName = (await context.Categories.ToListAsync(ct))
+            .GroupBy(c => c.NameEn, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+        var specialtiesByName = (await context.Specialties.ToListAsync(ct))
+            .GroupBy(s => s.NameEn, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+        var skillsByName = (await context.Skills.ToListAsync(ct))
+            .GroupBy(s => s.Name, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+        var existingCategorySpecialtyKeys = (await context.CategorySpecialties
+                .Select(cs => new { cs.CategoryId, cs.SpecialtyId })
+                .ToListAsync(ct))
+            .Select(x => (x.CategoryId, x.SpecialtyId))
+            .ToHashSet();
+
+        var existingSpecialtySkillKeys = (await context.SpecialtySkills
+                .Select(ss => new { ss.SpecialtyId, ss.SkillId })
+                .ToListAsync(ct))
+            .Select(x => (x.SpecialtyId, x.SkillId))
+            .ToHashSet();
+
         var specialtyNames = TaxonomySeedData.Categories
             .SelectMany(c => c.Specialties)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -32,45 +54,78 @@ public static class TaxonomySeeder
             .Select((name, index) => (name, Id: TaxonomySeedData.EntityId("33333333-3333-3333-3333", index + 1)))
             .ToDictionary(x => x.name, x => x.Id, StringComparer.OrdinalIgnoreCase);
 
-        var categories = TaxonomySeedData.Categories.Select(def => new Category
+        foreach (var def in TaxonomySeedData.Categories)
         {
-            Id = TaxonomySeedData.CategoryId(def.Key),
-            Name = def.NameAr,
-            NameEn = def.NameEn,
-            CreatedAt = seededAt,
-            CreatedBy = TaxonomySeedData.SeedUser
-        }).ToList();
+            if (categoriesByName.ContainsKey(def.NameEn))
+                continue;
 
-        var specialties = specialtyNames.Select(nameEn => new Specialty
-        {
-            Id = specialtyIds[nameEn],
-            NameEn = nameEn,
-            NameAr = TaxonomySeedData.SpecialtyNamesAr.TryGetValue(nameEn, out var nameAr)
-                ? nameAr
-                : nameEn,
-            CreatedAt = seededAt,
-            CreatedBy = TaxonomySeedData.SeedUser
-        }).ToList();
+            var category = new Category
+            {
+                Id = TaxonomySeedData.CategoryId(def.Key),
+                Name = def.NameAr,
+                NameEn = def.NameEn,
+                CreatedAt = seededAt,
+                CreatedBy = TaxonomySeedData.SeedUser
+            };
+            await context.Categories.AddAsync(category, ct);
+            categoriesByName[def.NameEn] = category;
+        }
 
-        var skills = skillNames.Select(name => new Skill
+        foreach (var nameEn in specialtyNames)
         {
-            Id = skillIds[name],
-            Name = name,
-            CreatedAt = seededAt,
-            CreatedBy = TaxonomySeedData.SeedUser
-        }).ToList();
+            if (specialtiesByName.ContainsKey(nameEn))
+                continue;
+
+            var specialty = new Specialty
+            {
+                Id = specialtyIds[nameEn],
+                NameEn = nameEn,
+                NameAr = TaxonomySeedData.SpecialtyNamesAr.TryGetValue(nameEn, out var nameAr)
+                    ? nameAr
+                    : nameEn,
+                CreatedAt = seededAt,
+                CreatedBy = TaxonomySeedData.SeedUser
+            };
+            await context.Specialties.AddAsync(specialty, ct);
+            specialtiesByName[nameEn] = specialty;
+        }
+
+        foreach (var name in skillNames)
+        {
+            if (skillsByName.ContainsKey(name))
+                continue;
+
+            var skill = new Skill
+            {
+                Id = skillIds[name],
+                Name = name,
+                CreatedAt = seededAt,
+                CreatedBy = TaxonomySeedData.SeedUser
+            };
+            await context.Skills.AddAsync(skill, ct);
+            skillsByName[name] = skill;
+        }
 
         var categorySpecialties = new List<CategorySpecialty>();
         foreach (var def in TaxonomySeedData.Categories)
         {
-            var categoryId = TaxonomySeedData.CategoryId(def.Key);
+            if (!categoriesByName.TryGetValue(def.NameEn, out var category))
+                continue;
+
             foreach (var specialtyName in def.Specialties.Distinct(StringComparer.OrdinalIgnoreCase))
             {
+                if (!specialtiesByName.TryGetValue(specialtyName, out var specialty))
+                    continue;
+
+                var key = (category.Id, specialty.Id);
+                if (!existingCategorySpecialtyKeys.Add(key))
+                    continue;
+
                 categorySpecialties.Add(new CategorySpecialty
                 {
                     Id = Guid.NewGuid(),
-                    CategoryId = categoryId,
-                    SpecialtyId = specialtyIds[specialtyName],
+                    CategoryId = category.Id,
+                    SpecialtyId = specialty.Id,
                     CreatedAt = seededAt,
                     CreatedBy = TaxonomySeedData.SeedUser
                 });
@@ -96,25 +151,36 @@ public static class TaxonomySeeder
         var specialtySkills = new List<SpecialtySkill>();
         foreach (var (specialtyName, linkedSkills) in specialtySkillNames)
         {
-            var specialtyId = specialtyIds[specialtyName];
+            if (!specialtiesByName.TryGetValue(specialtyName, out var specialty))
+                continue;
+
             foreach (var skillName in linkedSkills.OrderBy(s => s, StringComparer.OrdinalIgnoreCase))
             {
+                if (!skillsByName.TryGetValue(skillName, out var skill))
+                    continue;
+
+                var key = (specialty.Id, skill.Id);
+                if (!existingSpecialtySkillKeys.Add(key))
+                    continue;
+
                 specialtySkills.Add(new SpecialtySkill
                 {
                     Id = Guid.NewGuid(),
-                    SpecialtyId = specialtyId,
-                    SkillId = skillIds[skillName],
+                    SpecialtyId = specialty.Id,
+                    SkillId = skill.Id,
                     CreatedAt = seededAt,
                     CreatedBy = TaxonomySeedData.SeedUser
                 });
             }
         }
 
-        await context.Categories.AddRangeAsync(categories, ct);
-        await context.Specialties.AddRangeAsync(specialties, ct);
-        await context.Skills.AddRangeAsync(skills, ct);
-        await context.CategorySpecialties.AddRangeAsync(categorySpecialties, ct);
-        await context.SpecialtySkills.AddRangeAsync(specialtySkills, ct);
-        await context.SaveChangesAsync(ct);
+        if (categorySpecialties.Count > 0)
+            await context.CategorySpecialties.AddRangeAsync(categorySpecialties, ct);
+
+        if (specialtySkills.Count > 0)
+            await context.SpecialtySkills.AddRangeAsync(specialtySkills, ct);
+
+        if (context.ChangeTracker.HasChanges())
+            await context.SaveChangesAsync(ct);
     }
 }
