@@ -26,6 +26,14 @@ using FreeGency.Application.Features.WalletFeature.Queries;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using FreeGency.Application.Features.SocialLinks.Commands;
+using FreeGency.Application.Features.Proposals.Commands;
+using FreeGency.Application.Common.Mappings.ProposalsMapping;
+using FreeGency.Application.Features.Teams.Commands;
+using FreeGency.Application.Features.ProposalRanking;
+using FreeGency.Application.Features.Portfolio.Commands;
+using FreeGency.Application.Features.WalletFeature.Queries;
+using FreeGency.Application.Features.ClientNotification.Commands;
 
 namespace FreeGency.Application
 {
@@ -40,6 +48,7 @@ namespace FreeGency.Application
                 cfg.AddMaps(typeof(ProjectMapping).Assembly);
                 cfg.AddMaps(typeof(ProposalMapping).Assembly);
             });
+            services.AddScoped<IClientNotficationService, ClientNotficationService>();
 
             services.AddScoped<IWalletService, WalletService>();
             services.AddScoped<IAccountService, AccountService>();

@@ -19,6 +19,7 @@ namespace FreeGency.Application.Features.Authentication
     {
         private readonly int _refreshTokenExpiryDays = 14;
         private readonly IWalletRepository walletRepository = unitOfWork.Repository<IWalletRepository, Wallet>();
+        private readonly IClientNotificationSettingsRepository clientNotificationSettingsRepository = unitOfWork.Repository<IClientNotificationSettingsRepository, ClientNotificationSettings>();
         public async Task<Result> RegisterAsync(RegisterRequestDto dto)
         {
             var emailIsExist = await userManager.Users.AnyAsync(x => x.Email == dto.Email);
@@ -38,23 +39,27 @@ namespace FreeGency.Application.Features.Authentication
             if (dto.Mode == "Client")
             {
                 var repo = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
-                await repo.AddAsync(new ClientProfile
+                var clientProfile = new ClientProfile
                 {
                     Id = Guid.NewGuid(),
                     UserId = user.Id,
                     CreatedAt = DateTime.UtcNow,
-                });
+                };
+                await repo.AddAsync(clientProfile);
+                var clientNotfication = new ClientNotificationSettings { Id=Guid.NewGuid(),ProfileId = clientProfile.Id };
+                await clientNotificationSettingsRepository.AddAsync(clientNotfication);
                 await unitOfWork.SaveChangesAsync();
             }
             else
             {
                 var repo = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
-                await repo.AddAsync(new DeveloperProfile
+                var developerProfile = new DeveloperProfile
                 {
                     Id = Guid.NewGuid(),
                     UserId = user.Id,
-                    CreatedAt = DateTime.UtcNow,
-                });
+                    CreatedAt = DateTime.UtcNow
+                };
+                await repo.AddAsync(developerProfile);
                 await unitOfWork.SaveChangesAsync();
             }
 
