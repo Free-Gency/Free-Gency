@@ -34,6 +34,7 @@ public class Project : ISoftDeletableEntity
     public virtual ICollection<ProjectProposal> ProjectProposals { get; set; } = [];
     public virtual ICollection<SavedProject> SavedProjects { get; set; } = [];
     public virtual ICollection<Milestone> Milestones { get; set; } = [];
+    public virtual ICollection<MilestonePlanVersion> MilestonePlanVersions { get; set; } = [];
     public virtual ICollection<ProjectMember> ProjectMembers { get; set; } = [];
     public virtual ICollection<ProjectFile> ProjectFiles { get; set; } = [];
     public virtual ICollection<ProjectEvent> ProjectEvents { get; set; } = [];

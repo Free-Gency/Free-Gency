@@ -6,7 +6,7 @@ using Org.BouncyCastle.Asn1;
 
 namespace FreeGency.Infrastructure.Persistence.Repositories;
 
-public class GenericRepository<TEntity> : IGenericRepository<TEntity> 
+public class GenericRepository<TEntity> : IGenericRepository<TEntity>
     where TEntity : class, IBaseEntity
 {
     protected readonly ApplicationDbContext _context;

@@ -20,6 +20,8 @@ public class Milestone : ISoftDeletableEntity
     public decimal Amount { get; set; }
     public decimal ReleasedAmount { get; set; } = 0;
     public int SortOrder { get; set; } = 0;
+    public DateTime? DueDate { get; set; }
+    public bool IsFunded { get; set; }
     public ReleaseStatus ReleaseStatus { get; set; } = ReleaseStatus.Locked;
     public WorkStatus WorkStatus { get; set; } = WorkStatus.NotStarted;
     public string? ProposedByUserId { get; set; }

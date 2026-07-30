@@ -1,4 +1,3 @@
-﻿
 namespace FreeGency.Application.Features.Proposals.Dtos;
 
 public class ProposalDto
@@ -23,9 +22,17 @@ public class ProposalDto
 
     public string CoverLetter { get; init; } = string.Empty;
 
+    public string Approach { get; init; } = string.Empty;
+
+    public string? ProposedTimeline { get; init; }
+
+    public string? PortfolioUrl { get; init; }
+
     public decimal ProposedBudget { get; init; }
 
     public string Status { get; init; } = default!;
+
+    public string? RejectReason { get; init; }
 
     public DateTime AppliedAt { get; init; }
 

@@ -1,4 +1,3 @@
-﻿
 namespace FreeGency.Application.Features.Proposals.Dtos;
 
 public class UpdateProposalDto
@@ -7,7 +6,11 @@ public class UpdateProposalDto
 
     public string? CoverLetter { get; init; }
 
-    public decimal? ProposedBudget { get; init; }
+    public string? Approach { get; init; }
 
-    public ProposalStatus? Status { get; init; }
+    public string? ProposedTimeline { get; init; }
+
+    public string? PortfolioUrl { get; init; }
+
+    public decimal? ProposedBudget { get; init; }
 }

@@ -39,8 +39,7 @@ public sealed class ProposalRankingService : IApplicationProposalRankingService
         if (project is null)
             return ApiResponse.Failure<ProjectRankingResponse>(AppError.NotFound(nameof(Project), projectId));
 
-        // Rank all active proposals (Pending / Accepted / Rejected) so clients
-        // still see match scores after decisions — skip withdrawn only.
+        // Rank open + decided proposals so clients still see match scores — skip withdrawn only.
         var proposals = await _proposalRepository.Query()
             .Where(p => p.ProjectId == projectId && p.Status != ProposalStatus.Withdrawn)
             .Include(p => p.Team).ThenInclude(t => t!.TeamSkills).ThenInclude(ts => ts.Skill)
