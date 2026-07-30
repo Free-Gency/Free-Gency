@@ -28,7 +28,18 @@ public partial class ProposalService
 
     public async Task<ApiResponse<ProposalDto>> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        var proposal = await _proposalRepository.GetByIdAsync(id, ct);
+        var proposal = await _proposalRepository.Query()
+            .Include(p => p.Project)
+            .Include(p => p.Team).ThenInclude(t => t!.TeamSkills).ThenInclude(ts => ts.Skill)
+            .Include(p => p.Team).ThenInclude(t => t!.TeamSpecialties).ThenInclude(ts => ts.Specialty)
+            .Include(p => p.User).ThenInclude(u => u!.ClientProfile)
+            .Include(p => p.User).ThenInclude(u => u!.DeveloperProfile).ThenInclude(dp => dp!.UserSkills).ThenInclude(us => us.Skill)
+            .Include(p => p.User).ThenInclude(u => u!.DeveloperProfile).ThenInclude(dp => dp!.UserSpecialties).ThenInclude(us => us.Specialty)
+            .Include(p => p.ProposalAttachments)
+            .Include(p => p.ChatRoom)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == id, ct);
+
         if (proposal is null)
             return ApiResponse.Failure<ProposalDto>(AppError.NotFound(nameof(ProjectProposal), id));
 

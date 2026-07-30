@@ -17,7 +17,7 @@ public class ProjectProposalConfiguration : IEntityTypeConfiguration<ProjectProp
         builder.Property(pp => pp.CoverLetter).IsRequired();
         builder.Property(pp => pp.Approach).HasMaxLength(5000);
         builder.Property(pp => pp.ProposedTimeline).HasMaxLength(200);
-        builder.Property(pp => pp.PortfolioUrl).HasMaxLength(1000);
+        builder.Property(pp => pp.SimilarLinksUrl).HasMaxLength(1000);
         builder.Property(pp => pp.RejectReason).HasMaxLength(500);
         builder.Property(pp => pp.ProposedBudget).HasColumnType("decimal(18,2)");
         builder.Property(pp => pp.Status)

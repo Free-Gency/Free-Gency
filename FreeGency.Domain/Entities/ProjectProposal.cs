@@ -21,7 +21,7 @@ public class ProjectProposal : ISoftDeletableEntity
     public string CoverLetter { get; set; } = string.Empty;
     public string Approach { get; set; } = string.Empty;
     public string? ProposedTimeline { get; set; }
-    public string? PortfolioUrl { get; set; }
+    public string? SimilarLinksUrl { get; set; }
     public decimal ProposedBudget { get; set; }
     public ProposalStatus Status { get; set; } = ProposalStatus.Pending;
     public string? RejectReason { get; set; }

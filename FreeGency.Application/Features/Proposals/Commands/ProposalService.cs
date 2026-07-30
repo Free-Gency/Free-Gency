@@ -52,7 +52,7 @@ public partial class ProposalService : IProposalService
             CoverLetter = dto.CoverLetter,
             Approach = dto.Approach ?? string.Empty,
             ProposedTimeline = dto.ProposedTimeline,
-            PortfolioUrl = dto.PortfolioUrl,
+            SimilarLinksUrl = dto.SimilarLinksUrl,
             ProposedBudget = dto.ProposedBudget,
             Status = ProposalStatus.Pending
         };
@@ -90,8 +90,8 @@ public partial class ProposalService : IProposalService
             proposal.Approach = dto.Approach;
         if (dto.ProposedTimeline is not null)
             proposal.ProposedTimeline = dto.ProposedTimeline;
-        if (dto.PortfolioUrl is not null)
-            proposal.PortfolioUrl = dto.PortfolioUrl;
+        if (dto.SimilarLinksUrl is not null)
+            proposal.SimilarLinksUrl = dto.SimilarLinksUrl;
         if (dto.ProposedBudget.HasValue)
             proposal.ProposedBudget = dto.ProposedBudget.Value;
 

@@ -29,9 +29,9 @@ public sealed class CreateProposalValidator : AbstractValidator<CreateProposalDt
             .MaximumLength(200)
             .When(x => x.ProposedTimeline is not null);
 
-        RuleFor(x => x.PortfolioUrl)
+        RuleFor(x => x.SimilarLinksUrl)
             .MaximumLength(1000)
-            .When(x => x.PortfolioUrl is not null);
+            .When(x => x.SimilarLinksUrl is not null);
 
         RuleFor(x => x.ProposedBudget)
             .GreaterThan(0)

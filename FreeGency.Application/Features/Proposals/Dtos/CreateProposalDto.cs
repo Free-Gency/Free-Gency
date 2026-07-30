@@ -14,7 +14,7 @@ public class CreateProposalDto
 
     public string? ProposedTimeline { get; init; }
 
-    public string? PortfolioUrl { get; init; }
+    public string? SimilarLinksUrl { get; init; }
 
     public decimal ProposedBudget { get; init; }
 

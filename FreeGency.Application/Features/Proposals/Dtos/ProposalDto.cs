@@ -26,7 +26,7 @@ public class ProposalDto
 
     public string? ProposedTimeline { get; init; }
 
-    public string? PortfolioUrl { get; init; }
+    public string? SimilarLinksUrl { get; init; }
 
     public decimal ProposedBudget { get; init; }
 
@@ -41,4 +41,8 @@ public class ProposalDto
     public Guid? ChatRoomId { get; init; }
 
     public IEnumerable<string> AttachmentUrls { get; init; } = [];
+
+    public IEnumerable<string> Skills { get; init; } = [];
+
+    public IEnumerable<string> Specialties { get; init; } = [];
 }
