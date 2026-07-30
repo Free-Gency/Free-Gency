@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace FreeGency.Domain.Enums;
 
-namespace FreeGency.Domain.Enums
+public enum ProposalStatus
 {
-    public enum ProposalStatus
-    {
-        Pending=0,
-        Accepted=1,
-        Rejected=2,
-        Withdrawn=3
-    }
+    Pending = 0,
+    Viewed = 1,
+    InDiscussion = 2,
+    Rejected = 3,
+    Withdrawn = 4,
+    Expired = 5,
 }

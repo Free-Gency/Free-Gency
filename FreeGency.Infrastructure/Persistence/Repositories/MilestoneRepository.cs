@@ -1,4 +1,4 @@
-﻿using FreeGency.Domain.Entities;
+using FreeGency.Domain.Entities;
 using FreeGency.Domain.Enums;
 using FreeGency.Domain.Interfaces.Repositories;
 using FreeGency.Infrastructure.Persistence.Context;
@@ -14,6 +14,25 @@ public class MilestoneRepository:GenericRepository<Milestone>,IMilestoneReposito
     public async Task<IEnumerable<Milestone>> GetByProjectIdAsync(Guid projectId,CancellationToken ct = default)
     {
         return await _dbSet.AsNoTracking().Where(m => m.ProjectId == projectId).OrderBy(m => m.SortOrder).ToListAsync(ct);
+    }
+
+    public async Task<Milestone?> GetNextUnfundedAsync(Guid projectId, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .Where(m => m.ProjectId == projectId && !m.IsFunded && m.ReleaseStatus != ReleaseStatus.Released)
+            .OrderBy(m => m.SortOrder)
+            .FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<IEnumerable<Milestone>> GetDueForAutoReleaseAsync(DateTime cutoffUtc, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .Where(m =>
+                m.WorkStatus == WorkStatus.Submitted &&
+                m.ReleaseStatus == ReleaseStatus.Pending &&
+                m.AvailableAt != null &&
+                m.AvailableAt <= cutoffUtc)
+            .ToListAsync(ct);
     }
 
     public async Task UpdateWorkStatusAsync(Guid milestoneId,WorkStatus status,CancellationToken ct = default)

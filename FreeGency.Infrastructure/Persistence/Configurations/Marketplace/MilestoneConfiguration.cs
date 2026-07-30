@@ -18,6 +18,8 @@ public class MilestoneConfiguration : IEntityTypeConfiguration<Milestone>
         builder.Property(m => m.Amount).HasColumnType("decimal(18,2)");
         builder.Property(m => m.ReleasedAmount).HasColumnType("decimal(18,2)").HasDefaultValue(0m);
         builder.Property(m => m.SortOrder).HasDefaultValue(0);
+        builder.Property(m => m.DueDate).HasColumnType("datetime2");
+        builder.Property(m => m.IsFunded).HasDefaultValue(false);
         builder.Property(m => m.ReleaseStatus)
             .HasConversion<string>()
             .HasMaxLength(50)

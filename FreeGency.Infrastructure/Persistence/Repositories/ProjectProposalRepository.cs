@@ -1,4 +1,4 @@
-﻿
+
 
 namespace FreeGency.Infrastructure.Persistence.Repositories;
 
@@ -48,7 +48,11 @@ public class ProjectProposalRepository
     }
     public async Task<bool> HasPendingOrActiveAsync(Guid projectId,ApplicantType applicantType,Guid applicantId,CancellationToken ct = default)
     {
-        IQueryable<ProjectProposal> query = _dbSet.AsNoTracking().Where(p =>p.ProjectId == projectId &&(p.Status == ProposalStatus.Pending ||p.Status == ProposalStatus.Accepted));
+        IQueryable<ProjectProposal> query = _dbSet.AsNoTracking().Where(p =>
+            p.ProjectId == projectId &&
+            (p.Status == ProposalStatus.Pending ||
+             p.Status == ProposalStatus.Viewed ||
+             p.Status == ProposalStatus.InDiscussion));
 
         query = applicantType switch
         {
@@ -89,6 +93,42 @@ public class ProjectProposalRepository
         proposal.Status = status;
         proposal.ResponseAt = DateTime.UtcNow;
        _dbSet.Update(proposal);
+    }
+
+    public async Task UpdateStatusAsync(
+        Guid proposalId,
+        ProposalStatus status,
+        string? rejectReason,
+        CancellationToken ct = default)
+    {
+        var proposal = await _dbSet.FirstOrDefaultAsync(p => p.Id == proposalId, ct);
+        if (proposal is null)
+            throw new KeyNotFoundException("Proposal not found.");
+        proposal.Status = status;
+        proposal.RejectReason = rejectReason;
+        proposal.ResponseAt = DateTime.UtcNow;
+        _dbSet.Update(proposal);
+    }
+
+    public async Task<IEnumerable<ProjectProposal>> GetActiveDiscussionByProjectIdAsync(
+        Guid projectId, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .Where(p => p.ProjectId == projectId && p.Status == ProposalStatus.InDiscussion)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IEnumerable<ProjectProposal>> GetCascadeRejectCandidatesAsync(
+        Guid projectId, Guid exceptProposalId, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .Where(p =>
+                p.ProjectId == projectId &&
+                p.Id != exceptProposalId &&
+                p.Status != ProposalStatus.Rejected &&
+                p.Status != ProposalStatus.Withdrawn &&
+                p.Status != ProposalStatus.Expired)
+            .ToListAsync(ct);
     }
 
     public async Task AddAttachmentAsync(ProposalAttachment attachment,CancellationToken ct = default)

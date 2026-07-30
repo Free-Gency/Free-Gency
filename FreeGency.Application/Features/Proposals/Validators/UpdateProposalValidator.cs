@@ -14,6 +14,18 @@ public sealed class UpdateProposalValidator : AbstractValidator<UpdateProposalDt
             .MaximumLength(5000)
             .When(x => x.CoverLetter is not null);
 
+        RuleFor(x => x.Approach)
+            .MaximumLength(5000)
+            .When(x => x.Approach is not null);
+
+        RuleFor(x => x.ProposedTimeline)
+            .MaximumLength(200)
+            .When(x => x.ProposedTimeline is not null);
+
+        RuleFor(x => x.PortfolioUrl)
+            .MaximumLength(1000)
+            .When(x => x.PortfolioUrl is not null);
+
         RuleFor(x => x.ProposedBudget)
             .GreaterThan(0)
             .When(x => x.ProposedBudget.HasValue)

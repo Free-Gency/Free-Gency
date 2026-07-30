@@ -4,6 +4,7 @@ using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FreeGency.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260730114834_ProposalMilestoneNegotiationFlow")]
+    partial class ProposalMilestoneNegotiationFlow
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -263,78 +266,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("ChatRoomMembers", "chat");
-                });
-
-            modelBuilder.Entity("FreeGency.Domain.Entities.ClientNotificationSettings", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasDefaultValue("system");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedBy")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("MilestoneAddedEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("MilestoneAddedInApp")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("NewMessageEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("NewMessageInApp")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("ProfileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("ProposalReceivedEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("ProposalReceivedInApp")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("WalletUpdatedEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("WalletUpdatedInApp")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfileId")
-                        .IsUnique();
-
-                    b.ToTable("clientNotificationSettings");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.ClientProfile", b =>
@@ -3525,18 +3456,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FreeGency.Domain.Entities.ClientNotificationSettings", b =>
-                {
-                    b.HasOne("FreeGency.Domain.Entities.ClientProfile", "clientProfile")
-                        .WithOne("ClientNotificationSettings")
-                        .HasForeignKey("FreeGency.Domain.Entities.ClientNotificationSettings", "ProfileId")
-                        .HasPrincipalKey("FreeGency.Domain.Entities.ClientProfile", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("clientProfile");
-                });
-
             modelBuilder.Entity("FreeGency.Domain.Entities.ClientProfile", b =>
                 {
                     b.HasOne("FreeGency.Domain.Entities.User", "User")
@@ -4460,9 +4379,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("FreeGency.Domain.Entities.ClientProfile", b =>
                 {
-                    b.Navigation("ClientNotificationSettings")
-                        .IsRequired();
-
                     b.Navigation("UserInterests");
 
                     b.Navigation("UserSkills");

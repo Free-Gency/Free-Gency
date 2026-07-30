@@ -1,4 +1,4 @@
-﻿
+
 namespace FreeGency.Application.Features.Milestones.DTOs;
 
 public sealed class MilestoneDto
@@ -13,6 +13,8 @@ public sealed class MilestoneDto
     public string ReleaseStatus { get; init; } = default!;
     public string WorkStatus { get; init; } = default!;
     public Guid? ProposedByUserId { get; init; }
+    public DateTime? DueDate { get; init; }
+    public bool IsFunded { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime? SubmittedAt { get; init; }
     public DateTime? AvailableAt { get; init; }

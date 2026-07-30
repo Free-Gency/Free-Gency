@@ -81,6 +81,7 @@ namespace FreeGency.Api
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
             builder.Services.AddSignalR();
+            builder.Services.AddHostedService<FreeGency.Api.BackgroundJobs.MilestoneAutoReleaseWorker>();
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("Frontend", policy =>

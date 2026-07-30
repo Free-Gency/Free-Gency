@@ -1,5 +1,3 @@
-﻿
-
 namespace FreeGency.Application.Features.Proposals.Dtos;
 
 public class CreateProposalDto
@@ -11,6 +9,12 @@ public class CreateProposalDto
     public Guid? TeamId { get; init; }
 
     public string CoverLetter { get; init; } = default!;
+
+    public string Approach { get; init; } = string.Empty;
+
+    public string? ProposedTimeline { get; init; }
+
+    public string? PortfolioUrl { get; init; }
 
     public decimal ProposedBudget { get; init; }
 

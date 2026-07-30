@@ -19,8 +19,12 @@ public class ProjectProposal : ISoftDeletableEntity
     public Guid? TeamId { get; set; }
     public Guid? UserId { get; set; }
     public string CoverLetter { get; set; } = string.Empty;
+    public string Approach { get; set; } = string.Empty;
+    public string? ProposedTimeline { get; set; }
+    public string? PortfolioUrl { get; set; }
     public decimal ProposedBudget { get; set; }
     public ProposalStatus Status { get; set; } = ProposalStatus.Pending;
+    public string? RejectReason { get; set; }
     public DateTime AppliedAt { get; set; }
     public DateTime? ResponseAt { get; set; }
 
@@ -29,4 +33,5 @@ public class ProjectProposal : ISoftDeletableEntity
     public virtual User? User { get; set; }
     public virtual ICollection<ProposalAttachment> ProposalAttachments { get; set; } = [];
     public virtual ChatRoom? ChatRoom { get; set; }
+    public virtual ICollection<MilestonePlanVersion> MilestonePlanVersions { get; set; } = [];
 }
