@@ -65,14 +65,15 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
 
             if (request == null)
                 return Result.Failure(TeamErrors.JoinRequestNotFound);
-
+            var isLeader = await _teamMemberRepository.IsLeaderAsync(
+                                                        request.TeamId,
+                                                        currentUserService.UserId);
+            if (!isLeader)
+                return Result.Failure(TeamErrors.NotAuthorized);
             if (request.Status != TeamJoinRequestStatus.pending)
                 return Result.Failure(TeamErrors.RequestAlreadyHandled);
 
-            var leaderId = currentUserService.UserId;
-
-            if (request.Team.OwnerUserId != leaderId)
-                return Result.Failure(TeamErrors.NotAuthorized);
+           
 
             var member = await _teamMemberRepository.GetEntityWithSpec(
                 new TeamMemberSpecification(request.TeamId, request.UserId));
@@ -92,7 +93,7 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
 
             request.Status = TeamJoinRequestStatus.Accepted;
             request.ResponseAt = DateTime.UtcNow;
-            request.RespondedByUserId = leaderId.ToString();
+            request.RespondedByUserId = currentUserService.UserId.ToString();
 
             _teamJoinRequestRepository.Update(request);
 
@@ -107,18 +108,17 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
 
             if (request == null)
                 return Result.Failure(TeamErrors.JoinRequestNotFound);
-
+            var isLeader = await _teamMemberRepository.IsLeaderAsync(
+                                                        request.TeamId,
+                                                        currentUserService.UserId);
+            if (!isLeader)
+                return Result.Failure(TeamErrors.NotAuthorized);
             if (request.Status != TeamJoinRequestStatus.pending)
                 return Result.Failure(TeamErrors.RequestAlreadyHandled);
 
-            var leaderId = currentUserService.UserId;
-
-            if (request.Team.OwnerUserId != leaderId)
-                return Result.Failure(TeamErrors.NotAuthorized);
-
             request.Status = TeamJoinRequestStatus.Rejected;
             request.ResponseAt = DateTime.UtcNow;
-            request.RespondedByUserId = leaderId.ToString();
+            request.RespondedByUserId = currentUserService.UserId.ToString();
 
             _teamJoinRequestRepository.Update(request);
 
