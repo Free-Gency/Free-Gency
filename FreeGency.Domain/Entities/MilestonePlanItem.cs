@@ -1,4 +1,5 @@
 using FreeGency.Domain.Abstractions;
+using FreeGency.Domain.Enums;
 
 namespace FreeGency.Domain.Entities;
 
@@ -19,8 +20,8 @@ public class MilestonePlanItem : ISoftDeletableEntity
     public decimal Amount { get; set; }
     public DateTime? DueDate { get; set; }
     public int SortOrder { get; set; }
-    /// <summary>New | Updated | null when unchanged vs previous version.</summary>
-    public string? ChangeTag { get; set; }
+    /// <summary>Null when unchanged vs previous version.</summary>
+    public MilestoneChangeTag? ChangeTag { get; set; }
 
     public virtual MilestonePlanVersion PlanVersion { get; set; } = null!;
 }

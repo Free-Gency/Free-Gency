@@ -108,11 +108,11 @@ public partial class MilestoneService
             ProposedByUserId = _currentUser.UserId,
             Items = dto.Milestones.Select((m, index) =>
             {
-                string? tag = null;
+                MilestoneChangeTag? tag = null;
                 if (previous is not null)
                 {
                     if (index >= prevItems.Count)
-                        tag = "New";
+                        tag = MilestoneChangeTag.New;
                     else
                     {
                         var p = prevItems[index];
@@ -120,7 +120,7 @@ public partial class MilestoneService
                                       || !string.Equals(p.DefinitionOfDone, m.DefinitionOfDone, StringComparison.Ordinal)
                                       || p.Amount != m.Amount
                                       || p.DueDate != m.DueDate;
-                        if (changed) tag = "Updated";
+                        if (changed) tag = MilestoneChangeTag.Updated;
                     }
                 }
 
@@ -521,7 +521,7 @@ public partial class MilestoneService
             Amount = i.Amount,
             DueDate = i.DueDate,
             SortOrder = i.SortOrder,
-            ChangeTag = i.ChangeTag
+            ChangeTag = i.ChangeTag?.ToString()
         }).ToList()
     };
 }

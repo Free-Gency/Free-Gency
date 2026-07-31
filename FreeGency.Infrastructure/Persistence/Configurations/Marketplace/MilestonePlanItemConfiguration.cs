@@ -16,7 +16,9 @@ public class MilestonePlanItemConfiguration : IEntityTypeConfiguration<Milestone
         builder.Property(i => i.DefinitionOfDone).IsRequired();
         builder.Property(i => i.Amount).HasColumnType("decimal(18,2)");
         builder.Property(i => i.DueDate).HasColumnType("datetime2");
-        builder.Property(i => i.ChangeTag).HasMaxLength(20);
+        builder.Property(i => i.ChangeTag)
+            .HasConversion<string>()
+            .HasMaxLength(20);
 
         builder.HasOne(i => i.PlanVersion)
             .WithMany(v => v.Items)
