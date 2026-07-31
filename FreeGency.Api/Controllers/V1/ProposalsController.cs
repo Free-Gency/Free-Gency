@@ -16,7 +16,8 @@ public class ProposalsController(IProposalService proposalService) : BaseApiCont
         => HandleResult(await proposalService.GetByIdAsync(id, ct));
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateProposalDto dto, CancellationToken ct)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> Create([FromForm] CreateProposalDto dto, CancellationToken ct)
         => HandleResult(await proposalService.CreateAsync(dto, ct));
 
     [HttpPut]

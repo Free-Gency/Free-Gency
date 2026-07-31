@@ -1,5 +1,7 @@
 using FreeGency.Application.Features.Proposals.Dtos;
 using FreeGency.Domain.Interfaces.Repositories.Teams;
+using FreeGency.Infrastructure.Integrations.Cloudinary;
+using FreeGency.Infrastructure.Interfaces;
 
 namespace FreeGency.Application.Features.Proposals.Commands;
 
@@ -9,19 +11,27 @@ public partial class ProposalService : IProposalService
     private readonly IProjectRepository _projectRepository;
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly IChatRoomRepository _chatRoomRepository;
+    private readonly IMessageRepository _messageRepository;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly IStorageService _storageService;
 
-    public ProposalService(ICurrentUserService currentUser, IUnitOfWork unitOfWork, IMapper mapper)
+    public ProposalService(
+        ICurrentUserService currentUser,
+        IUnitOfWork unitOfWork,
+        IMapper mapper,
+        IStorageService storageService)
     {
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _storageService = storageService;
         _proposalRepository = _unitOfWork.Repository<IProjectProposalRepository, ProjectProposal>();
         _projectRepository = _unitOfWork.Repository<IProjectRepository, Project>();
         _teamMemberRepository = _unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
         _chatRoomRepository = _unitOfWork.Repository<IChatRoomRepository, ChatRoom>();
+        _messageRepository = _unitOfWork.Repository<IMessageRepository, Message>();
     }
 
     public async Task<ApiResponse> CreateAsync(CreateProposalDto dto, CancellationToken ct = default)
@@ -40,6 +50,10 @@ public partial class ProposalService : IProposalService
         if (dto.ApplicantType == ApplicantType.Team && dto.TeamId is null)
             return ApiResponse.Failure(AppError.Validation("TeamId is required when applying as a team."));
 
+        if (dto.ApplicantType == ApplicantType.Team &&
+            !await _teamMemberRepository.IsLeaderAsync(dto.TeamId!.Value, _currentUser.UserId, ct))
+            return ApiResponse.Failure(AppError.Forbidden("Only a team leader can submit a proposal for the team."));
+
         if (await _proposalRepository.HasPendingOrActiveAsync(dto.ProjectId, dto.ApplicantType, applicantId, ct))
             return ApiResponse.Failure(AppError.Validation("You already have a pending or active proposal for this project."));
 
@@ -48,7 +62,7 @@ public partial class ProposalService : IProposalService
             ProjectId = dto.ProjectId,
             ApplicantType = dto.ApplicantType,
             TeamId = dto.ApplicantType == ApplicantType.Team ? dto.TeamId : null,
-            UserId = dto.ApplicantType == ApplicantType.User ? _currentUser.UserId : null,
+            UserId = _currentUser.UserId,
             CoverLetter = dto.CoverLetter,
             Approach = dto.Approach ?? string.Empty,
             ProposedTimeline = dto.ProposedTimeline,
@@ -57,9 +71,28 @@ public partial class ProposalService : IProposalService
             Status = ProposalStatus.Pending
         };
 
-        var attachments = dto.AttachmentUrls
-            .Select(url => new ProposalAttachment { FileUrl = url })
-            .ToList();
+        var attachments = new List<ProposalAttachment>();
+        if (dto.Attachments is { Length: > 0 })
+        {
+            foreach (var file in dto.Attachments)
+            {
+                UploadedAsset uploaded;
+                try
+                {
+                    uploaded = await _storageService.UploadAsync(file, StorageFolders.ProposalAttachments, ct);
+                }
+                catch (Exception)
+                {
+                    return ApiResponse.Failure(AppError.FileUploadFailed(file.FileName));
+                }
+
+                attachments.Add(new ProposalAttachment
+                {
+                    FileName = string.IsNullOrWhiteSpace(uploaded.FileName) ? file.FileName : uploaded.FileName,
+                    FileUrl = uploaded.Url
+                });
+            }
+        }
 
         await _proposalRepository.AddWithAttachmentsAsync(proposal, attachments, ct);
         await _unitOfWork.SaveChangesAsync(ct);
@@ -153,24 +186,53 @@ public partial class ProposalService : IProposalService
 
         await _proposalRepository.UpdateStatusAsync(proposalId, ProposalStatus.InDiscussion, ct);
 
-        // Chat: create/reuse room for this proposal only (no ProjectId — unique index + later reopen).
         var existingRoom = await _chatRoomRepository.GetByProposalIdAsync(proposalId, ct);
         if (existingRoom is null)
         {
-            var memberUserIds = new List<Guid> { project.ClientId };
+            var members = new List<(Guid UserId, bool CanSend, string? RoleLabel)>
+            {
+                (project.ClientId, true, "Client")
+            };
+
             if (proposal.ApplicantType == ApplicantType.User && proposal.UserId.HasValue)
-                memberUserIds.Add(proposal.UserId.Value);
+            {
+                members.Add((proposal.UserId.Value, true, null));
+            }
+            else if (proposal.ApplicantType == ApplicantType.Team && proposal.TeamId.HasValue)
+            {
+                var speakerId = proposal.UserId;
+                var leaders = await _teamMemberRepository.GetLeadersAsync(proposal.TeamId.Value, ct);
+                foreach (var leader in leaders)
+                {
+                    var canSend = speakerId.HasValue && leader.UserId == speakerId.Value;
+                    members.Add((leader.UserId, canSend, canSend ? "Team Leader" : "Team Leader (view only)"));
+                }
+
+                if (speakerId.HasValue && members.All(m => m.UserId != speakerId.Value))
+                    members.Add((speakerId.Value, true, "Team Leader"));
+            }
 
             var chatRoom = new ChatRoom
             {
                 RoomType = RoomType.Proposal,
+                Status = ChatRoomStatus.Active,
                 ProposalId = proposal.Id,
+                TeamId = proposal.TeamId,
                 ProjectId = null,
-                Title = $"Proposal - {project.Title}",
+                Title = $"{project.Title}",
                 CreatedByUserId = _currentUser.UserId
             };
 
-            await _chatRoomRepository.AddWithMembersAsync(chatRoom, memberUserIds, ct);
+            await _chatRoomRepository.AddWithMembersAsync(chatRoom, members, ct);
+
+            await _messageRepository.AddAsync(new Message
+            {
+                Id = Guid.NewGuid(),
+                ChatRoomId = chatRoom.Id,
+                SenderUserId = null,
+                MessageType = MessageType.System,
+                Text = "Discussion started. Accepting a proposal is not a hire — negotiate the Milestone Plan next."
+            }, ct);
         }
 
         await _unitOfWork.SaveChangesAsync(ct);

@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 namespace FreeGency.Application.Features.Proposals.Dtos;
 
 public class CreateProposalDto
@@ -18,5 +20,6 @@ public class CreateProposalDto
 
     public decimal ProposedBudget { get; init; }
 
-    public IEnumerable<string> AttachmentUrls { get; init; } = [];
+    /// <summary>Optional attachment files (max 10).</summary>
+    public IFormFile[]? Attachments { get; init; }
 }

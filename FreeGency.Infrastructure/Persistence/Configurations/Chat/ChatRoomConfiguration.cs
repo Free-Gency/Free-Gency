@@ -1,4 +1,5 @@
 using FreeGency.Domain.Entities;
+using FreeGency.Domain.Enums;
 using FreeGency.Infrastructure.Persistence.Schemas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,6 +14,11 @@ public class ChatRoomConfiguration : IEntityTypeConfiguration<ChatRoom>
         builder.HasKey(c => c.Id);
 
         builder.Property(c => c.RoomType).HasConversion<string>().HasMaxLength(50);
+        builder.Property(c => c.Status)
+            .HasConversion<string>()
+            .HasMaxLength(50)
+            .HasDefaultValue(ChatRoomStatus.Active);
+        builder.Property(c => c.ArchivedAt).HasColumnType("datetime2");
         builder.Property(c => c.Title).HasMaxLength(200);
 
         builder.HasIndex(c => c.TeamId)
@@ -48,6 +54,12 @@ public class ChatRoomConfiguration : IEntityTypeConfiguration<ChatRoom>
         builder.HasOne(c => c.CreatedByUser)
             .WithMany(u => u.CreatedChatRooms)
             .HasForeignKey(c => c.CreatedByUserId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
+
+        builder.HasOne(c => c.SourceProposalRoom)
+            .WithMany()
+            .HasForeignKey(c => c.SourceProposalRoomId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
     }

@@ -1,4 +1,5 @@
 using FluentValidation;
+using FreeGency.Application.Common.Validators;
 using FreeGency.Application.Features.Proposals.Dtos;
 
 namespace FreeGency.Application.Features.Proposals.Validators;
@@ -37,8 +38,10 @@ public sealed class CreateProposalValidator : AbstractValidator<CreateProposalDt
             .GreaterThan(0)
             .WithMessage("Proposed budget must be greater than zero.");
 
-        RuleFor(x => x.AttachmentUrls)
-            .Must(x => x is null || x.Count() <= 10)
+        RuleFor(x => x.Attachments)
+            .Must(x => x is null || x.Length <= 10)
             .WithMessage("A proposal can have at most 10 attachments.");
+
+        UploadFileValidator.ApplyManyRules(this, x => x.Attachments, UploadFileKind.Any, maxSizeInMb: 50);
     }
 }

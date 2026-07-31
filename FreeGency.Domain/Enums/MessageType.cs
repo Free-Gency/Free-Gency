@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace FreeGency.Domain.Enums;
 
-namespace FreeGency.Domain.Enums
+public enum MessageType
 {
-    public enum MessageType
-    {
-        Text=0,File
-    }
+    Text = 0,
+    Attachment = 1,
+    System = 2,
+    MilestonePlan = 3,
 }

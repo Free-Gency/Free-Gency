@@ -17,6 +17,9 @@ public class ProjectProposal : ISoftDeletableEntity
     public Guid ProjectId { get; set; }
     public ApplicantType ApplicantType { get; set; }
     public Guid? TeamId { get; set; }
+    /// <summary>
+    /// Solo applicant, or the team leader who submitted (negotiation speaker) when ApplicantType is Team.
+    /// </summary>
     public Guid? UserId { get; set; }
     public string CoverLetter { get; set; } = string.Empty;
     public string Approach { get; set; } = string.Empty;

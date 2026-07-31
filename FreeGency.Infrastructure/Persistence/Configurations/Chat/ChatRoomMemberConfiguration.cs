@@ -15,6 +15,8 @@ public class ChatRoomMemberConfiguration : IEntityTypeConfiguration<ChatRoomMemb
 
         builder.Property(m => m.JoinedAt).HasColumnType("datetime2");
         builder.Property(m => m.LastReadAt).HasColumnType("datetime2");
+        builder.Property(m => m.RoleLabel).HasMaxLength(100);
+        builder.Property(m => m.CanSend).HasDefaultValue(true);
 
         builder.HasOne(m => m.ChatRoom)
             .WithMany(c => c.ChatRoomMembers)

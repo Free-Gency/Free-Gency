@@ -75,8 +75,9 @@ public partial class MilestoneService
         if (project.AssignedUserId is not null || project.AssignedTeamId is not null)
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Validation("Project already has a hired assignee."));
 
-        if (!await IsProposalApplicantAsync(proposal, ct))
-            return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Forbidden("Only the proposal applicant can propose a milestone plan."));
+        if (!await IsProposalNegotiationSpeakerAsync(proposal, ct))
+            return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Forbidden(
+                "Only the team leader who submitted this proposal can propose a milestone plan."));
 
         var versionCount = await PlanRepo.CountByProjectIdAsync(dto.ProjectId, ct);
         if (versionCount >= MilestonePlanConstants.MaxPlanVersions)
@@ -155,6 +156,20 @@ public partial class MilestoneService
             await EscrowRepo.UpdatePlanStatusAsync(dto.ProjectId, PlanStatus.PlanSubmitted, ct);
         }
 
+        var proposalRoom = await ChatRoomRepo.GetByProposalIdAsync(dto.ProposalId, ct);
+        if (proposalRoom is not null)
+        {
+            await MessageRepo.AddAsync(new Message
+            {
+                Id = Guid.NewGuid(),
+                ChatRoomId = proposalRoom.Id,
+                SenderUserId = _currentUser.UserId,
+                MessageType = MessageType.MilestonePlan,
+                Text = $"Milestone Plan v{nextVersion} proposed.",
+                PlanVersionId = plan.Id
+            }, ct);
+        }
+
         await _unitOfWork.SaveChangesAsync(ct);
 
         var saved = await PlanRepo.GetByIdWithItemsAsync(plan.Id, ct);
@@ -185,6 +200,20 @@ public partial class MilestoneService
         PlanRepo.Update(plan);
 
         await EscrowRepo.UpdatePlanStatusAsync(plan.ProjectId, PlanStatus.PlanRevisionRequested, ct);
+
+        var proposalRoom = await ChatRoomRepo.GetByProposalIdAsync(plan.ProposalId, ct);
+        if (proposalRoom is not null)
+        {
+            await MessageRepo.AddAsync(new Message
+            {
+                Id = Guid.NewGuid(),
+                ChatRoomId = proposalRoom.Id,
+                SenderUserId = _currentUser.UserId,
+                MessageType = MessageType.Text,
+                Text = $"Request Changes on plan v{plan.Version}: {plan.ChangeComment}"
+            }, ct);
+        }
+
         await _unitOfWork.SaveChangesAsync(ct);
 
         return ApiResponse.Success("Changes requested. Waiting for a full revised plan version.");
@@ -254,6 +283,69 @@ public partial class MilestoneService
                 ProposalStatus.Rejected,
                 MilestonePlanConstants.HiredAnotherCandidateReason,
                 ct);
+        }
+
+        var proposalRoom = await ChatRoomRepo.GetByProposalIdForUpdateAsync(proposal.Id, ct);
+        if (proposalRoom is not null)
+        {
+            await MessageRepo.AddAsync(new Message
+            {
+                Id = Guid.NewGuid(),
+                ChatRoomId = proposalRoom.Id,
+                SenderUserId = null,
+                MessageType = MessageType.System,
+                Text = $"Milestone Plan v{plan.Version} accepted — hire locked. Negotiation chat archived."
+            }, ct);
+
+            proposalRoom.Status = ChatRoomStatus.Archived;
+            proposalRoom.ArchivedAt = DateTime.UtcNow;
+            ChatRoomRepo.Update(proposalRoom);
+        }
+
+        var projectMembers = new List<(Guid UserId, bool CanSend, string? RoleLabel)>
+        {
+            (project.ClientId, true, "Client")
+        };
+
+        if (proposal.ApplicantType == ApplicantType.User && proposal.UserId.HasValue)
+        {
+            projectMembers.Add((proposal.UserId.Value, true, null));
+        }
+        else if (proposal.ApplicantType == ApplicantType.Team && proposal.TeamId.HasValue)
+        {
+            var leaders = await TeamMemberRepo.GetLeadersAsync(proposal.TeamId.Value, ct);
+            foreach (var leader in leaders)
+                projectMembers.Add((leader.UserId, true, "Team Leader"));
+
+            if (proposal.UserId.HasValue && projectMembers.All(m => m.UserId != proposal.UserId.Value))
+                projectMembers.Add((proposal.UserId.Value, true, "Team Leader"));
+        }
+
+        var existingProjectRoom = await ChatRoomRepo.GetByProjectIdAsync(plan.ProjectId, ct);
+        if (existingProjectRoom is null)
+        {
+            var projectRoom = new ChatRoom
+            {
+                RoomType = RoomType.Project,
+                Status = ChatRoomStatus.Active,
+                ProjectId = plan.ProjectId,
+                TeamId = proposal.TeamId,
+                ProposalId = null,
+                SourceProposalRoomId = proposalRoom?.Id,
+                Title = project.Title,
+                CreatedByUserId = _currentUser.UserId
+            };
+
+            await ChatRoomRepo.AddWithMembersAsync(projectRoom, projectMembers, ct);
+
+            await MessageRepo.AddAsync(new Message
+            {
+                Id = Guid.NewGuid(),
+                ChatRoomId = projectRoom.Id,
+                SenderUserId = null,
+                MessageType = MessageType.System,
+                Text = $"Project started — {project.Title}. Milestone plan agreed. Team leaders can add working members to this room."
+            }, ct);
         }
 
         await _unitOfWork.SaveChangesAsync(ct);
@@ -481,6 +573,24 @@ public partial class MilestoneService
             MilestoneId = milestone.Id,
             IdempotencyKey = releaseKey
         }, ct);
+    }
+
+    private IChatRoomRepository ChatRoomRepo =>
+        _unitOfWork.Repository<IChatRoomRepository, ChatRoom>();
+
+    private IMessageRepository MessageRepo =>
+        _unitOfWork.Repository<IMessageRepository, Message>();
+
+    private async Task<bool> IsProposalNegotiationSpeakerAsync(ProjectProposal proposal, CancellationToken ct)
+    {
+        if (proposal.UserId != _currentUser.UserId)
+            return false;
+
+        if (proposal.ApplicantType == ApplicantType.User)
+            return true;
+
+        return proposal.TeamId is not null &&
+               await TeamMemberRepo.IsLeaderAsync(proposal.TeamId.Value, _currentUser.UserId, ct);
     }
 
     private async Task<bool> IsProposalApplicantAsync(ProjectProposal proposal, CancellationToken ct)

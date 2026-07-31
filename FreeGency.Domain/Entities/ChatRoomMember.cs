@@ -17,6 +17,8 @@ public class ChatRoomMember : ISoftDeletableEntity
     public Guid UserId { get; set; }
     public DateTime JoinedAt { get; set; }
     public DateTime? LastReadAt { get; set; }
+    public string? RoleLabel { get; set; }
+    public bool CanSend { get; set; } = true;
 
     public virtual ChatRoom ChatRoom { get; set; } = null!;
     public virtual User User { get; set; } = null!;

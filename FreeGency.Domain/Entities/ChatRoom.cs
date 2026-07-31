@@ -15,6 +15,9 @@ public class ChatRoom : ISoftDeletableEntity
     public string? DeletedBy { get; set; }
 
     public RoomType RoomType { get; set; }
+    public ChatRoomStatus Status { get; set; } = ChatRoomStatus.Active;
+    public DateTime? ArchivedAt { get; set; }
+    public Guid? SourceProposalRoomId { get; set; }
     public Guid? TeamId { get; set; }
     public Guid? ProjectId { get; set; }
     public Guid? ProposalId { get; set; }
@@ -25,6 +28,7 @@ public class ChatRoom : ISoftDeletableEntity
     public virtual Project? Project { get; set; }
     public virtual ProjectProposal? Proposal { get; set; }
     public virtual User? CreatedByUser { get; set; }
+    public virtual ChatRoom? SourceProposalRoom { get; set; }
     public virtual ICollection<ChatRoomMember> ChatRoomMembers { get; set; } = [];
     public virtual ICollection<Message> Messages { get; set; } = [];
 }
