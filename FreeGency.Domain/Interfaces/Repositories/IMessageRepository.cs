@@ -4,7 +4,7 @@ namespace FreeGency.Domain.Interfaces.Repositories
 {
     public interface IMessageRepository : IGenericRepository<Message>
     {
-        IQueryable<Message> GetByRoomIdAsync(Guid roomId, int skip, int take);
+        IQueryable<Message> GetByRoomIdAsync(Guid roomId);
         Task<IEnumerable<Message>> GetLatestAsync(Guid roomId, int count, CancellationToken ct = default);
         Task<int> CountUnreadAsync(Guid chatRoomId, Guid userId, CancellationToken ct = default);
     }

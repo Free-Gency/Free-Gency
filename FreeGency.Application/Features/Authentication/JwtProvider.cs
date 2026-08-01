@@ -17,13 +17,14 @@ namespace FreeGency.Application.Features.Authentication
 
         public (string token, int expiresIn) GenerateToken(User user)
         {
-            Claim[] claims = [
-                new("uid",user.Id.ToString()),
-                new (JwtRegisteredClaimNames.Email,user.Email!),
-                new (JwtRegisteredClaimNames.GivenName,user.FristName),
-                new (JwtRegisteredClaimNames.FamilyName,user.LastName),
-                new (JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
-                ];
+            Claim[] claims =
+                            [   
+                new("uid", user.Id.ToString()),
+                new(ClaimTypes.Email, user.Email!),
+                new(ClaimTypes.GivenName, user.FristName),
+                new(ClaimTypes.Surname, user.LastName),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            ];
             var symmetricsecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
             var signingCredentials = new SigningCredentials(symmetricsecurityKey, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(

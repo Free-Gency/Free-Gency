@@ -5,6 +5,7 @@ namespace FreeGency.Domain.Interfaces.Repositories;
 
 public interface IProjectProposalRepository : IGenericRepository<ProjectProposal>
 {
+    Task<ProjectProposal?> GetProposelById(Guid Id);
     Task<IEnumerable<ProjectProposal>> GetByProjectIdAsync(Guid projectId,ProposalStatus? status = null,CancellationToken ct = default);
     Task<IEnumerable<ProjectProposal>> GetPendingByProjectIdAsync(Guid projectId,CancellationToken ct = default);
     Task<IEnumerable<ProjectProposal>> GetActiveDiscussionByProjectIdAsync(Guid projectId, CancellationToken ct = default);

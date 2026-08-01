@@ -34,6 +34,7 @@ using FreeGency.Application.Features.ProposalRanking;
 using FreeGency.Application.Features.Portfolio.Commands;
 using FreeGency.Application.Features.WalletFeature.Queries;
 using FreeGency.Application.Features.ClientNotification.Commands;
+using FreeGency.Application.Features.ChatFeature.Commands;
 
 namespace FreeGency.Application
 {
@@ -49,7 +50,7 @@ namespace FreeGency.Application
                 cfg.AddMaps(typeof(ProposalMapping).Assembly);
             });
             services.AddScoped<IClientNotficationService, ClientNotficationService>();
-
+            services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IWalletService, WalletService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IExternalServices, ExternalServices>();

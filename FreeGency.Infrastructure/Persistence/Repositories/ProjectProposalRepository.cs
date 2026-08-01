@@ -149,4 +149,8 @@ public class ProjectProposalRepository
         _context.Set<ProposalAttachment>().Remove(attachment);
     }
 
+    public async Task<ProjectProposal?> GetProposelById(Guid Id)
+    {
+        return await _dbSet.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefaultAsync();
+    }
 }
