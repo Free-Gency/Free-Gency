@@ -9,4 +9,5 @@ public static class StorageFolders
     public const string ProjectFiles = "project-files";
     public const string ProposalAttachments = "proposal-attachments";
     public const string ChatFiles = "chat-files";
+    
 }

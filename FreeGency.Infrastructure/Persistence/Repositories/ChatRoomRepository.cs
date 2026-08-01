@@ -11,6 +11,10 @@ public class ChatRoomRepository : GenericRepository<ChatRoom>, IChatRoomReposito
     public ChatRoomRepository(ApplicationDbContext context) : base(context)
     {
     }
+    public IQueryable<ChatRoom> GetChatRoomQueryable(Guid userId)
+    {
+        return _dbSet.Where(x => x.ChatRoomMembers.Any(m => m.UserId == userId));
+    }
 
     public async Task<IEnumerable<ChatRoom>> GetByUserIdAsync(Guid userId, CancellationToken ct = default)
     {
@@ -35,7 +39,7 @@ public class ChatRoomRepository : GenericRepository<ChatRoom>, IChatRoomReposito
     public async Task<ChatRoom?> GetByProposalIdAsync(Guid proposalId, CancellationToken ct = default)
     {
         return await _dbSet.AsNoTracking()
-            .FirstOrDefaultAsync(r => r.ProposalId == proposalId, ct);
+            .FirstOrDefaultAsync(r => r.ProposalId == proposalId && r.RoomType==RoomType.Proposal, ct);
     }
 
     public async Task<ChatRoom?> GetByProposalIdForUpdateAsync(Guid proposalId, CancellationToken ct = default)
@@ -118,5 +122,10 @@ public class ChatRoomRepository : GenericRepository<ChatRoom>, IChatRoomReposito
             throw new KeyNotFoundException("Chat room member not found.");
         member.LastReadAt = DateTime.UtcNow;
         _context.Set<ChatRoomMember>().Update(member);
+    }
+
+    public async Task<bool> RoomIsExist(Guid RoomId)
+    {
+        return await _dbSet.AnyAsync(x => x.Id == RoomId);
     }
 }

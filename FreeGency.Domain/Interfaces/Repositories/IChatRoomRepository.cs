@@ -4,6 +4,8 @@ namespace FreeGency.Domain.Interfaces.Repositories;
 
 public interface IChatRoomRepository : IGenericRepository<ChatRoom>
 {
+    Task<bool> RoomIsExist(Guid RoomId);
+    IQueryable<ChatRoom> GetChatRoomQueryable(Guid userId);
     Task<IEnumerable<ChatRoom>> GetByUserIdAsync(Guid userId, CancellationToken ct = default);
 
     Task<ChatRoom?> GetTeamMainAsync(Guid teamId, CancellationToken ct = default);
@@ -27,4 +29,5 @@ public interface IChatRoomRepository : IGenericRepository<ChatRoom>
     Task RemoveMemberAsync(Guid roomId, Guid userId, CancellationToken ct = default);
 
     Task UpdateLastReadAsync(Guid roomId, Guid userId, CancellationToken ct = default);
+    
 }

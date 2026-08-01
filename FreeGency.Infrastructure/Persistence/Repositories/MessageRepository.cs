@@ -15,12 +15,11 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
                     m.SenderUserId != userId,
                     ct);
 
-        public IQueryable<Message> GetByRoomIdAsync(Guid roomId, int skip, int take)
+        public IQueryable<Message> GetByRoomIdAsync(Guid roomId)
             => _dbSet
                 .AsNoTracking()
-                .Where(m => m.ChatRoomId == roomId)
-                .Skip(skip)
-                .Take(take);
+                .Where(m => m.ChatRoomId == roomId);
+               
 
         public async Task<IEnumerable<Message>> GetLatestAsync(Guid roomId, int count, CancellationToken ct = default)
             => await _dbSet
