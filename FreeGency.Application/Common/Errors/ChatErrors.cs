@@ -85,5 +85,17 @@ namespace FreeGency.Application.Common.Errors
         "Message must contain text or a file.",
         StatusCodes.Status400BadRequest
     );
+        public static readonly Error ActiveProfileRequired =
+            new(
+                "Chat.ActiveProfileRequired",
+                "An active client or developer profile is required for chat.",
+                StatusCodes.Status400BadRequest
+            );
+        public static readonly Error ProfileNotFound =
+            new(
+                "Chat.ProfileNotFound",
+                "Required client or developer profile was not found.",
+                StatusCodes.Status400BadRequest
+            );
     }
 }

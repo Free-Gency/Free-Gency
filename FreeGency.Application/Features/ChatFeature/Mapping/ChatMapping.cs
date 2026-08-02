@@ -1,29 +1,28 @@
 ﻿using FreeGency.Application.Features.ChatFeature.Dtos;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using FreeGency.Domain.Enums;
 
 namespace FreeGency.Application.Features.ChatFeature.Mapping
 {
     public static class ChatMapping
     {
-        public static ChatRoom ToEntity(this ProjectProposal projectProposal,Guid UserId)
+        public static ChatRoom ToEntity(this ProjectProposal projectProposal, Guid userId)
         {
             return new ChatRoom
             {
                 Id = Guid.NewGuid(),
-                CreatedByUserId = UserId,
+                CreatedByUserId = userId,
                 ProposalId = projectProposal.Id,
                 ProjectId = projectProposal.ProjectId,
                 TeamId = projectProposal.TeamId,
                 Title = projectProposal.Project.Title,
                 RoomType = RoomType.Proposal,
-                
             };
         }
+
         public static IQueryable<ChatRoomDto> ToChatRoomListDto(
-    this IQueryable<ChatRoom> query,
-    Guid currentUserId)
+            this IQueryable<ChatRoom> query,
+            Guid? clientProfileId,
+            Guid? developerProfileId)
         {
             return query
                 .Select(r => new
@@ -31,7 +30,9 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                     Room = r,
 
                     CurrentMember = r.ChatRoomMembers
-                        .First(m => m.UserId == currentUserId),
+                        .First(m =>
+                            (clientProfileId != null && m.ClientProfileId == clientProfileId) ||
+                            (developerProfileId != null && m.DeveloperProfileId == developerProfileId)),
 
                     LastMessage = r.Messages
                         .OrderByDescending(m => m.CreatedAt)
@@ -40,10 +41,13 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                             m.Text,
                             m.CreatedAt,
                             m.MessageType,
-                            SenderName = m.SenderUser != null
-                                ? m.SenderUser.FristName + " " + m.SenderUser.LastName
-                                : null,
-                            m.SenderUserId
+                            SenderName = m.SenderClientProfile != null
+                                ? m.SenderClientProfile.User.FristName + " " + m.SenderClientProfile.User.LastName
+                                : m.SenderDeveloperProfile != null
+                                    ? m.SenderDeveloperProfile.User.FristName + " " + m.SenderDeveloperProfile.User.LastName
+                                    : null,
+                            m.SenderClientProfileId,
+                            m.SenderDeveloperProfileId
                         })
                         .FirstOrDefault()
                 })
@@ -71,24 +75,40 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                         : null,
 
                     UnreadCount = x.Room.Messages.Count(m =>
-                        m.SenderUserId != currentUserId &&
+                        !((clientProfileId != null && m.SenderClientProfileId == clientProfileId) ||
+                          (developerProfileId != null && m.SenderDeveloperProfileId == developerProfileId)) &&
                         (x.CurrentMember.LastReadAt == null ||
                          m.CreatedAt > x.CurrentMember.LastReadAt))
                 });
         }
-        public static IQueryable<RoomMessagesDto> ToRoomMessageDto(this IQueryable<Message> messages,Guid UserId)
+
+        public static IQueryable<RoomMessagesDto> ToRoomMessageDto(
+            this IQueryable<Message> messages,
+            Guid? clientProfileId,
+            Guid? developerProfileId)
         {
             return messages.Select(x => new RoomMessagesDto
             {
                 Id = x.Id,
-                SenderId = x.SenderUserId,
-                SenderName = x.SenderUser != null ? x.SenderUser.FristName + " " + x.SenderUser.LastName : null,
+                SenderId = x.SenderClientProfileId ?? x.SenderDeveloperProfileId,
+                SenderProfileType = x.SenderClientProfileId != null
+                    ? nameof(profileMode.Client)
+                    : x.SenderDeveloperProfileId != null
+                        ? nameof(profileMode.Developer)
+                        : null,
+                SenderName = x.SenderClientProfile != null
+                    ? x.SenderClientProfile.User.FristName + " " + x.SenderClientProfile.User.LastName
+                    : x.SenderDeveloperProfile != null
+                        ? x.SenderDeveloperProfile.User.FristName + " " + x.SenderDeveloperProfile.User.LastName
+                        : null,
                 Text = x.Text,
-                FileName=x.FileName,
+                FileName = x.FileName,
                 FileUrl = x.FileUrl,
                 CreatedAt = x.CreatedAt,
                 MessageType = x.MessageType.ToString(),
-                IsMine = x.SenderUserId ==UserId
+                IsMine =
+                    (clientProfileId != null && x.SenderClientProfileId == clientProfileId) ||
+                    (developerProfileId != null && x.SenderDeveloperProfileId == developerProfileId)
             });
         }
     }

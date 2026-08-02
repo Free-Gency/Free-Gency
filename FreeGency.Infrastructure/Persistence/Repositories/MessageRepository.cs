@@ -7,19 +7,23 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
     {
         public MessageRepository(ApplicationDbContext context) : base(context) { }
 
-        public async Task<int> CountUnreadAsync(Guid chatRoomId, Guid userId, CancellationToken ct = default)
+        public async Task<int> CountUnreadAsync(
+            Guid chatRoomId,
+            Guid? clientProfileId,
+            Guid? developerProfileId,
+            CancellationToken ct = default)
             => await _dbSet
                 .AsNoTracking()
                 .CountAsync(m =>
                     m.ChatRoomId == chatRoomId &&
-                    m.SenderUserId != userId,
+                    !((clientProfileId != null && m.SenderClientProfileId == clientProfileId) ||
+                      (developerProfileId != null && m.SenderDeveloperProfileId == developerProfileId)),
                     ct);
 
         public IQueryable<Message> GetByRoomIdAsync(Guid roomId)
             => _dbSet
                 .AsNoTracking()
                 .Where(m => m.ChatRoomId == roomId);
-               
 
         public async Task<IEnumerable<Message>> GetLatestAsync(Guid roomId, int count, CancellationToken ct = default)
             => await _dbSet
