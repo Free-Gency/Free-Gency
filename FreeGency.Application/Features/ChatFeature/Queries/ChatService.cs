@@ -56,7 +56,7 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 return Result.Failure<PaginatedResult<RoomMessagesDto>>(ChatErrors.UserNotMember);
 
             var messages = _messageRepository.GetByRoomIdAsync(ChatRoomId);
-            var result = messages.ToRoomMessageDto(clientProfileId, developerProfileId);
+            var result = messages.ToRoomMessageDto(clientProfileId, developerProfileId).OrderBy(x=>x.CreatedAt);
             var pagination = await PaginatedResult<RoomMessagesDto>.CreateAsync(
                 result,
                 pagedQuery.PageNumber,

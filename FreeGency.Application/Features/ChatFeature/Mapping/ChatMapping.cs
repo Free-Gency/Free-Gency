@@ -88,8 +88,12 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
             Guid? clientProfileId,
             Guid? developerProfileId)
         {
-            return messages.Select(x => new RoomMessagesDto
-            {
+            return messages
+                .OrderByDescending(x => x.CreatedAt)
+                
+                .OrderBy(x => x.CreatedAt)
+                .Select(x => new RoomMessagesDto
+                {
                 Id = x.Id,
                 SenderId = x.SenderClientProfileId ?? x.SenderDeveloperProfileId,
                 SenderProfileType = x.SenderClientProfileId != null

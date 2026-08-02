@@ -69,6 +69,7 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             };
 
             await _messageRepository.AddAsync(message);
+            member.LastReadAt = DateTime.UtcNow;
             await unitOfWork.SaveChangesAsync();
             var roomMembers = await _chatRoomMemberRepository.GetRoomProfileIdsAsync(ChatRoomId);
             var dto = new RoomMessagesDto

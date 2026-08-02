@@ -12,4 +12,6 @@ public class AuthResponseDto
     public int ExpiresIn { get; set; }
     public string RefreshToken { get; set; } = string.Empty;
     public DateTime RefreshTokenExpiration { get; set; }
+    public string ActiveMode { get; set; }
+    public Guid? ProfileId { get; set; }
 }
