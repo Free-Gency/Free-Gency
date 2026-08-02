@@ -11,6 +11,14 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
         {
         }
 
+        public async Task<List<Guid>> GetRoomProfileIdsAsync(Guid roomId)
+        {
+            return await _dbSet
+                .Where(x => x.ChatRoomId == roomId)
+                .Select(x => x.ClientProfileId ?? x.DeveloperProfileId!.Value)
+                .ToListAsync();
+        }
+
         public async Task<ChatRoomMember?> IsMember(Guid? clientProfileId, Guid? developerProfileId, Guid roomId)
         {
             return await _dbSet.FirstOrDefaultAsync(x =>
