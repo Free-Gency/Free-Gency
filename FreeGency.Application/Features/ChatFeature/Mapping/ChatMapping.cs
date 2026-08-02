@@ -12,7 +12,6 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                 Id = Guid.NewGuid(),
                 CreatedByUserId = userId,
                 ProposalId = projectProposal.Id,
-                ProjectId = projectProposal.ProjectId,
                 TeamId = projectProposal.TeamId,
                 Title = projectProposal.Project.Title,
                 RoomType = RoomType.Proposal
