@@ -15,5 +15,6 @@ namespace FreeGency.Application.Features.ChatFeature.Dtos
         public DateTime? LastMessageAt { get; set; }
         public int UnreadCount { get; set; }
         public string? LastMessageSender { get; set; }
+        public DateTime? ArchivedAt { get; set; }
     }
 }

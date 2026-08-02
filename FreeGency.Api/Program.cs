@@ -120,6 +120,7 @@ namespace FreeGency.Api
             app.UseAuthorization();
             app.MapControllers();
             app.MapHub<NotificationHub>("/hub/notifications");
+            app.MapHub<ChatHub>("/hub/chat");
             app.Run();
         }
     }

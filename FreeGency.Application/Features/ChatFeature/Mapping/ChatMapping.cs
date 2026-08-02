@@ -15,7 +15,7 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                 ProjectId = projectProposal.ProjectId,
                 TeamId = projectProposal.TeamId,
                 Title = projectProposal.Project.Title,
-                RoomType = RoomType.Proposal,
+                RoomType = RoomType.Proposal
             };
         }
 
@@ -78,7 +78,8 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                         !((clientProfileId != null && m.SenderClientProfileId == clientProfileId) ||
                           (developerProfileId != null && m.SenderDeveloperProfileId == developerProfileId)) &&
                         (x.CurrentMember.LastReadAt == null ||
-                         m.CreatedAt > x.CurrentMember.LastReadAt))
+                         m.CreatedAt > x.CurrentMember.LastReadAt)),
+                    ArchivedAt=x.Room.ArchivedAt
                 });
         }
 

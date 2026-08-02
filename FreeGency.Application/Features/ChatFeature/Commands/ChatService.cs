@@ -1,15 +1,18 @@
-﻿using FreeGency.Application.Features.ChatFeature.Dtos;
+﻿using FreeGency.Application.Common.Hubs;
+using FreeGency.Application.Features.ChatFeature.Dtos;
 using FreeGency.Application.Features.ChatFeature.Mapping;
 using FreeGency.Domain.Enums;
 using FreeGency.Infrastructure.Integrations.Cloudinary;
+using Microsoft.AspNetCore.SignalR;
 
 namespace FreeGency.Application.Features.ChatFeature.Commands
 {
     public partial class ChatService(
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
-        IStorageService storageService,
-        IHttpContextAccessor httpContextAccessor) : IChatService
+        IStorageService storageService
+        , IHubContext<ChatHub> hub
+        ) : IChatService
     {
         private readonly IProjectProposalRepository _projectProposalRepository =
             unitOfWork.Repository<IProjectProposalRepository, ProjectProposal>();
@@ -67,8 +70,8 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
 
             await _messageRepository.AddAsync(message);
             await unitOfWork.SaveChangesAsync();
-
-            return Result.Success(new RoomMessagesDto
+            var roomMembers = await _chatRoomMemberRepository.GetRoomProfileIdsAsync(ChatRoomId);
+            var dto = new RoomMessagesDto
             {
                 Id = message.Id,
                 SenderId = active.Value.ProfileId,
@@ -80,7 +83,29 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 FileUrl = message.FileUrl,
                 CreatedAt = message.CreatedAt,
                 IsMine = true
-            });
+            };
+            foreach (var profileId in roomMembers)
+            {
+                await hub.Clients
+                    .Group($"profile-{profileId}")
+                    .SendAsync("ReceiveMessage", dto);
+            }
+            var roomUpdated = new RoomUpdatedDto
+            {
+                RoomId = ChatRoomId,
+                LastMessage = message.Text ?? message.FileName,
+                LastMessageType = message.MessageType.ToString(),
+                LastMessageAt = message.CreatedAt,
+                LastMessageSender = $"{currentUserService.FirstName} {currentUserService.LastName}",
+                SenderId= active.Value.ProfileId
+            };
+            foreach (var profileId in roomMembers)
+            {
+                await hub.Clients
+                    .Group($"profile-{profileId}")
+                    .SendAsync("RoomUpdated", roomUpdated);
+            }
+            return Result.Success(dto);
         }
 
         public async Task<Result<Guid>> StartDiscussionAsync(StartDiscussionRequestDto dto)
@@ -153,6 +178,27 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             };
             await _messageRepository.AddAsync(message);
             await unitOfWork.SaveChangesAsync();
+            var roomDto = new ChatRoomDto
+            {
+                Id = chatRoom.Id,
+                RoomType = chatRoom.RoomType.ToString(),
+                Status = chatRoom.Status.ToString(),
+                Title = chatRoom.Title,
+                LastMessage = message.Text,
+                LastMessageType = message.MessageType.ToString(),
+                LastMessageAt = message.CreatedAt,
+                LastMessageSender = "System",
+                UnreadCount = 0,
+                ArchivedAt = chatRoom.ArchivedAt
+            };
+            foreach (var member in members)
+            {
+                var profileId = member.ClientProfileId ?? member.DeveloperProfileId;
+
+                await hub.Clients
+                    .Group($"profile-{profileId}")
+                    .SendAsync("DiscussionStarted", roomDto);
+            }
             return Result.Success(chatRoom.Id);
         }
 
@@ -204,5 +250,7 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 return (null, null);
             }
         }
+
+
     }
 }
