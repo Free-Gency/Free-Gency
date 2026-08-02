@@ -26,6 +26,29 @@ public partial class ProposalService
         return ApiResponse.Success(pagedResult);
     }
 
+    public async Task<ApiResponse<PaginatedResult<ProposalDto>>> GetMyProposalsAsync(
+        FilterProposalDto filter,
+        CancellationToken ct = default)
+    {
+        var userId = _currentUser.UserId;
+
+        var myProposals = _proposalRepository.Query()
+            .Where(p => p.UserId == userId ||
+                        (p.TeamId != null &&
+                         _teamMemberRepository.Query().Any(tm => tm.TeamId == p.TeamId && tm.UserId == userId)))
+            .ApplyFilters(filter)
+            .ApplySearch(filter)
+            .ApplySorting(filter);
+
+        var pagedResult = await PaginatedResult<ProposalDto>.CreateAsync(
+            myProposals.ProjectTo<ProposalDto>(_mapper.ConfigurationProvider),
+            filter.PageNumber,
+            filter.PageSize,
+            ct);
+
+        return ApiResponse.Success(pagedResult);
+    }
+
     public async Task<ApiResponse<ProposalDto>> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         var proposal = await _proposalRepository.Query()

@@ -18,6 +18,10 @@ public class MilestonesController(IMilestoneService milestoneService) : BaseApiC
     public async Task<IActionResult> GetLatestPlan([FromRoute] Guid projectId, CancellationToken ct)
         => HandleResult(await milestoneService.GetLatestPlanAsync(projectId, ct));
 
+    [HttpGet("milestones/mine")]
+    public async Task<IActionResult> GetMine(CancellationToken ct)
+        => HandleResult(await milestoneService.GetMyMilestonesAsync(ct));
+
     [HttpPost("milestone-plans")]
     public async Task<IActionResult> ProposePlan([FromBody] ProposeMilestonePlanDto dto, CancellationToken ct)
         => HandleResult(await milestoneService.ProposePlanAsync(dto, ct));

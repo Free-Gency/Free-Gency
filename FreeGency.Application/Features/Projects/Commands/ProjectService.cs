@@ -7,6 +7,7 @@
         private readonly ICategoryRepository _categoryRepo;
         private readonly ISpecialtyRepository _specialtyRepo;
         private readonly ISkillRepository _skillRepo;
+        private readonly ITeamMemberRepository _teamMemberRepo;
         private readonly ICurrentUserService _currentUser;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -20,6 +21,7 @@
             _specialtyRepo = _unitOfWork.Repository<ISpecialtyRepository, Specialty>();
             _skillRepo = _unitOfWork.Repository<ISkillRepository, Skill>();
             _categoryRepo = _unitOfWork.Repository<ICategoryRepository, Category>();
+            _teamMemberRepo = _unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
         }
 
 

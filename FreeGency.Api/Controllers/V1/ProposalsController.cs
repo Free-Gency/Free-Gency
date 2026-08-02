@@ -11,6 +11,10 @@ public class ProposalsController(IProposalService proposalService) : BaseApiCont
     public async Task<IActionResult> Browse([FromQuery] FilterProposalDto filter, CancellationToken ct)
         => HandleResult(await proposalService.BrowseAsync(filter, ct));
 
+    [HttpGet("mine")]
+    public async Task<IActionResult> GetMine([FromQuery] FilterProposalDto filter, CancellationToken ct)
+        => HandleResult(await proposalService.GetMyProposalsAsync(filter, ct));
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         => HandleResult(await proposalService.GetByIdAsync(id, ct));
