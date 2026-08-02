@@ -74,13 +74,13 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 UPDATE m
                 SET ClientProfileId = cp.Id
                 FROM chat.ChatRoomMembers m
-                INNER JOIN identity.ClientProfiles cp ON cp.UserId = m.UserId
+                INNER JOIN [identity].ClientProfiles cp ON cp.UserId = m.UserId
                 WHERE m.RoleLabel LIKE N'%Client%';
 
                 UPDATE m
                 SET DeveloperProfileId = dp.Id
                 FROM chat.ChatRoomMembers m
-                INNER JOIN identity.DeveloperProfiles dp ON dp.UserId = m.UserId
+                INNER JOIN [identity].DeveloperProfiles dp ON dp.UserId = m.UserId
                 WHERE m.ClientProfileId IS NULL
                   AND (m.RoleLabel IS NULL OR m.RoleLabel NOT LIKE N'%Client%');
                 """);
@@ -92,7 +92,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 FROM chat.Messages msg
                 INNER JOIN chat.ChatRoomMembers m
                     ON m.ChatRoomId = msg.ChatRoomId AND m.UserId = msg.SenderUserId
-                INNER JOIN identity.ClientProfiles cp ON cp.Id = m.ClientProfileId
+                INNER JOIN [identity].ClientProfiles cp ON cp.Id = m.ClientProfileId
                 WHERE msg.SenderUserId IS NOT NULL
                   AND m.ClientProfileId IS NOT NULL;
 
@@ -101,7 +101,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 FROM chat.Messages msg
                 INNER JOIN chat.ChatRoomMembers m
                     ON m.ChatRoomId = msg.ChatRoomId AND m.UserId = msg.SenderUserId
-                INNER JOIN identity.DeveloperProfiles dp ON dp.Id = m.DeveloperProfileId
+                INNER JOIN [identity].DeveloperProfiles dp ON dp.Id = m.DeveloperProfileId
                 WHERE msg.SenderUserId IS NOT NULL
                   AND msg.SenderClientProfileId IS NULL
                   AND m.DeveloperProfileId IS NOT NULL;
@@ -111,7 +111,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 FROM chat.Messages msg
                 INNER JOIN chat.ChatRooms r ON r.Id = msg.ChatRoomId
                 INNER JOIN marketplace.Projects p ON p.Id = COALESCE(r.ProjectId, (SELECT TOP 1 pp.ProjectId FROM marketplace.ProjectProposals pp WHERE pp.Id = r.ProposalId))
-                INNER JOIN identity.ClientProfiles cp ON cp.UserId = p.ClientId
+                INNER JOIN [identity].ClientProfiles cp ON cp.UserId = p.ClientId
                 WHERE msg.SenderUserId IS NOT NULL
                   AND msg.SenderClientProfileId IS NULL
                   AND msg.SenderDeveloperProfileId IS NULL
@@ -120,7 +120,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 UPDATE msg
                 SET SenderDeveloperProfileId = dp.Id
                 FROM chat.Messages msg
-                INNER JOIN identity.DeveloperProfiles dp ON dp.UserId = msg.SenderUserId
+                INNER JOIN [identity].DeveloperProfiles dp ON dp.UserId = msg.SenderUserId
                 WHERE msg.SenderUserId IS NOT NULL
                   AND msg.SenderClientProfileId IS NULL
                   AND msg.SenderDeveloperProfileId IS NULL;
@@ -336,25 +336,25 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 UPDATE m
                 SET UserId = cp.UserId
                 FROM chat.ChatRoomMembers m
-                INNER JOIN identity.ClientProfiles cp ON cp.Id = m.ClientProfileId
+                INNER JOIN [identity].ClientProfiles cp ON cp.Id = m.ClientProfileId
                 WHERE m.ClientProfileId IS NOT NULL;
 
                 UPDATE m
                 SET UserId = dp.UserId
                 FROM chat.ChatRoomMembers m
-                INNER JOIN identity.DeveloperProfiles dp ON dp.Id = m.DeveloperProfileId
+                INNER JOIN [identity].DeveloperProfiles dp ON dp.Id = m.DeveloperProfileId
                 WHERE m.DeveloperProfileId IS NOT NULL;
 
                 UPDATE msg
                 SET SenderUserId = cp.UserId
                 FROM chat.Messages msg
-                INNER JOIN identity.ClientProfiles cp ON cp.Id = msg.SenderClientProfileId
+                INNER JOIN [identity].ClientProfiles cp ON cp.Id = msg.SenderClientProfileId
                 WHERE msg.SenderClientProfileId IS NOT NULL;
 
                 UPDATE msg
                 SET SenderUserId = dp.UserId
                 FROM chat.Messages msg
-                INNER JOIN identity.DeveloperProfiles dp ON dp.Id = msg.SenderDeveloperProfileId
+                INNER JOIN [identity].DeveloperProfiles dp ON dp.Id = msg.SenderDeveloperProfileId
                 WHERE msg.SenderDeveloperProfileId IS NOT NULL;
                 """);
 
