@@ -15,19 +15,29 @@ namespace FreeGency.Application.Common.Hubs
             var active = await _userRepository.GetActiveProfileAsync(currentUserService.UserId);
             if (active != null)
             {
-                var GroupName = $"profile-{active.Value.ProfileId}";
-                await Groups.AddToGroupAsync(Context.ConnectionId, GroupName);
+                var groupName = $"profile-{active.Value.ProfileId}";
+                Context.Items["ProfileGroup"] = groupName;
+
+                await Groups.AddToGroupAsync(
+                    Context.ConnectionId,
+                    groupName
+                );
             } 
             await base.OnConnectedAsync();
         }
         public async override Task OnDisconnectedAsync(Exception? exception)
         {
-            var active = await _userRepository.GetActiveProfileAsync(currentUserService.UserId);
-            if (active != null)
+            if (Context.Items.TryGetValue(
+            "ProfileGroup",
+            out var groupName))
             {
-                var GroupName = $"profile-{active.Value.ProfileId}";
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupName);
+
+                await Groups.RemoveFromGroupAsync(
+                    Context.ConnectionId,
+                    groupName!.ToString()!
+                );
             }
+
             await base.OnDisconnectedAsync(exception);
         }
     }

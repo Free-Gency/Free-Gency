@@ -58,7 +58,7 @@ namespace FreeGency.Api
                              var path = context.HttpContext.Request.Path;
 
                              if (!string.IsNullOrEmpty(accessToken) &&
-                                 path.StartsWithSegments("/hub/notifications"))
+                                 path.StartsWithSegments("/hub"))
                              {
                                  context.Token = accessToken;
                              }

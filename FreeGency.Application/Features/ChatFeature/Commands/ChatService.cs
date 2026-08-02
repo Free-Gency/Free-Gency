@@ -69,6 +69,7 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             };
 
             await _messageRepository.AddAsync(message);
+            member.LastReadAt = DateTime.UtcNow;
             await unitOfWork.SaveChangesAsync();
             var roomMembers = await _chatRoomMemberRepository.GetRoomProfileIdsAsync(ChatRoomId);
             var dto = new RoomMessagesDto
@@ -207,7 +208,28 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             }
             return Result.Success(chatRoom.Id);
         }
+        public async Task<Result> MarkAsRead(Guid roomId)
+        {
+            var active = await _userRepository.GetActiveProfileAsync(currentUserService.UserId);
+            if (active is null)
+                return Result.Failure(ChatErrors.ActiveProfileRequired);
 
+            var (clientProfileId, developerProfileId) = SplitActiveProfile(active.Value);
+
+            var member = await _chatRoomMemberRepository.IsMember(
+                clientProfileId,
+                developerProfileId,
+                roomId);
+
+            if (member == null)
+                return Result.Failure(ChatErrors.UserNotMember);
+
+            member.LastReadAt = DateTime.UtcNow;
+
+            await unitOfWork.SaveChangesAsync();
+
+            return Result.Success();
+        }
         private async Task<Result> AddLeadersAsync(
             List<ChatRoomMember> rm,
             IReadOnlyList<TeamMember> leaders,
@@ -257,6 +279,6 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             }
         }
 
-
+       
     }
 }

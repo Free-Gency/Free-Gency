@@ -18,7 +18,9 @@ namespace FreeGency.Application.Common.Mappings.AuthenticationMapping
                 Token = token,
                 ExpiresIn = expiresIn,
                 RefreshToken = refreshToken,
-                RefreshTokenExpiration = refreshTokenEXpirationDays
+                RefreshTokenExpiration = refreshTokenEXpirationDays,
+                ActiveMode=user.ActiveProfileMode.ToString()!,
+                ProfileId=user.ActiveProfileMode==profileMode.Client?user.ClientProfile?.Id:user.DeveloperProfile?.Id
             };
         }
         public static User ToEntity(this RegisterRequestDto dto)

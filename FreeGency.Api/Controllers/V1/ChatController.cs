@@ -35,5 +35,11 @@ namespace FreeGency.Api.Controllers.V1
             var result = await chatService.SendMessageAsync(roomId, sendMessageRequest);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
+        [HttpPut("rooms/{roomId}/read")]
+        public async Task<IActionResult> MarkAsRead(Guid roomId)
+        {
+            var result = await chatService.MarkAsRead(roomId);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
     }
 }
