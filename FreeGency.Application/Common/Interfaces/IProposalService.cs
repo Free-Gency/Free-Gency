@@ -5,6 +5,9 @@ namespace FreeGency.Application.Common.Interfaces;
 public interface IProposalService
 {
     Task<ApiResponse<PaginatedResult<ProposalDto>>> BrowseAsync(FilterProposalDto filter, CancellationToken ct = default);
+    Task<ApiResponse<PaginatedResult<ProposalDto>>> GetMyProposalsAsync(
+        FilterProposalDto filter,
+        CancellationToken ct = default);
     Task<ApiResponse<ProposalDto>> GetByIdAsync(Guid id, CancellationToken ct = default);
 
     Task<ApiResponse> CreateAsync(CreateProposalDto dto, CancellationToken ct = default);

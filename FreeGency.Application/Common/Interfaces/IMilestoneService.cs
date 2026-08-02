@@ -5,6 +5,7 @@ namespace FreeGency.Application.Common.Interfaces;
 public interface IMilestoneService
 {
     Task<ApiResponse<IEnumerable<MilestoneDto>>> GetByProjectIdAsync(Guid projectId, CancellationToken ct = default);
+    Task<ApiResponse<IEnumerable<DeveloperMilestoneDto>>> GetMyMilestonesAsync(CancellationToken ct = default);
 
     Task<ApiResponse<IEnumerable<MilestonePlanVersionDto>>> GetPlanVersionsAsync(Guid projectId, CancellationToken ct = default);
     Task<ApiResponse<MilestonePlanVersionDto>> GetLatestPlanAsync(Guid projectId, CancellationToken ct = default);

@@ -39,6 +39,11 @@ namespace FreeGency.Application.Common.Extensions.QueryExtensions.Projects
                         ? query.OrderBy(p => p.BudgetMin)
                         : query.OrderByDescending(p => p.BudgetMin),
 
+                "deadline" =>
+                    request.SortDirection == "asc"
+                        ? query.OrderBy(p => p.Deadline == null).ThenBy(p => p.Deadline)
+                        : query.OrderByDescending(p => p.Deadline == null).ThenByDescending(p => p.Deadline),
+
                 _ =>
                     request.SortDirection == "asc"
                         ? query.OrderBy(p => p.CreatedAt)

@@ -106,7 +106,9 @@ namespace FreeGency.Application.Features.Projects.Commands
             {
                 "as-client" => query.Where(p => p.ClientId == userId),
                 "as-assignee" => query.Where(p =>
-                    p.AssignedUserId == userId || p.AssignedTeamId == userId),
+                    p.AssignedUserId == userId ||
+                    (p.AssignedTeamId != null &&
+                     _teamMemberRepo.Query().Any(tm => tm.TeamId == p.AssignedTeamId && tm.UserId == userId))),
                 _ => throw new AppValidationException(
                     "Role",
                     "Role must be either 'as-client' or 'as-assignee'."),

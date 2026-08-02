@@ -6,6 +6,7 @@ public partial class MilestoneService : IMilestoneService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMilestoneRepository _milestoneRepo;
     private readonly IProjectRepository _projectRepo;
+    private readonly ITeamMemberRepository _teamMemberRepo;
     private readonly ICurrentUserService _currentUser;
     private readonly IMapper _mapper;
 
@@ -16,5 +17,6 @@ public partial class MilestoneService : IMilestoneService
         _mapper = mapper;
         _milestoneRepo = _unitOfWork.Repository<IMilestoneRepository, Milestone>();
         _projectRepo = _unitOfWork.Repository<IProjectRepository, Project>();
+        _teamMemberRepo = _unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
     }
 }
