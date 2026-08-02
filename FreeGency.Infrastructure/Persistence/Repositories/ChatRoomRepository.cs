@@ -11,15 +11,23 @@ public class ChatRoomRepository : GenericRepository<ChatRoom>, IChatRoomReposito
     public ChatRoomRepository(ApplicationDbContext context) : base(context)
     {
     }
-    public IQueryable<ChatRoom> GetChatRoomQueryable(Guid userId)
+
+    public IQueryable<ChatRoom> GetChatRoomQueryable(Guid? clientProfileId, Guid? developerProfileId)
     {
-        return _dbSet.Where(x => x.ChatRoomMembers.Any(m => m.UserId == userId));
+        return _dbSet.Where(x => x.ChatRoomMembers.Any(m =>
+            (clientProfileId != null && m.ClientProfileId == clientProfileId) ||
+            (developerProfileId != null && m.DeveloperProfileId == developerProfileId)));
     }
 
-    public async Task<IEnumerable<ChatRoom>> GetByUserIdAsync(Guid userId, CancellationToken ct = default)
+    public async Task<IEnumerable<ChatRoom>> GetByProfileAsync(
+        Guid? clientProfileId,
+        Guid? developerProfileId,
+        CancellationToken ct = default)
     {
         return await _dbSet.AsNoTracking()
-            .Where(r => r.ChatRoomMembers.Any(m => m.UserId == userId))
+            .Where(r => r.ChatRoomMembers.Any(m =>
+                (clientProfileId != null && m.ClientProfileId == clientProfileId) ||
+                (developerProfileId != null && m.DeveloperProfileId == developerProfileId)))
             .OrderByDescending(r => r.UpdatedAt ?? r.CreatedAt)
             .ToListAsync(ct);
     }
@@ -39,7 +47,7 @@ public class ChatRoomRepository : GenericRepository<ChatRoom>, IChatRoomReposito
     public async Task<ChatRoom?> GetByProposalIdAsync(Guid proposalId, CancellationToken ct = default)
     {
         return await _dbSet.AsNoTracking()
-            .FirstOrDefaultAsync(r => r.ProposalId == proposalId && r.RoomType==RoomType.Proposal, ct);
+            .FirstOrDefaultAsync(r => r.ProposalId == proposalId && r.RoomType == RoomType.Proposal, ct);
     }
 
     public async Task<ChatRoom?> GetByProposalIdForUpdateAsync(Guid proposalId, CancellationToken ct = default)
@@ -47,15 +55,9 @@ public class ChatRoomRepository : GenericRepository<ChatRoom>, IChatRoomReposito
         return await _dbSet.FirstOrDefaultAsync(r => r.ProposalId == proposalId, ct);
     }
 
-    public Task AddWithMembersAsync(ChatRoom room, IEnumerable<Guid> memberUserIds, CancellationToken ct = default)
-        => AddWithMembersAsync(
-            room,
-            memberUserIds.Select(id => (id, true, (string?)null)),
-            ct);
-
     public async Task AddWithMembersAsync(
         ChatRoom room,
-        IEnumerable<(Guid UserId, bool CanSend, string? RoleLabel)> members,
+        IEnumerable<(Guid? ClientProfileId, Guid? DeveloperProfileId, bool CanSend, string? RoleLabel)> members,
         CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(room);
@@ -67,13 +69,17 @@ public class ChatRoomRepository : GenericRepository<ChatRoom>, IChatRoomReposito
 
         var now = DateTime.UtcNow;
         var entities = members
-            .GroupBy(m => m.UserId)
+            .Where(m => m.ClientProfileId.HasValue ^ m.DeveloperProfileId.HasValue)
+            .GroupBy(m => m.ClientProfileId.HasValue
+                ? ("C", m.ClientProfileId!.Value)
+                : ("D", m.DeveloperProfileId!.Value))
             .Select(g => g.First())
             .Select(m => new ChatRoomMember
             {
                 Id = Guid.NewGuid(),
                 ChatRoomId = room.Id,
-                UserId = m.UserId,
+                ClientProfileId = m.ClientProfileId,
+                DeveloperProfileId = m.DeveloperProfileId,
                 JoinedAt = now,
                 CanSend = m.CanSend,
                 RoleLabel = m.RoleLabel
@@ -84,13 +90,20 @@ public class ChatRoomRepository : GenericRepository<ChatRoom>, IChatRoomReposito
 
     public async Task AddMemberAsync(
         Guid roomId,
-        Guid userId,
+        Guid? clientProfileId,
+        Guid? developerProfileId,
         CancellationToken ct = default,
         bool canSend = true,
         string? roleLabel = null)
     {
+        if (clientProfileId.HasValue == developerProfileId.HasValue)
+            throw new ArgumentException("Exactly one of clientProfileId or developerProfileId must be set.");
+
         var exists = await _context.Set<ChatRoomMember>()
-            .AnyAsync(x => x.ChatRoomId == roomId && x.UserId == userId, ct);
+            .AnyAsync(x =>
+                x.ChatRoomId == roomId &&
+                ((clientProfileId != null && x.ClientProfileId == clientProfileId) ||
+                 (developerProfileId != null && x.DeveloperProfileId == developerProfileId)), ct);
         if (exists)
             return;
 
@@ -98,26 +111,33 @@ public class ChatRoomRepository : GenericRepository<ChatRoom>, IChatRoomReposito
         {
             Id = Guid.NewGuid(),
             ChatRoomId = roomId,
-            UserId = userId,
+            ClientProfileId = clientProfileId,
+            DeveloperProfileId = developerProfileId,
             JoinedAt = DateTime.UtcNow,
             CanSend = canSend,
             RoleLabel = roleLabel
         }, ct);
     }
 
-    public async Task RemoveMemberAsync(Guid roomId, Guid userId, CancellationToken ct = default)
+    public async Task RemoveMemberAsync(
+        Guid roomId,
+        Guid? clientProfileId,
+        Guid? developerProfileId,
+        CancellationToken ct = default)
     {
-        var member = await _context.Set<ChatRoomMember>()
-            .FirstOrDefaultAsync(x => x.ChatRoomId == roomId && x.UserId == userId, ct);
+        var member = await FindMemberAsync(roomId, clientProfileId, developerProfileId, ct);
         if (member is null)
             return;
         _context.Set<ChatRoomMember>().Remove(member);
     }
 
-    public async Task UpdateLastReadAsync(Guid roomId, Guid userId, CancellationToken ct = default)
+    public async Task UpdateLastReadAsync(
+        Guid roomId,
+        Guid? clientProfileId,
+        Guid? developerProfileId,
+        CancellationToken ct = default)
     {
-        var member = await _context.Set<ChatRoomMember>()
-            .FirstOrDefaultAsync(x => x.ChatRoomId == roomId && x.UserId == userId, ct);
+        var member = await FindMemberAsync(roomId, clientProfileId, developerProfileId, ct);
         if (member is null)
             throw new KeyNotFoundException("Chat room member not found.");
         member.LastReadAt = DateTime.UtcNow;
@@ -127,5 +147,18 @@ public class ChatRoomRepository : GenericRepository<ChatRoom>, IChatRoomReposito
     public async Task<bool> RoomIsExist(Guid RoomId)
     {
         return await _dbSet.AnyAsync(x => x.Id == RoomId);
+    }
+
+    private async Task<ChatRoomMember?> FindMemberAsync(
+        Guid roomId,
+        Guid? clientProfileId,
+        Guid? developerProfileId,
+        CancellationToken ct)
+    {
+        return await _context.Set<ChatRoomMember>()
+            .FirstOrDefaultAsync(x =>
+                x.ChatRoomId == roomId &&
+                ((clientProfileId != null && x.ClientProfileId == clientProfileId) ||
+                 (developerProfileId != null && x.DeveloperProfileId == developerProfileId)), ct);
     }
 }

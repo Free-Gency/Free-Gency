@@ -15,7 +15,8 @@ public class Message : ISoftDeletableEntity
     public string? DeletedBy { get; set; }
 
     public Guid ChatRoomId { get; set; }
-    public Guid? SenderUserId { get; set; }
+    public Guid? SenderClientProfileId { get; set; }
+    public Guid? SenderDeveloperProfileId { get; set; }
     public MessageType MessageType { get; set; } = MessageType.Text;
     public string? Text { get; set; }
     public string? FileUrl { get; set; }
@@ -23,6 +24,7 @@ public class Message : ISoftDeletableEntity
     public Guid? PlanVersionId { get; set; }
 
     public virtual ChatRoom ChatRoom { get; set; } = null!;
-    public virtual User? SenderUser { get; set; }
+    public virtual ClientProfile? SenderClientProfile { get; set; }
+    public virtual DeveloperProfile? SenderDeveloperProfile { get; set; }
     public virtual MilestonePlanVersion? PlanVersion { get; set; }
 }

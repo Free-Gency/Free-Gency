@@ -159,11 +159,17 @@ public partial class MilestoneService
         var proposalRoom = await ChatRoomRepo.GetByProposalIdAsync(dto.ProposalId, ct);
         if (proposalRoom is not null)
         {
+            var senderProfiles = await ResolveActiveSenderProfilesAsync(ct);
+            if (senderProfiles is null)
+                return ApiResponse.Failure<MilestonePlanVersionDto>(
+                    AppError.Validation("An active client or developer profile is required for chat."));
+
             await MessageRepo.AddAsync(new Message
             {
                 Id = Guid.NewGuid(),
                 ChatRoomId = proposalRoom.Id,
-                SenderUserId = _currentUser.UserId,
+                SenderClientProfileId = senderProfiles.Value.ClientProfileId,
+                SenderDeveloperProfileId = senderProfiles.Value.DeveloperProfileId,
                 MessageType = MessageType.MilestonePlan,
                 Text = $"Milestone Plan v{nextVersion} proposed.",
                 PlanVersionId = plan.Id
@@ -204,11 +210,17 @@ public partial class MilestoneService
         var proposalRoom = await ChatRoomRepo.GetByProposalIdAsync(plan.ProposalId, ct);
         if (proposalRoom is not null)
         {
+            var senderProfiles = await ResolveActiveSenderProfilesAsync(ct);
+            if (senderProfiles is null)
+                return ApiResponse.Failure(
+                    AppError.Validation("An active client or developer profile is required for chat."));
+
             await MessageRepo.AddAsync(new Message
             {
                 Id = Guid.NewGuid(),
                 ChatRoomId = proposalRoom.Id,
-                SenderUserId = _currentUser.UserId,
+                SenderClientProfileId = senderProfiles.Value.ClientProfileId,
+                SenderDeveloperProfileId = senderProfiles.Value.DeveloperProfileId,
                 MessageType = MessageType.Text,
                 Text = $"Request Changes on plan v{plan.Version}: {plan.ChangeComment}"
             }, ct);
@@ -292,7 +304,6 @@ public partial class MilestoneService
             {
                 Id = Guid.NewGuid(),
                 ChatRoomId = proposalRoom.Id,
-                SenderUserId = null,
                 MessageType = MessageType.System,
                 Text = $"Milestone Plan v{plan.Version} accepted — hire locked. Negotiation chat archived."
             }, ct);
@@ -302,23 +313,50 @@ public partial class MilestoneService
             ChatRoomRepo.Update(proposalRoom);
         }
 
-        var projectMembers = new List<(Guid UserId, bool CanSend, string? RoleLabel)>
+        var clientProfileId = await UserRepo.GetClientProfileIdByUserIdAsync(project.ClientId, ct);
+        if (clientProfileId is null)
+            return ApiResponse.Failure(AppError.Validation("Client profile is required to create the project chat."));
+
+        var projectMembers = new List<(Guid? ClientProfileId, Guid? DeveloperProfileId, bool CanSend, string? RoleLabel)>
         {
-            (project.ClientId, true, "Client")
+            (clientProfileId, null, true, "Client")
         };
 
         if (proposal.ApplicantType == ApplicantType.User && proposal.UserId.HasValue)
         {
-            projectMembers.Add((proposal.UserId.Value, true, null));
+            var developerProfileId =
+                await UserRepo.GetDeveloperProfileIdByUserIdAsync(proposal.UserId.Value, ct);
+            if (developerProfileId is null)
+                return ApiResponse.Failure(AppError.Validation("Assignee developer profile was not found."));
+
+            projectMembers.Add((null, developerProfileId, true, null));
         }
         else if (proposal.ApplicantType == ApplicantType.Team && proposal.TeamId.HasValue)
         {
             var leaders = await TeamMemberRepo.GetLeadersAsync(proposal.TeamId.Value, ct);
-            foreach (var leader in leaders)
-                projectMembers.Add((leader.UserId, true, "Team Leader"));
+            var addedDeveloperProfileIds = new HashSet<Guid>();
 
-            if (proposal.UserId.HasValue && projectMembers.All(m => m.UserId != proposal.UserId.Value))
-                projectMembers.Add((proposal.UserId.Value, true, "Team Leader"));
+            foreach (var leader in leaders)
+            {
+                var developerProfileId =
+                    await UserRepo.GetDeveloperProfileIdByUserIdAsync(leader.UserId, ct);
+                if (developerProfileId is null)
+                    return ApiResponse.Failure(AppError.Validation("Team leader developer profile was not found."));
+
+                projectMembers.Add((null, developerProfileId, true, "Team Leader"));
+                addedDeveloperProfileIds.Add(developerProfileId.Value);
+            }
+
+            if (proposal.UserId.HasValue)
+            {
+                var speakerProfileId =
+                    await UserRepo.GetDeveloperProfileIdByUserIdAsync(proposal.UserId.Value, ct);
+                if (speakerProfileId is null)
+                    return ApiResponse.Failure(AppError.Validation("Speaker developer profile was not found."));
+
+                if (addedDeveloperProfileIds.Add(speakerProfileId.Value))
+                    projectMembers.Add((null, speakerProfileId, true, "Team Leader"));
+            }
         }
 
         var existingProjectRoom = await ChatRoomRepo.GetByProjectIdAsync(plan.ProjectId, ct);
@@ -342,7 +380,6 @@ public partial class MilestoneService
             {
                 Id = Guid.NewGuid(),
                 ChatRoomId = projectRoom.Id,
-                SenderUserId = null,
                 MessageType = MessageType.System,
                 Text = $"Project started — {project.Title}. Milestone plan agreed. Team leaders can add working members to this room."
             }, ct);
@@ -580,6 +617,21 @@ public partial class MilestoneService
 
     private IMessageRepository MessageRepo =>
         _unitOfWork.Repository<IMessageRepository, Message>();
+
+    private IUserRepository UserRepo =>
+        _unitOfWork.Repository<IUserRepository, User>();
+
+    private async Task<(Guid? ClientProfileId, Guid? DeveloperProfileId)?> ResolveActiveSenderProfilesAsync(
+        CancellationToken ct)
+    {
+        var active = await UserRepo.GetActiveProfileAsync(_currentUser.UserId, ct);
+        if (active is null)
+            return null;
+
+        return active.Value.Mode == profileMode.Client
+            ? (active.Value.ProfileId, null)
+            : (null, active.Value.ProfileId);
+    }
 
     private async Task<bool> IsProposalNegotiationSpeakerAsync(ProjectProposal proposal, CancellationToken ct)
     {

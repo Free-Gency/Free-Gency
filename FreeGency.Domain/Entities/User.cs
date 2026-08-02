@@ -34,8 +34,6 @@ public class User : IdentityUser<Guid>, ISoftDeletableEntity
     public virtual ICollection<TeamJoinRequest> TeamJoinRequests { get; set; } = [];
     public virtual ICollection<SocialLink> SocialLinks { get; set; } = [];
     public virtual ICollection<ProjectMember> ProjectMembers { get; set; } = [];
-    public virtual ICollection<ChatRoomMember> ChatRoomMembers { get; set; } = [];
-    public virtual ICollection<Message> SentMessages { get; set; } = [];
     public virtual ICollection<Review> ReviewsWritten { get; set; } = [];
     public virtual ICollection<Review> ReviewsReceived { get; set; } = [];
     public virtual ICollection<PortfolioProject> PortfolioProjects { get; set; } = [];
