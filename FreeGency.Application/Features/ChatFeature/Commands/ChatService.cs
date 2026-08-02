@@ -115,8 +115,13 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             if (proposal == null) return Result.Failure<Guid>(ChatErrors.ProposalNotFound);
             if (proposal.Project.ClientId != userId)
                 return Result.Failure<Guid>(ChatErrors.OnlyProjectClientCanStartDiscussion);
-            if (proposal.Status != ProposalStatus.Pending)
+            if (proposal.Status is not (ProposalStatus.Pending or ProposalStatus.Viewed))
                 return Result.Failure<Guid>(ChatErrors.InvalidProposalStatus);
+
+            var activeDiscussions =
+                (await _projectProposalRepository.GetActiveDiscussionByProjectIdAsync(proposal.ProjectId)).ToList();
+            if (activeDiscussions.Any(p => p.Id != proposal.Id))
+                return Result.Failure<Guid>(ChatErrors.AnotherDiscussionActive);
 
             var chatRoomIsExist = await _chatRoomRepository.GetByProposalIdAsync(dto.ProposalId);
             if (chatRoomIsExist != null) return Result.Failure<Guid>(ChatErrors.DiscussionAlreadyExists);
@@ -177,6 +182,7 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 Text = "Discussion started. You can now negotiate the milestone plan."
             };
             await _messageRepository.AddAsync(message);
+            await _projectProposalRepository.UpdateStatusAsync(proposal.Id, ProposalStatus.InDiscussion);
             await unitOfWork.SaveChangesAsync();
             var roomDto = new ChatRoomDto
             {

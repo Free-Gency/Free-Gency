@@ -70,9 +70,15 @@ namespace FreeGency.Application.Common.Errors
         public static readonly Error InvalidProposalStatus =
     new(
         "Chat.InvalidProposalStatus",
-        "Discussion can only be started for pending proposals.",
+        "Discussion can only be started for pending or viewed proposals.",
         StatusCodes.Status400BadRequest
     );
+        public static readonly Error AnotherDiscussionActive =
+            new(
+                "Chat.AnotherDiscussionActive",
+                "Another discussion is already active. Close it before starting a new one.",
+                StatusCodes.Status400BadRequest
+            );
         public static readonly Error TeamHasNoLeaders =
     new(
         "Chat.TeamHasNoLeaders",
