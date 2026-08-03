@@ -336,25 +336,25 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 UPDATE m
                 SET UserId = cp.UserId
                 FROM chat.ChatRoomMembers m
-                INNER JOIN identity.ClientProfiles cp ON cp.Id = m.ClientProfileId
+                INNER JOIN [identity].ClientProfiles cp ON cp.Id = m.ClientProfileId
                 WHERE m.ClientProfileId IS NOT NULL;
 
                 UPDATE m
                 SET UserId = dp.UserId
                 FROM chat.ChatRoomMembers m
-                INNER JOIN identity.DeveloperProfiles dp ON dp.Id = m.DeveloperProfileId
+                INNER JOIN [identity].DeveloperProfiles dp ON dp.Id = m.DeveloperProfileId
                 WHERE m.DeveloperProfileId IS NOT NULL;
 
                 UPDATE msg
                 SET SenderUserId = cp.UserId
                 FROM chat.Messages msg
-                INNER JOIN identity.ClientProfiles cp ON cp.Id = msg.SenderClientProfileId
+                INNER JOIN [identity].ClientProfiles cp ON cp.Id = msg.SenderClientProfileId
                 WHERE msg.SenderClientProfileId IS NOT NULL;
 
                 UPDATE msg
                 SET SenderUserId = dp.UserId
                 FROM chat.Messages msg
-                INNER JOIN identity.DeveloperProfiles dp ON dp.Id = msg.SenderDeveloperProfileId
+                INNER JOIN [identity].DeveloperProfiles dp ON dp.Id = msg.SenderDeveloperProfileId
                 WHERE msg.SenderDeveloperProfileId IS NOT NULL;
                 """);
 
