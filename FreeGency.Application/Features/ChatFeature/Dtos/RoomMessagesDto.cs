@@ -14,5 +14,6 @@ namespace FreeGency.Application.Features.ChatFeature.Dtos
         public string? FileUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsMine { get; set; }
+        public Guid? OtherProfileId { get; set; }
     }
 }

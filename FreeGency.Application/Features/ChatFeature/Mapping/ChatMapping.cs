@@ -85,11 +85,9 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
         public static IQueryable<RoomMessagesDto> ToRoomMessageDto(
             this IQueryable<Message> messages,
             Guid? clientProfileId,
-            Guid? developerProfileId)
+            Guid? developerProfileId,Guid? otherProfileId)
         {
             return messages
-                .OrderByDescending(x => x.CreatedAt)
-                
                 .OrderBy(x => x.CreatedAt)
                 .Select(x => new RoomMessagesDto
                 {
@@ -112,7 +110,8 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                 MessageType = x.MessageType.ToString(),
                 IsMine =
                     (clientProfileId != null && x.SenderClientProfileId == clientProfileId) ||
-                    (developerProfileId != null && x.SenderDeveloperProfileId == developerProfileId)
+                    (developerProfileId != null && x.SenderDeveloperProfileId == developerProfileId),
+                OtherProfileId=otherProfileId
             });
         }
     }

@@ -13,6 +13,7 @@ public static class DependencyInjection
             cfg.AddMaps(typeof(ProjectMapping).Assembly);
             cfg.AddMaps(typeof(ProposalMapping).Assembly);
         });
+        services.AddSingleton<OnlineUsersService>();
         services.AddScoped<IClientNotficationService, ClientNotficationService>();
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IWalletService, WalletService>();
