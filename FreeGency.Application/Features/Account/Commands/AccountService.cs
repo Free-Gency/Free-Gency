@@ -12,6 +12,8 @@ namespace FreeGency.Application.Features.Account.Queries;
 
 public partial class AccountService
 {
+    private readonly IClientNotificationSettingsRepository clientNotificationSettingsRepository = unitOfWork.Repository<IClientNotificationSettingsRepository, ClientNotificationSettings>();
+    private readonly IDeveloperNotificationSettingsRepository developerNotificationSettingsRepository = unitOfWork.Repository<IDeveloperNotificationSettingsRepository, DeveloperNotificationSettings>();
     public async Task<Result> ChangePasswordAsync(ChangePasswordRequestDto dto)
     {
         var userId =currentUserService.UserId;
@@ -117,6 +119,7 @@ public partial class AccountService
             {
                 var clientProfile = new ClientProfile { Id = Guid.NewGuid(), UserId = userId };
                 await _profileRepository.AddAsync(clientProfile);
+                await clientNotificationSettingsRepository.AddAsync(new ClientNotificationSettings { Id = Guid.NewGuid(), ProfileId = clientProfile.Id });
                 await unitOfWork.SaveChangesAsync();
             }
         }
@@ -129,6 +132,7 @@ public partial class AccountService
             {
                 var developerProfile = new DeveloperProfile { Id = Guid.NewGuid(), UserId = userId };
                 await _developerProfileRepository.AddAsync(developerProfile);
+                await developerNotificationSettingsRepository.AddAsync(new DeveloperNotificationSettings { Id = Guid.NewGuid(), ProfileId = developerProfile.Id });
                 await unitOfWork.SaveChangesAsync();
             }
         }

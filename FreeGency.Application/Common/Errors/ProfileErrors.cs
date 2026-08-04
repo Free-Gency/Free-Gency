@@ -11,5 +11,7 @@ namespace FreeGency.Application.Common.Errors
            new("User.Client Profile Exists", "Client Profile already exists", StatusCodes.Status409Conflict);
         public static readonly Error DeveloperProfileAlreadyExists =
            new("User.Developer Profile Exists", "Developer Profile already exists", StatusCodes.Status409Conflict);
+        public static readonly Error DeveloperProfileNotFound =
+          new("User.Developer Profile Not Found", "Developer Profile Not Found", StatusCodes.Status404NotFound);
     }
 }
