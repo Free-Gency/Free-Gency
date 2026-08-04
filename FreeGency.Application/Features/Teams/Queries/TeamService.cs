@@ -1,15 +1,33 @@
 using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Common.Mappings.TeamsMapping;
+using FreeGency.Application.Common.Pagination;
 using FreeGency.Application.Features.Teams.Dtos;
 
 namespace FreeGency.Application.Features.Teams.Commands
 {
     public partial class TeamService
     {
-        public async Task<ApiResponse<IEnumerable<TeamDto>>> BrowseAsync(CancellationToken ct = default)
+        public async Task<ApiResponse<PaginatedResult<TeamDto>>> BrowseAsync(
+            FilterTeamsRequestDto filter,
+            CancellationToken ct = default)
         {
-            var teams = await _teamRepository.GetAllAsync(ct);
-            return ApiResponse.Success(teams.Select(t => t.ToDto()));
+            var userId = _currentUserService.UserId;
+            var (items, totalCount) = await _teamRepository.GetBrowseHubItemsPagedAsync(
+                userId == Guid.Empty ? null : userId,
+                filter.Search,
+                filter.CategoryId,
+                filter.ExcludeMine,
+                filter.PageNumber,
+                filter.PageSize,
+                ct);
+
+            var page = PaginatedResult<TeamDto>.FromList(
+                items.Select(t => t.ToDto()).ToList(),
+                filter.PageNumber,
+                filter.PageSize,
+                totalCount);
+
+            return ApiResponse.Success(page);
         }
 
         public async Task<ApiResponse<TeamDto>> GetByIdAsync(Guid id, CancellationToken ct = default)
@@ -18,12 +36,13 @@ namespace FreeGency.Application.Features.Teams.Commands
             if (team is null)
                 return ApiResponse.Failure<TeamDto>(AppError.NotFound(nameof(Team), id));
 
-            return ApiResponse.Success(team.ToDto());
+            var userId = _currentUserService.UserId;
+            return ApiResponse.Success(team.ToDto(userId == Guid.Empty ? null : userId));
         }
 
         public async Task<ApiResponse<IEnumerable<TeamDto>>> GetMineAsync(CancellationToken ct = default)
         {
-            var teams = await _teamRepository.GetByOwnerUserIdWithDetailsAsync(_currentUserService.UserId, ct);
+            var teams = await _teamRepository.GetMyHubItemsAsync(_currentUserService.UserId, ct);
             return ApiResponse.Success(teams.Select(t => t.ToDto()));
         }
 
@@ -33,7 +52,8 @@ namespace FreeGency.Application.Features.Teams.Commands
             if (team is null)
                 return ApiResponse.Failure<TeamDto>(AppError.NotFound(nameof(Team), teamCode));
 
-            return ApiResponse.Success(team.ToDto());
+            var userId = _currentUserService.UserId;
+            return ApiResponse.Success(team.ToDto(userId == Guid.Empty ? null : userId));
         }
     }
 }

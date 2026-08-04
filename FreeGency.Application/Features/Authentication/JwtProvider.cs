@@ -37,7 +37,7 @@ namespace FreeGency.Application.Features.Authentication
             return (new JwtSecurityTokenHandler().WriteToken(token), _options.ExpiresIn * 60);
         }
 
-        public Guid? ValidateToken(string token)
+        public Guid? ValidateToken(string token, bool validateLifetime = true)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var symmetricsecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
@@ -49,6 +49,7 @@ namespace FreeGency.Application.Features.Authentication
                     ValidateIssuerSigningKey = true,
                     ValidateIssuer = false,
                     ValidateAudience = false,
+                    ValidateLifetime = validateLifetime,
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);
                 var jwttoken = (JwtSecurityToken)validatedToken;

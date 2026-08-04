@@ -1,0 +1,57 @@
+Prompt for Bruno — FreeGency color system (stay close)
+
+Use this FreeGency color palette so the new screens feel like the same website.
+You can refine slightly, but stay close to these values — do not invent a totally different brand palette.
+
+PRIMARY / BRAND
+- Brand purple:        #6366F1
+- Brand purple hover:  #4F46E5
+- Brand soft/tint:     #EEF2FF
+- Brand soft border:   #C7D2FE
+- Logo / active links: #6366F1
+
+BACKGROUNDS
+- Page background:     #FFFFFF
+- Soft section / header strip: #F8F9FB
+- Input / search fill: #F0F2F5
+- Card background:     #FFFFFF
+- Dashed empty card:   #F9FAFB
+
+TEXT
+- Heading / primary text: #111827
+- Body / secondary text:  #6B7280
+- Muted / meta text:      #9CA3AF
+- On primary button:      #FFFFFF
+
+BORDERS / DIVIDERS
+- Default border:      #E5E7EB
+- Soft divider:        #F3F4F6
+- Focus ring:          #6366F1 (soft glow / outline)
+
+BUTTONS
+- Primary:   bg #6366F1, text #FFFFFF, hover #4F46E5
+- Secondary: bg #F3F4F6, text #111827, border #E5E7EB
+
+BADGES
+- Team Leader: bg #EEF2FF, text #4F46E5
+- Team Member: bg #F3F4F6, text #4B5563
+- Archived / muted: bg #F3F4F6, text #6B7280
+
+ACCENTS
+- Rating star: #FBBF24
+- Icon tiles: soft purple gradients using #6366F1 → #A78BFA (or #EC4899 → #6366F1 sparingly)
+- Success (if needed): #10B981
+- Danger (if needed):  #EF4444
+- Warning (if needed): #F59E0B
+
+USAGE RULES
+1. Purple is the only strong brand accent — use it for CTAs, active tabs, logo, key icons.
+2. Keep most UI white/gray; purple should not flood the page.
+3. Cards: white + light border (#E5E7EB) + soft shadow.
+4. Active tab: purple text + purple underline.
+5. Don’t switch to dark mode as the default site theme.
+6. Stay close to this system even if you propose a refreshed look.
+
+Task:
+Design: [اسم الصفحة هنا]
+Apply this FreeGency color system so the page matches the existing website feel.

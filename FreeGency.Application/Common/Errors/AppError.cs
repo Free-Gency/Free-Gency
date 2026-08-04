@@ -112,9 +112,9 @@ namespace FreeGency.Application.Common.Errors
 
 
         #region NOTIFICATION ERRORs
-        public static AppError NotificationDoesNotBelongToUser(Guid notificationId) =>
-            new("Notification.DoesNotBelongToUser",
-                $"Notification '{notificationId}' does not belong to you.",
+        public static AppError NotificationDoesNotBelongToProfile(Guid notificationId) =>
+            new("Notification.DoesNotBelongToProfile",
+                $"Notification '{notificationId}' does not belong to your active profile.",
                 StatusCodes.Status403Forbidden);
         #endregion
 

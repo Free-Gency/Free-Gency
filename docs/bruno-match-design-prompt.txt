@@ -1,0 +1,29 @@
+Prompt for Bruno — Same idea, fresher look
+
+I will send FreeGency screenshots as reference for the product idea and structure.
+Keep the same page purpose, layout logic, and information hierarchy — but propose a new visual look (not a 1:1 copy of the screenshots).
+
+Keep from the current product:
+- Same screen goal and content structure
+- Same components / sections / user flows
+- Clean SaaS marketplace feel
+- Clear hierarchy, readable typography, good whitespace
+
+Feel free to refresh:
+- Color system (new primary + neutrals — avoid generic purple-on-white if you can)
+- Typography (more distinctive, still professional)
+- Card / surface treatment
+- Spacing rhythm and visual atmosphere
+- Subtle motion / polish ideas if useful
+
+Rules:
+1. Same idea and UX structure — new visual direction.
+2. Suggest 1 strong look (or 2 short options max) with a clear rationale.
+3. Desktop-first, still usable on mobile.
+4. Don’t change the product meaning or invent unrelated features.
+5. If something is unclear, keep the structure from the screenshots and only restyle it.
+
+Task:
+Design: [اسم الصفحة هنا]
+Reference screenshots = structure + idea.
+Your job = propose a refreshed look for FreeGency that still feels like the same product.

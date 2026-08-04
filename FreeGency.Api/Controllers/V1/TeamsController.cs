@@ -12,8 +12,8 @@ public class TeamsController(ITeamService _teamService) : BaseApiController
         => HandleResult(await _teamService.CreateAsync(dto, ct));
 
     [HttpGet]
-    public async Task<IActionResult> Browse(CancellationToken ct)
-        => HandleResult(await _teamService.BrowseAsync(ct));
+    public async Task<IActionResult> Browse([FromQuery] FilterTeamsRequestDto filter, CancellationToken ct)
+        => HandleResult(await _teamService.BrowseAsync(filter, ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)

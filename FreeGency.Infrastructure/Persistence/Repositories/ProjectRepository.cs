@@ -10,6 +10,7 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
     {
         return await _dbSet
             .AsNoTracking()
+            .AsSplitQuery()
             .Where(p => p.Id == id)
             .Include(p => p.Client)
                 .ThenInclude(c => c.ClientProfile)

@@ -11,9 +11,9 @@ public class TeamCategoryConfiguration : IEntityTypeConfiguration<TeamCategory>
     {
         builder.ToTable("TeamCategories", DbSchemas.Teams);
         builder.HasKey(tc => new { tc.Id, tc.TeamId, tc.CategoryId });
-        // Enforce: each team belongs to exactly one category (Category -> Team is 1 to M)
-        builder.HasIndex(tc => tc.TeamId).IsUnique();
+        // A team may belong to multiple categories; one row per team+category.
         builder.HasIndex(tc => new { tc.TeamId, tc.CategoryId }).IsUnique();
+        builder.HasIndex(tc => tc.TeamId);
 
         builder.Property(tc => tc.IsPrimary).HasDefaultValue(false);
 
