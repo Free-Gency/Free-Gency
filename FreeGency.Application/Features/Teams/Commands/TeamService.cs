@@ -35,7 +35,7 @@ namespace FreeGency.Application.Features.Teams.Commands
             {
                 try
                 {
-                    logoUrl = (await _storageService.UploadAsync(dto.Logo, StorageFolders.Category, ct)).Url;
+                    logoUrl = (await _storageService.UploadAsync(dto.Logo, StorageFolders.TeamLogo, ct)).Url;
                 }
                 catch (Exception)
                 {
@@ -43,7 +43,20 @@ namespace FreeGency.Application.Features.Teams.Commands
                 }
             }
 
-            var team = dto.ToEntity(_currentUserService.UserId, teamCode, logoUrl);
+            string? coverUrl = null;
+            if (dto.Cover is not null)
+            {
+                try
+                {
+                    coverUrl = (await _storageService.UploadAsync(dto.Cover, StorageFolders.TeamLogo, ct)).Url;
+                }
+                catch (Exception)
+                {
+                    return ApiResponse.Failure<Guid>(AppError.FileUploadFailed(dto.Cover.FileName));
+                }
+            }
+
+            var team = dto.ToEntity(_currentUserService.UserId, teamCode, logoUrl, coverUrl);
 
             var categories = dto.Categories.Select(c => (c.CategoryId, c.IsPrimary));
             await _teamRepository.AddWithTaxonomyAsync(team, categories, dto.SkillIds, ct);
@@ -68,11 +81,23 @@ namespace FreeGency.Application.Features.Teams.Commands
             {
                 try
                 {
-                    team.Logo = (await _storageService.UploadAsync(dto.Logo, StorageFolders.Category, ct)).Url;
+                    team.Logo = (await _storageService.UploadAsync(dto.Logo, StorageFolders.TeamLogo, ct)).Url;
                 }
                 catch (Exception)
                 {
                     return ApiResponse.Failure(AppError.FileUploadFailed(dto.Logo.FileName));
+                }
+            }
+
+            if (dto.Cover is not null)
+            {
+                try
+                {
+                    team.Cover = (await _storageService.UploadAsync(dto.Cover, StorageFolders.TeamLogo, ct)).Url;
+                }
+                catch (Exception)
+                {
+                    return ApiResponse.Failure(AppError.FileUploadFailed(dto.Cover.FileName));
                 }
             }
 

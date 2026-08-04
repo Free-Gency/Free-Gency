@@ -1,0 +1,171 @@
+Prompt for Bruno — Create Team onboarding flow (FreeGency)
+
+Design a Create Team experience as a guided onboarding wizard (not a single long form).
+When the user clicks "Create team" / "Launch New Team", open this multi-step flow.
+
+Use FreeGency visual language (white SaaS UI, brand purple #6366F1, soft cards, clear hierarchy).
+Desktop-first; keep steps calm and focused — one job per step.
+
+==================================================
+FLOW OVERVIEW
+==================================================
+
+Entry points:
+- My Teams → "Create team" button
+- My Teams → "Launch New Team" dashed card
+
+Flow type: full-page or large modal wizard with:
+- Progress indicator (Step X of N)
+- Title + short helper text per step
+- Primary CTA (Continue / Create team)
+- Secondary (Back / Skip where allowed)
+- Ability to close / save draft optional (nice-to-have)
+
+After successful create → celebration / success screen → then optional product-tour hints on Team Management.
+
+==================================================
+DATA THE FORM MUST COLLECT
+==================================================
+
+Base this on FreeGency CreateTeam fields.
+
+STEP 1 — Team identity (required core)
+Fields:
+1) Team Name* (string, required)
+   - Placeholder: "e.g. Nexus Design"
+   - Helper: "This is how clients will see your team."
+2) Logo (image upload, optional)
+   - Upload / drag-drop / avatar preview
+   - Helper: "Optional. You can add this later."
+3) About Us (textarea, optional but encouraged)
+   - Max ~2000 chars
+   - Placeholder: "Tell clients what your team is great at…"
+   - Helper: "A short bio helps you stand out on Discover."
+
+STEP 2 — Categories (required)
+Fields:
+4) Categories* (multi-select from catalog)
+   - User picks one or more categories
+5) Primary Category* (exactly one of the selected categories marked IsPrimary)
+   - UX idea: first selected becomes primary, or radio/star on each chip
+   - Helper: "Primary category is how clients discover you first."
+
+STEP 3 — Skills (required / strongly recommended)
+Fields:
+6) Skills* (multi-select SkillIds from catalog)
+   - Searchable chips / tags
+   - Helper: "Pick skills that match projects you want to win."
+
+STEP 4 — Specialties (optional — can be Skip)
+Fields:
+7) Specialties (optional multi-select SpecialtyIds)
+   - Can be set after create too
+   - Helper: "Optional. Fine-tune your focus areas."
+
+STEP 5 — Review + create
+Show summary card:
+- Logo + Name
+- About preview
+- Primary category + other categories
+- Skills chips
+- Specialties (if any)
+CTA: "Create team"
+
+SYSTEM-GENERATED (do NOT ask user to type these)
+- TeamCode (auto after create, 8-char invite code)
+- Owner = current user (Team Leader)
+- AverageRating / MembersCount start empty/zero
+
+==================================================
+SUCCESS SCREEN (right after create)
+==================================================
+
+Show:
+- "Your team is live" / "Nexus Design is ready"
+- Auto-generated Team Code in a copyable box (big, clear)
+- Primary actions:
+  1) Copy invite code
+  2) Invite members / Share code
+  3) Go to Team Management
+- Secondary:
+  - Skip for now → My Teams
+
+Copy ideas:
+- Title: "You're the Team Leader"
+- Body: "Share this code so members can join. You can also manage requests from Team Management."
+- Code label: "Team invite code"
+
+==================================================
+POST-ONBOARDING PRODUCT TOUR HINTS
+==================================================
+
+After success (or first visit to Team Management), run a short coach-mark / tooltip tour.
+Tone: friendly, short, actionable. Max 4–5 hints. Allow Skip tour / Next / Done.
+
+HINT 1 — Team overview
+Target: Team header / dashboard
+Title: "This is your team home"
+Body: "Everything for {TeamName} lives here — members, jobs, messages, and settings."
+
+HINT 2 — Invite members
+Target: Invite / Team code / Members section
+Title: "Bring your crew"
+Body: "Share the invite code or approve join requests. Members help you deliver projects together."
+
+HINT 3 — Team profile / Discoverability
+Target: Categories / Skills / Edit profile
+Title: "Help clients find you"
+Body: "Keep categories and skills updated so the right projects match your team."
+
+HINT 4 — Team Messages (Leaders)
+Target: Management → Messages
+Title: "Client negotiations live here"
+Body: "As a Team Leader, you’ll see proposal chats with clients here. Only the submitting leader can reply during negotiation."
+
+HINT 5 — Next win (final)
+Target: Team Openings / Jobs / Create job / Explore projects CTA
+Title: "Ready for the first mission?"
+Body: "Post a team opening or apply to projects as a team. Your invite code is always in Settings if someone needs it."
+CTA on last hint: "Got it — let’s go"
+
+Optional micro-hints (tooltips, not full tour):
+- Empty members list: "No members yet — share your team code to grow."
+- Empty skills: "Add skills to improve project matching."
+- First Messages empty: "When a client starts a discussion on your proposal, it appears here."
+
+==================================================
+UX RULES
+==================================================
+
+1) Feels like onboarding: progress, encouragement, short copy — not a dense admin form.
+2) Validate per step before Continue (especially Name, Categories+Primary, Skills).
+3) Logo / About / Specialties can be Skip or optional.
+4) After create, always surface TeamCode prominently.
+5) Tour should not block forever — Skip available; don’t show again after Done (persist dismissed).
+6) Match FreeGency colors: purple CTAs, soft gray secondary, white cards.
+7) Mobile: stack steps vertically; keep one primary CTA sticky at bottom.
+
+==================================================
+SCREENS TO DESIGN
+==================================================
+
+1) Entry from My Teams (Create team / Launch New Team)
+2) Step 1 Identity
+3) Step 2 Categories (+ primary)
+4) Step 3 Skills
+5) Step 4 Specialties (optional/skip)
+6) Step 5 Review
+7) Success + Team Code
+8) Team Management with product-tour hints (all 5 coach marks)
+9) Empty states with micro-hints
+
+==================================================
+SAMPLE CONTENT
+==================================================
+
+Team name: Nexus Design
+About: "Product design squad for SaaS startups — research, UI, and design systems."
+Categories: Design (Primary), Product
+Skills: Figma, UI Design, Design Systems, Prototyping
+Specialties: SaaS, Fintech
+Team code: A9K2M7QX

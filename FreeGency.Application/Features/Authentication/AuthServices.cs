@@ -104,7 +104,8 @@ namespace FreeGency.Application.Features.Authentication
 
         public async Task<Result<AuthResponseDto>> GetRefeshTokenaync(string Token, string RefreshToken, CancellationToken cancellationToken = default)
         {
-            var userId = jwtProvider.ValidateToken(Token);
+            // Access JWT may already be expired — that is exactly when refresh is needed.
+            var userId = jwtProvider.ValidateToken(Token, validateLifetime: false);
             if (userId == null) return Result.Failure<AuthResponseDto>(AuthenticationErrors.TokenNotValid);
             var user = await userManager.FindByIdAsync(userId.ToString()!);
             if (user == null) return Result.Failure<AuthResponseDto>(AuthenticationErrors.TokenNotValid);
@@ -116,7 +117,7 @@ namespace FreeGency.Application.Features.Authentication
         }
         public async Task<Result<bool>> RevokeRefeshTokenaync(string Token, string RefreshToken, CancellationToken cancellationToken = default)
         {
-            var userId = jwtProvider.ValidateToken(Token);
+            var userId = jwtProvider.ValidateToken(Token, validateLifetime: false);
             if (userId == null) return Result.Failure<bool>(AuthenticationErrors.TokenNotValid);
             var user = await userManager.FindByIdAsync(userId.ToString()!);
             if (user == null) return Result.Failure<bool>(AuthenticationErrors.TokenNotValid);

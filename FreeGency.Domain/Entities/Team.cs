@@ -16,6 +16,7 @@ public class Team : ISoftDeletableEntity
     public Guid OwnerUserId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Logo { get; set; }
+    public string? Cover { get; set; }
     public string TeamCode { get; set; } = string.Empty;
     public string? AboutUs { get; set; }
     public decimal AverageRating { get; set; } = 0;

@@ -19,11 +19,19 @@ public class PortfolioProjectConfiguration : IEntityTypeConfiguration<PortfolioP
         builder.Property(p => p.Budget).HasColumnType("decimal(18,2)");
         builder.Property(p => p.ImageCover).HasMaxLength(500);
         builder.Property(p => p.ProjectUrl).HasMaxLength(500);
+        builder.Property(p => p.PrototypeUrl).HasMaxLength(500);
         builder.Property(p => p.CompletionDate).HasColumnType("datetime2");
         builder.Property(p => p.Visibility)
             .HasConversion<string>()
             .HasMaxLength(50)
             .HasDefaultValue(Visibility.Public);
+
+        builder.Property(p => p.DurationLabel).HasMaxLength(100);
+        builder.Property(p => p.Industry).HasMaxLength(120);
+        builder.Property(p => p.TeamLeads).HasMaxLength(200);
+        builder.Property(p => p.TestimonialAuthorName).HasMaxLength(150);
+        builder.Property(p => p.TestimonialAuthorTitle).HasMaxLength(200);
+        builder.Property(p => p.TestimonialAuthorAvatarUrl).HasMaxLength(500);
 
         builder.HasOne(p => p.OwnerUser)
             .WithMany(u => u.PortfolioProjects)

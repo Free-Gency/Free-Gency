@@ -1,0 +1,205 @@
+Prompt لـ Bruno — Team Management Messages (FreeGency)
+
+السياق
+صمّم واجهة Messages داخل Team → Management لمنصة FreeGency (marketplace بين Clients وفرق Developers).
+
+هذه الشاشة مخصصة لقادة الفريق (Team Leaders) فقط — مش الأعضاء العاديين.
+الهدف: متابعة مفاوضات العروض مع العملاء + مجموعات الفريق الداخلية.
+
+مهم: غرف Project (بعد التعيين/Hire) لا تظهر هنا — تظهر في Personal Messages للبروفايل الشخصي.
+
+مرجع السلوك: chat-scenarios.md
+
+
+Layout عام
+تصميم Inbox + Chat (split view):
+
+يسار (~320px): قائمة الغرف + بحث + فلتر + زر "Create Group"
+يمين: محادثة الغرفة المختارة أو empty state
+
+Empty state (لا غرفة مختارة):
+"Select a conversation"
+"Proposal negotiations and team groups appear here."
+
+
+قائمة الغرف (Inbox — يسار)
+
+أنواع الغرف المعروضة:
+1. Proposal — مفاوضة مع Client (Active أو Archived)
+2. TeamGroup — مجموعة داخلية أنشأها Leader
+
+شكل عنصر القائمة:
+[Icon]  {Project Title} · {Client Name}
+        {Preview line}                    {time}  [badge?]
+
+Preview line حسب آخر رسالة:
+- Text -> مقتطف من النص
+- Attachment -> 📎 {FileName}
+- MilestonePlan -> 📋 Milestone plan proposed
+- System -> النص بدون اسم مرسل
+
+Badges:
+- Status: Archived -> Archived (muted/gray) — Proposal بعد Accept Plan فقط
+- UnreadCount > 0 -> عداد unread
+- RoomType: TeamGroup -> أيقونة group
+
+Sections (اختياري):
+- Active negotiations
+- Archived
+- Team groups
+
+Search: فلترة بالعنوان (Project title).
+
+
+حالات الغرف — Proposal (مفاوضة مع Client)
+
+Scenario 1 — Leader هو المتحدث (canSend: true)
+- Composer مفعّل: text + attach + Propose Plan
+- Header:
+  {Project Title}
+  Client: {Client Name} · Proposal negotiation
+- يقدر يرسل Text / Attachment / Milestone Plan
+
+Scenario 2 — Leader تاني (canSend: false) — Read-only
+نفس المحادثة، لكن:
+- Composer مخفي أو disabled
+- Banner أعلى المحادثة:
+  🔒 View only — Only {Speaker Name} can reply on behalf of the team.
+- كل الـ Leaders يشوفوا نفس التاريخ كامل
+
+Scenario 3 — Archived (بعد Accept Plan / Hire)
+- Badge Archived في القائمة والـ header
+- Composer معطّل
+- Banner:
+  This negotiation is closed. Continue in Personal Messages → Project chat.
+- المحتوى read-only للتاريخ
+
+
+أنواع الرسائل داخل المحادثة
+
+1. Text
+- فقاعات chat عادية
+- Client: يسار + avatar + {SenderName} + badge Client
+- Developer (team): يمين/يسار حسب IsMine
+- Timestamp تحت الفقاعة
+
+2. Attachment
+📎 {FileName}
+[Download / Preview]
++ optional caption text
+
+3. System (بدون sender)
+- centered pill / muted banner
+- أمثلة:
+  - Discussion started. Negotiate the milestone plan next.
+  - Milestone plan accepted. Project started.
+
+4. MilestonePlan — Plan Card (مهم)
+Card داخل الـ timeline (مش فقاعة عادية):
+
+┌─────────────────────────────────────────┐
+│ 📋 Milestone Plan · Version {N}         │
+│ Proposed by {Developer Name} · {date}   │
+├─────────────────────────────────────────┤
+│ 1. {Title}           ${Amount}  {Due}   │
+│    DoD: {DefinitionOfDone...}           │
+│ 2. ...                                  │
+├─────────────────────────────────────────┤
+│ Total: ${sum}                           │
+│ [View details]                          │
+└─────────────────────────────────────────┘
+
+- Client يشوف: Request Changes / Accept Plan (في واجهة Client — مش Team Management)
+- Team Leader يشوف الـ card read-only + زر View details لو محتاج expand
+
+
+Team Group Chat
+
+إنشاء مجموعة:
+- زر "+ Create Group" في الـ inbox
+- Modal: Group name + اختيار أعضاء من الفريق (multi-select)
+
+شكل الغرفة:
+- Header: {Group Name} + subtitle Team group · {N} members
+- Composer مفعّل لأي Leader
+- رسائل Text / Attachment فقط (مفيش Milestone Plan)
+- TeamGroup مش archived
+
+ملاحظة: نفس الـ TeamGroup تظهر كمان في Personal Messages لكل عضو (Developer profile membership).
+
+
+Header المحادثة — Proposal
+{Project Title}
+Client: {Client Name}
+[Proposal] [Active | Archived]
+
+Optional: link View project / View proposal
+
+
+Composer (لما canSend = true)
+[📎 Attach]  [Type a message...                    ]  [Send]
+
+Secondary action (Proposal active فقط):
+[📋 Propose Milestone Plan]
+
+يفتح modal/stepper لإدخال milestones (Title, DoD, Amount, Due date).
+
+
+States للتصميم (Screens مطلوبة)
+1. Inbox فارغ — لا conversations
+2. Inbox فيه Proposal active + Archived + TeamGroup
+3. Proposal chat — Leader متحدث (canSend: true) + plan card
+4. Proposal chat — Leader read-only (canSend: false) + view-only banner
+5. Proposal chat — Archived + disabled composer
+6. Team Group chat + Create Group modal
+7. Mobile: inbox ↔ chat navigation (stack)
+
+
+قواعد UX (لا تكسرها)
+- Team Management Messages = Proposal (active + archived) + TeamGroups فقط
+- Project rooms = Personal Messages — مش هنا
+- Regular team members مش يشوفوا client negotiations
+- Proposal archived فقط بعد Accept Milestone Plan
+- أثناء Proposal: Leader واحد بس (canSend) — الباقي read-only
+- بعد Hire: Project room في Personal Messages؛ كل Leaders يقدروا يرسلوا + RoleLabel badges للأعضاء المضافين
+
+
+Data fields (للـ dev handoff)
+
+ChatRoom list item:
+Id, RoomType, Status, Title, LastMessage, LastMessageType, LastMessageAt, UnreadCount, LastMessageSender
+
+Message:
+MessageType (Text | Attachment | System | MilestonePlan), SenderName, SenderProfileType (Client | Developer), IsMine, Text, FileName, FileUrl, PlanVersionId, CreatedAt
+
+Member (logic):
+CanSend, RoleLabel (Project rooms — Personal Messages)
+
+
+Visual direction
+- SaaS marketplace — clean, professional
+- Client messages: neutral/cool tone
+- Team/Developer: brand accent
+- System: muted centered
+- Milestone Plan card: elevated card — distinct عن text bubbles
+- Archived: desaturated + clear badge
+
+مهم: طابق ستايل FreeGency من السكرين شوتات المرفقة (My Teams / باقي الصفحات):
+أبيض نظيف، بنفسجي أساسي، كروت rounded بظل خفيف، tabs بخط بنفسجي، أزرار primary بنفسجي وsecondary رمادي.
+
+
+Sample content للـ mockup
+- Proposal room title: SaaS Billing Dashboard · Acme Corp
+- Team group: Backend sync · 4 members
+- System: Discussion started. Propose a milestone plan to continue.
+- Plan card: Version 2 — 3 milestones — Total $4,500
+
+
+Reference flow
+Demo HTML (لو موجود في الـ frontend repo):
+FreeGency-Frontend/freegency/public/demo/proposal-milestone-flow.html
+
+
+ملخص سريع للفرق بين السطحين
+- Team → Management → Messages: أي Team Leader → Proposal (active + archived) + TeamGroups
+- Personal Messages: البروفايل النشط (Client/Developer) → كل الغرف اللي العضو فيها — بما فيها Project بعد Hire
