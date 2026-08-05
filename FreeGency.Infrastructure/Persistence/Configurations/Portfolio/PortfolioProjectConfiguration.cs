@@ -28,7 +28,7 @@ public class PortfolioProjectConfiguration : IEntityTypeConfiguration<PortfolioP
 
         builder.Property(p => p.DurationLabel).HasMaxLength(100);
         builder.Property(p => p.Industry).HasMaxLength(120);
-        builder.Property(p => p.TeamLeads).HasMaxLength(200);
+        builder.Property(p => p.TeamLeads).HasMaxLength(2000);
         builder.Property(p => p.TestimonialAuthorName).HasMaxLength(150);
         builder.Property(p => p.TestimonialAuthorTitle).HasMaxLength(200);
         builder.Property(p => p.TestimonialAuthorAvatarUrl).HasMaxLength(500);

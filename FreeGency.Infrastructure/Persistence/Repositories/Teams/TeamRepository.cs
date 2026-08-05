@@ -8,43 +8,18 @@ public sealed class TeamRepository : GenericRepository<Team>, ITeamRepository
 {
     public TeamRepository(ApplicationDbContext context) : base(context) { }
 
+    private const int HubAvatarLimit = 3;
+
     public async Task<IReadOnlyList<TeamHubItem>> GetMyHubItemsAsync(Guid userId, CancellationToken ct = default)
     {
-        var teams = await _dbSet
+        var teamIds = await _dbSet
             .AsNoTracking()
-            .AsSplitQuery()
             .Where(t => t.OwnerUserId == userId || t.TeamMembers.Any(tm => tm.UserId == userId))
             .OrderByDescending(t => t.UpdatedAt ?? t.CreatedAt)
-            .Include(t => t.Owner).ThenInclude(u => u!.DeveloperProfile)
-            .Include(t => t.Owner).ThenInclude(u => u!.ClientProfile)
-            .Include(t => t.TeamMembers).ThenInclude(tm => tm.User).ThenInclude(u => u.DeveloperProfile)
-            .Include(t => t.TeamMembers).ThenInclude(tm => tm.User).ThenInclude(u => u.ClientProfile)
-            .Include(t => t.TeamCategories).ThenInclude(tc => tc.Category)
-            .Include(t => t.TeamSpecialties).ThenInclude(ts => ts.Specialty)
-            .Include(t => t.TeamSkills).ThenInclude(ts => ts.Skill)
+            .Select(t => t.Id)
             .ToListAsync(ct);
 
-        var projectCounts = await GetProjectsCountsAsync(teams.Select(t => t.Id).ToList(), ct);
-        return teams.Select(t => MapHubItem(t, userId, projectCounts)).ToList();
-    }
-
-    public async Task<IReadOnlyList<TeamHubItem>> GetBrowseHubItemsAsync(Guid? currentUserId, CancellationToken ct = default)
-    {
-        var teams = await _dbSet
-            .AsNoTracking()
-            .AsSplitQuery()
-            .OrderByDescending(t => t.UpdatedAt ?? t.CreatedAt)
-            .Include(t => t.Owner).ThenInclude(u => u!.DeveloperProfile)
-            .Include(t => t.Owner).ThenInclude(u => u!.ClientProfile)
-            .Include(t => t.TeamMembers).ThenInclude(tm => tm.User).ThenInclude(u => u.DeveloperProfile)
-            .Include(t => t.TeamMembers).ThenInclude(tm => tm.User).ThenInclude(u => u.ClientProfile)
-            .Include(t => t.TeamCategories).ThenInclude(tc => tc.Category)
-            .Include(t => t.TeamSpecialties).ThenInclude(ts => ts.Specialty)
-            .Include(t => t.TeamSkills).ThenInclude(ts => ts.Skill)
-            .ToListAsync(ct);
-
-        var projectCounts = await GetProjectsCountsAsync(teams.Select(t => t.Id).ToList(), ct);
-        return teams.Select(t => MapHubItem(t, currentUserId, projectCounts)).ToList();
+        return await LoadHubItemsByIdsAsync(teamIds, userId, ct);
     }
 
     public async Task<(IReadOnlyList<TeamHubItem> Items, int TotalCount)> GetBrowseHubItemsPagedAsync(
@@ -101,56 +76,200 @@ public sealed class TeamRepository : GenericRepository<Team>, ITeamRepository
         if (pageIds.Count == 0)
             return ([], totalCount);
 
-        var teams = await _dbSet
-            .AsNoTracking()
-            .AsSplitQuery()
-            .Where(t => pageIds.Contains(t.Id))
-            .Include(t => t.Owner).ThenInclude(u => u!.DeveloperProfile)
-            .Include(t => t.Owner).ThenInclude(u => u!.ClientProfile)
-            .Include(t => t.TeamMembers).ThenInclude(tm => tm.User).ThenInclude(u => u.DeveloperProfile)
-            .Include(t => t.TeamMembers).ThenInclude(tm => tm.User).ThenInclude(u => u.ClientProfile)
-            .Include(t => t.TeamCategories).ThenInclude(tc => tc.Category)
-            .Include(t => t.TeamSpecialties).ThenInclude(ts => ts.Specialty)
-            .Include(t => t.TeamSkills).ThenInclude(ts => ts.Skill)
-            .ToListAsync(ct);
-
-        var order = pageIds.Select((id, index) => (id, index)).ToDictionary(x => x.id, x => x.index);
-        teams = teams.OrderBy(t => order.GetValueOrDefault(t.Id, int.MaxValue)).ToList();
-
-        var projectCounts = await GetProjectsCountsAsync(pageIds, ct);
-        var items = teams.Select(t => MapHubItem(t, currentUserId, projectCounts)).ToList();
+        var items = await LoadHubItemsByIdsAsync(pageIds, currentUserId, ct);
         return (items, totalCount);
     }
 
-    public async Task<IReadOnlyList<Team>> GetByOwnerUserIdAsync(Guid ownerUserId, CancellationToken ct = default)
+    /// <summary>
+    /// Lightweight hub payload: projected columns only (no full member/profile graphs).
+    /// </summary>
+    private async Task<IReadOnlyList<TeamHubItem>> LoadHubItemsByIdsAsync(
+        IReadOnlyList<Guid> teamIds,
+        Guid? currentUserId,
+        CancellationToken ct)
     {
-        return await _dbSet
+        if (teamIds.Count == 0)
+            return [];
+
+        var cores = await _dbSet
             .AsNoTracking()
-            .Where(t => t.OwnerUserId == ownerUserId)
+            .Where(t => teamIds.Contains(t.Id))
+            .Select(t => new
+            {
+                t.Id,
+                t.Name,
+                t.Logo,
+                t.Cover,
+                t.TeamCode,
+                t.AboutUs,
+                t.AverageRating,
+                t.RatingCount,
+                t.OwnerUserId,
+                OwnerFirstName = t.Owner != null ? t.Owner.FristName : null,
+                OwnerLastName = t.Owner != null ? t.Owner.LastName : null,
+                OwnerDevImage = t.Owner != null && t.Owner.DeveloperProfile != null
+                    ? t.Owner.DeveloperProfile.ProfileImage
+                    : null,
+                OwnerClientImage = t.Owner != null && t.Owner.ClientProfile != null
+                    ? t.Owner.ClientProfile.ProfileImage
+                    : null,
+                MembersCount = t.TeamMembers.Count(),
+                MyMemberRole = currentUserId != null && currentUserId != Guid.Empty
+                    ? t.TeamMembers
+                        .Where(tm => tm.UserId == currentUserId)
+                        .Select(tm => (Role?)tm.TeamRole)
+                        .FirstOrDefault()
+                    : null,
+            })
             .ToListAsync(ct);
+
+        var categoryRows = await _context.Set<TeamCategory>()
+            .AsNoTracking()
+            .Where(tc => teamIds.Contains(tc.TeamId))
+            .Select(tc => new
+            {
+                tc.TeamId,
+                tc.CategoryId,
+                Name = tc.Category != null ? tc.Category.Name ?? string.Empty : string.Empty,
+                NameEn = tc.Category != null ? tc.Category.NameEn ?? string.Empty : string.Empty,
+                tc.IsPrimary,
+            })
+            .ToListAsync(ct);
+
+        var skillRows = await _context.Set<TeamSkill>()
+            .AsNoTracking()
+            .Where(ts => teamIds.Contains(ts.TeamId))
+            .Select(ts => new
+            {
+                ts.TeamId,
+                ts.SkillId,
+                Name = ts.Skill != null ? ts.Skill.Name ?? string.Empty : string.Empty,
+            })
+            .ToListAsync(ct);
+
+        // Project only avatar fields — then keep top 3 per team in memory.
+        var memberRows = await _context.Set<TeamMember>()
+            .AsNoTracking()
+            .Where(tm => teamIds.Contains(tm.TeamId))
+            .Select(tm => new
+            {
+                tm.TeamId,
+                tm.UserId,
+                tm.TeamRole,
+                tm.JoinedAt,
+                FirstName = tm.User != null ? tm.User.FristName : null,
+                LastName = tm.User != null ? tm.User.LastName : null,
+                DevImage = tm.User != null && tm.User.DeveloperProfile != null
+                    ? tm.User.DeveloperProfile.ProfileImage
+                    : null,
+                ClientImage = tm.User != null && tm.User.ClientProfile != null
+                    ? tm.User.ClientProfile.ProfileImage
+                    : null,
+            })
+            .ToListAsync(ct);
+
+        var avatarsByTeam = memberRows
+            .GroupBy(m => m.TeamId)
+            .ToDictionary(
+                g => g.Key,
+                g => g
+                    .OrderBy(m => m.TeamRole == Role.TeamLeader ? 0 : 1)
+                    .ThenBy(m => m.JoinedAt)
+                    .Take(HubAvatarLimit)
+                    .Select(m => new TeamMemberAvatarItem
+                    {
+                        UserId = m.UserId,
+                        Name = $"{m.FirstName ?? string.Empty} {m.LastName ?? string.Empty}".Trim(),
+                        ImageUrl = m.DevImage ?? m.ClientImage,
+                    })
+                    .ToList());
+
+        var categoriesByTeam = categoryRows
+            .GroupBy(c => c.TeamId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(x => new TeamCategoryItem
+                {
+                    CategoryId = x.CategoryId,
+                    Name = x.Name,
+                    NameEn = x.NameEn,
+                    IsPrimary = x.IsPrimary,
+                }).ToList());
+
+        var skillsByTeam = skillRows
+            .GroupBy(s => s.TeamId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(x => new TeamSkillItem
+                {
+                    SkillId = x.SkillId,
+                    Name = x.Name,
+                }).ToList());
+
+        var projectCounts = await GetProjectsCountsAsync(teamIds, ct);
+        var order = teamIds.Select((id, index) => (id, index)).ToDictionary(x => x.id, x => x.index);
+
+        return cores
+            .OrderBy(c => order.GetValueOrDefault(c.Id, int.MaxValue))
+            .Select(c =>
+            {
+                string? myRole = null;
+                if (currentUserId is Guid uid && uid != Guid.Empty)
+                {
+                    if (c.OwnerUserId == uid)
+                        myRole = nameof(Role.TeamLeader);
+                    else if (c.MyMemberRole is Role role)
+                        myRole = role.ToString();
+                }
+
+                var ownerName = $"{c.OwnerFirstName ?? string.Empty} {c.OwnerLastName ?? string.Empty}".Trim();
+                var avatars = avatarsByTeam.GetValueOrDefault(c.Id) ?? [];
+                if (avatars.Count == 0 && c.OwnerUserId != Guid.Empty)
+                {
+                    avatars =
+                    [
+                        new TeamMemberAvatarItem
+                        {
+                            UserId = c.OwnerUserId,
+                            Name = string.IsNullOrWhiteSpace(ownerName) ? "Owner" : ownerName,
+                            ImageUrl = c.OwnerDevImage ?? c.OwnerClientImage,
+                        },
+                    ];
+                }
+
+                return new TeamHubItem
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Logo = c.Logo,
+                    Cover = c.Cover,
+                    TeamCode = c.TeamCode,
+                    AboutUs = TruncateHubAbout(c.AboutUs),
+                    AverageRating = c.AverageRating,
+                    RatingCount = c.RatingCount,
+                    OwnerUserId = c.OwnerUserId,
+                    OwnerName = ownerName,
+                    MembersCount = c.MembersCount,
+                    ProjectsCount = projectCounts.GetValueOrDefault(c.Id),
+                    MyRole = myRole,
+                    MemberAvatars = avatars,
+                    Categories = categoriesByTeam.GetValueOrDefault(c.Id) ?? [],
+                    // Hub cards don't render specialties — skip the join entirely.
+                    Specialties = [],
+                    Skills = skillsByTeam.GetValueOrDefault(c.Id) ?? [],
+                };
+            })
+            .ToList();
     }
 
-    public async Task<IReadOnlyList<Team>> GetByOwnerUserIdWithDetailsAsync(Guid ownerUserId, CancellationToken ct = default)
+    private static string? TruncateHubAbout(string? about)
     {
-        return await _dbSet
-            .AsNoTracking()
-            .AsSplitQuery()
-            .Where(t => t.OwnerUserId == ownerUserId)
-            .Include(t => t.Owner)
-            .Include(t => t.TeamCategories).ThenInclude(tc => tc.Category)
-            .Include(t => t.TeamSpecialties).ThenInclude(ts => ts.Specialty)
-            .Include(t => t.TeamSkills).ThenInclude(ts => ts.Skill)
-            .Include(t => t.TeamMembers).ThenInclude(tm => tm.User).ThenInclude(u => u.DeveloperProfile)
-            .Include(t => t.TeamMembers).ThenInclude(tm => tm.User).ThenInclude(u => u.ClientProfile)
-            .Include(t => t.SocialLinks)
-            .ToListAsync(ct);
-    }
+        if (string.IsNullOrWhiteSpace(about))
+            return about;
 
-    public async Task<Team?> GetByTeamCodeAsync(string teamCode, CancellationToken ct = default)
-    {
-        return await _dbSet
-            .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.TeamCode == teamCode, ct);
+        const int max = 220;
+        var trimmed = about.Trim();
+        return trimmed.Length <= max ? trimmed : trimmed[..max].TrimEnd() + "…";
     }
 
     public async Task<Team?> GetByTeamCodeWithDetailsAsync(string teamCode, CancellationToken ct = default)
@@ -279,6 +398,30 @@ public sealed class TeamRepository : GenericRepository<Team>, ITeamRepository
                 ct);
     }
 
+    public async Task<IReadOnlyList<TeamFeedback>> GetFeedbackAsync(Guid teamId, int take, CancellationToken ct = default)
+    {
+        take = Math.Clamp(take <= 0 ? 20 : take, 1, 50);
+
+        return await _context.Set<TeamFeedback>()
+            .AsNoTracking()
+            .Include(x => x.ReviewerUser!)
+                .ThenInclude(u => u.ClientProfile)
+            .Include(x => x.ReviewerUser!)
+                .ThenInclude(u => u.DeveloperProfile)
+            .Where(x => x.TeamId == teamId)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(take)
+            .ToListAsync(ct);
+    }
+
+    public Task<bool> HasFeedbackAsync(Guid teamId, Guid reviewerUserId, CancellationToken ct = default)
+        => _context.Set<TeamFeedback>().AnyAsync(
+            x => x.TeamId == teamId && x.ReviewerUserId == reviewerUserId,
+            ct);
+
+    public Task AddFeedbackAsync(TeamFeedback feedback, CancellationToken ct = default)
+        => _context.Set<TeamFeedback>().AddAsync(feedback, ct).AsTask();
+
     public Task<bool> TeamCodeExistsAsync(string teamCode, CancellationToken ct = default)
     {
         return _dbSet.AsNoTracking().AnyAsync(t => t.TeamCode == teamCode, ct);
@@ -333,100 +476,5 @@ public sealed class TeamRepository : GenericRepository<Team>, ITeamRepository
             result[row.TeamId] = result.GetValueOrDefault(row.TeamId) + row.Count;
 
         return result;
-    }
-
-    private static TeamHubItem MapHubItem(
-        Team t,
-        Guid? currentUserId,
-        IReadOnlyDictionary<Guid, int> projectCounts)
-    {
-        var membersCount = t.TeamMembers?.Count ?? 0;
-        return new TeamHubItem
-        {
-            Id = t.Id,
-            Name = t.Name,
-            Logo = t.Logo,
-            Cover = t.Cover,
-            TeamCode = t.TeamCode,
-            AboutUs = t.AboutUs,
-            AverageRating = t.AverageRating,
-            RatingCount = t.RatingCount,
-            OwnerUserId = t.OwnerUserId,
-            OwnerName = $"{t.Owner?.FristName ?? string.Empty} {t.Owner?.LastName ?? string.Empty}".Trim(),
-            MembersCount = membersCount,
-            ProjectsCount = projectCounts.GetValueOrDefault(t.Id),
-            MyRole = ResolveMyRole(t, currentUserId),
-            MemberAvatars = BuildMemberAvatars(t),
-            Categories = (t.TeamCategories ?? [])
-                .Select(tc => new TeamCategoryItem
-                {
-                    CategoryId = tc.CategoryId,
-                    Name = tc.Category?.Name ?? string.Empty,
-                    NameEn = tc.Category?.NameEn ?? string.Empty,
-                    IsPrimary = tc.IsPrimary
-                })
-                .ToList(),
-            Specialties = (t.TeamSpecialties ?? [])
-                .Select(ts => new TeamSpecialtyItem
-                {
-                    SpecialtyId = ts.SpecialtyId,
-                    NameEn = ts.Specialty?.NameEn ?? string.Empty,
-                    NameAr = ts.Specialty?.NameAr ?? string.Empty
-                })
-                .ToList(),
-            Skills = (t.TeamSkills ?? [])
-                .Select(ts => new TeamSkillItem
-                {
-                    SkillId = ts.SkillId,
-                    Name = ts.Skill?.Name ?? string.Empty
-                })
-                .ToList()
-        };
-    }
-
-    private static string? ResolveMyRole(Team t, Guid? currentUserId)
-    {
-        if (currentUserId is null || currentUserId == Guid.Empty)
-            return null;
-
-        if (t.OwnerUserId == currentUserId)
-            return nameof(Role.TeamLeader);
-
-        var membership = t.TeamMembers?.FirstOrDefault(tm => tm.UserId == currentUserId);
-        return membership is null ? null : membership.TeamRole.ToString();
-    }
-
-    private static List<TeamMemberAvatarItem> BuildMemberAvatars(Team t)
-    {
-        var fromMembers = (t.TeamMembers ?? [])
-            .OrderBy(tm => tm.TeamRole == Role.TeamLeader ? 0 : 1)
-            .ThenBy(tm => tm.JoinedAt)
-            .Select(tm => new TeamMemberAvatarItem
-            {
-                UserId = tm.UserId,
-                Name = $"{tm.User?.FristName ?? string.Empty} {tm.User?.LastName ?? string.Empty}".Trim(),
-                ImageUrl = tm.User?.DeveloperProfile?.ProfileImage
-                    ?? tm.User?.ClientProfile?.ProfileImage
-            })
-            .Where(a => a.UserId != Guid.Empty)
-            .ToList();
-
-        if (fromMembers.Count > 0)
-            return fromMembers;
-
-        var ownerName = $"{t.Owner?.FristName ?? string.Empty} {t.Owner?.LastName ?? string.Empty}".Trim();
-        if (t.OwnerUserId == Guid.Empty)
-            return [];
-
-        return
-        [
-            new TeamMemberAvatarItem
-            {
-                UserId = t.OwnerUserId,
-                Name = string.IsNullOrWhiteSpace(ownerName) ? "Owner" : ownerName,
-                ImageUrl = t.Owner?.DeveloperProfile?.ProfileImage
-                    ?? t.Owner?.ClientProfile?.ProfileImage
-            }
-        ];
     }
 }

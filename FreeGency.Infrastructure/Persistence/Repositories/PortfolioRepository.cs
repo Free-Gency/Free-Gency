@@ -132,6 +132,8 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .Include(x => x.ReviewerUser!)
                     .ThenInclude(u => u.ClientProfile)
+                .Include(x => x.ReviewerUser!)
+                    .ThenInclude(u => u.DeveloperProfile)
                 .Where(x => x.PortfolioProjectId == portfolioProjectId)
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(take)

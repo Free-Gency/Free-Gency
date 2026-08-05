@@ -10,7 +10,6 @@ namespace FreeGency.Application.Features.Portfolio.Validators
                 .MaximumLength(150);
 
             RuleFor(x => x.Description)
-                .NotEmpty()
                 .MaximumLength(5000);
 
             RuleFor(x => x.Budget)
@@ -29,11 +28,11 @@ namespace FreeGency.Application.Features.Portfolio.Validators
             RuleFor(x => x.Solution).MaximumLength(8000);
             RuleFor(x => x.DurationLabel).MaximumLength(100);
             RuleFor(x => x.Industry).MaximumLength(120);
-            RuleFor(x => x.TeamLeads).MaximumLength(200);
+            RuleFor(x => x.TeamLeads).MaximumLength(2000);
             RuleFor(x => x.TestimonialQuote).MaximumLength(4000);
 
             RuleFor(x => x.CompletionDate)
-                .LessThanOrEqualTo(DateTime.UtcNow)
+                .LessThanOrEqualTo(DateTime.UtcNow.Date.AddDays(1))
                 .When(x => x.CompletionDate.HasValue);
         }
     }

@@ -23,6 +23,8 @@ public class ChatRoom : ISoftDeletableEntity
     public Guid? ProposalId { get; set; }
     public Guid? CreatedByUserId { get; set; }
     public string? Title { get; set; }
+    /// <summary>Optional room avatar (TeamMain / TeamGroup). Falls back to team logo in UI when null.</summary>
+    public string? Logo { get; set; }
 
     public virtual Team? Team { get; set; }
     public virtual Project? Project { get; set; }

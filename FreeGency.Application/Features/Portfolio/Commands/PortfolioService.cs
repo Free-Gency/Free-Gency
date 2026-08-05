@@ -375,7 +375,8 @@ namespace FreeGency.Application.Features.Portfolio.Commands
             CancellationToken ct = default)
         {
             if (!await CanManageTeamAsync(teamId, ct))
-                return ApiResponse.Failure<Guid>(AppError.Unauthorized());
+                return ApiResponse.Failure<Guid>(
+                    AppError.Forbidden("Only the team owner or a team leader can publish portfolio projects."));
 
             var project = _mapper.Map<PortfolioProject>(request);
 
@@ -383,6 +384,11 @@ namespace FreeGency.Application.Features.Portfolio.Commands
             project.OwnerType = owner.Team;
             project.OwnerTeamId = teamId;
             project.OwnerUserId = null;
+            project.CreatedBy = _currentUser.UserId.ToString();
+            project.Title = (request.Title ?? string.Empty).Trim();
+            project.Description = (request.Description ?? string.Empty).Trim();
+            if (project.TeamLeads is { Length: > 2000 })
+                project.TeamLeads = project.TeamLeads[..2000];
 
             await _portfolioRepo.AddWithSkillsAsync(
                 project,

@@ -60,6 +60,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PortfolioMetric> PortfolioMetrics => Set<PortfolioMetric>();
     public DbSet<RecentlyViewedPortfolio> RecentlyViewedPortfolios => Set<RecentlyViewedPortfolio>();
     public DbSet<PortfolioFeedback> PortfolioFeedbacks => Set<PortfolioFeedback>();
+    public DbSet<TeamFeedback> TeamFeedbacks => Set<TeamFeedback>();
 
     // Chat
     public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();

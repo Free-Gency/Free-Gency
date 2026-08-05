@@ -7,8 +7,6 @@ public interface ITeamRepository : IGenericRepository<Team>
 {
     Task<IReadOnlyList<TeamHubItem>> GetMyHubItemsAsync(Guid userId, CancellationToken ct = default);
 
-    Task<IReadOnlyList<TeamHubItem>> GetBrowseHubItemsAsync(Guid? currentUserId, CancellationToken ct = default);
-
     Task<(IReadOnlyList<TeamHubItem> Items, int TotalCount)> GetBrowseHubItemsPagedAsync(
         Guid? currentUserId,
         string? search,
@@ -17,12 +15,6 @@ public interface ITeamRepository : IGenericRepository<Team>
         int pageNumber,
         int pageSize,
         CancellationToken ct = default);
-
-    Task<IReadOnlyList<Team>> GetByOwnerUserIdAsync(Guid ownerUserId, CancellationToken ct = default);
-
-    Task<IReadOnlyList<Team>> GetByOwnerUserIdWithDetailsAsync(Guid ownerUserId, CancellationToken ct = default);
-
-    Task<Team?> GetByTeamCodeAsync(string teamCode, CancellationToken ct = default);
 
     Task<Team?> GetByTeamCodeWithDetailsAsync(string teamCode, CancellationToken ct = default);
 
@@ -39,6 +31,11 @@ public interface ITeamRepository : IGenericRepository<Team>
 
     Task UpdateRatingAsync(Guid teamId, decimal averageRating, int ratingCount, CancellationToken ct = default);
 
+    Task<IReadOnlyList<TeamFeedback>> GetFeedbackAsync(Guid teamId, int take, CancellationToken ct = default);
+
+    Task<bool> HasFeedbackAsync(Guid teamId, Guid reviewerUserId, CancellationToken ct = default);
+
+    Task AddFeedbackAsync(TeamFeedback feedback, CancellationToken ct = default);
 
     Task<bool> TeamCodeExistsAsync(string teamCode, CancellationToken ct = default);
     

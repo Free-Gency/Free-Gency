@@ -62,10 +62,17 @@ public class ProfileController(IAccountService accountService) : BaseApiControll
         return result.IsSuccess ? Ok() : result.ToProblem();
     }
 
-    [HttpPost("switch-profile")]
-    public async Task<IActionResult> SwitchProfile()
+    [HttpGet("modes")]
+    public async Task<IActionResult> GetProfileModes()
     {
-        var result = await accountService.SwitchModeAsync();
+        var result = await accountService.GetProfileModesAsync();
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
+    [HttpPost("switch-profile")]
+    public async Task<IActionResult> SwitchProfile([FromQuery] string? targetMode = null)
+    {
+        var result = await accountService.SwitchModeAsync(targetMode);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
@@ -74,6 +81,13 @@ public class ProfileController(IAccountService accountService) : BaseApiControll
     {
         var result = await accountService.GetDeveloperProfile();
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
+    [HttpPut("developer/me")]
+    public async Task<IActionResult> UpdateDeveloperProfile([FromForm] UpdateDeveloperAccountDto dto)
+    {
+        var result = await accountService.UpdateDeveloperProfileAsync(dto);
+        return result.IsSuccess ? Ok() : result.ToProblem();
     }
 
     [HttpPost("client/me/interests")]

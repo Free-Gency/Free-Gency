@@ -39,6 +39,7 @@ public class User : IdentityUser<Guid>, ISoftDeletableEntity
     public virtual ICollection<PortfolioProject> PortfolioProjects { get; set; } = [];
     public virtual ICollection<RecentlyViewedPortfolio> RecentlyViewedPortfolios { get; set; } = [];
     public virtual ICollection<PortfolioFeedback> PortfolioFeedbacks { get; set; } = [];
+    public virtual ICollection<TeamFeedback> TeamFeedbacks { get; set; } = [];
     public virtual Wallet? Wallet { get; set; }
     public virtual ICollection<TeamPayoutSplit> TeamPayoutSplits { get; set; } = [];
     public virtual ICollection<TeamJob> CreatedTeamJobs { get; set; } = [];

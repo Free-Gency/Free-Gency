@@ -50,4 +50,64 @@ public class TeamsController(ITeamService _teamService) : BaseApiController
     [Authorize]
     public async Task<IActionResult> ReplaceSkills(Guid id, [FromBody] UpdateTeamSkillsDto dto, CancellationToken ct)
         => HandleResult(await _teamService.ReplaceSkillsAsync(id, dto, ct));
+
+    [HttpGet("{id:guid}/members")]
+    [Authorize]
+    public async Task<IActionResult> GetMembers(Guid id, CancellationToken ct)
+        => HandleResult(await _teamService.GetMembersAsync(id, ct));
+
+    [HttpPut("{id:guid}/members/{userId:guid}/role")]
+    [Authorize]
+    public async Task<IActionResult> UpdateMemberRole(
+        Guid id,
+        Guid userId,
+        [FromBody] UpdateTeamMemberRoleDto dto,
+        CancellationToken ct)
+        => HandleResult(await _teamService.UpdateMemberRoleAsync(id, userId, dto, ct));
+
+    [HttpPost("{id:guid}/chat-groups")]
+    [Authorize]
+    public async Task<IActionResult> CreateChatGroup(
+        Guid id,
+        [FromBody] CreateTeamGroupDto dto,
+        CancellationToken ct)
+        => HandleResult(await _teamService.CreateTeamGroupAsync(id, dto, ct));
+
+    [HttpPut("{id:guid}/chat-groups/{roomId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> UpdateChatGroup(
+        Guid id,
+        Guid roomId,
+        [FromForm] UpdateTeamChatRoomDto dto,
+        CancellationToken ct)
+        => HandleResult(await _teamService.UpdateTeamChatRoomAsync(id, roomId, dto, ct));
+
+    [HttpGet("{id:guid}/chat-groups/{roomId:guid}/members")]
+    [Authorize]
+    public async Task<IActionResult> GetChatGroupMembers(
+        Guid id,
+        Guid roomId,
+        CancellationToken ct)
+        => HandleResult(await _teamService.GetTeamChatRoomMembersAsync(id, roomId, ct));
+
+    [HttpPost("{id:guid}/chat-groups/{roomId:guid}/members")]
+    [Authorize]
+    public async Task<IActionResult> AddChatGroupMembers(
+        Guid id,
+        Guid roomId,
+        [FromBody] AddTeamChatRoomMembersDto dto,
+        CancellationToken ct)
+        => HandleResult(await _teamService.AddTeamChatRoomMembersAsync(id, roomId, dto, ct));
+
+    [HttpGet("{id:guid}/reviews")]
+    public async Task<IActionResult> GetReviews(Guid id, CancellationToken ct)
+        => HandleResult(await _teamService.GetReviewsAsync(id, ct));
+
+    [HttpPost("{id:guid}/reviews")]
+    [Authorize]
+    public async Task<IActionResult> AddReview(
+        Guid id,
+        [FromBody] CreateTeamFeedbackRequestDto dto,
+        CancellationToken ct)
+        => HandleResult(await _teamService.AddReviewAsync(id, dto, ct));
 }

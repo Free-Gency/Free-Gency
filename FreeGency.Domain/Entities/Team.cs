@@ -36,5 +36,6 @@ public class Team : ISoftDeletableEntity
     public virtual ICollection<ChatRoom> ChatRooms { get; set; } = [];
     public virtual ICollection<PortfolioProject> PortfolioProjects { get; set; } = [];
     public virtual ICollection<Review> Reviews { get; set; } = [];
+    public virtual ICollection<TeamFeedback> TeamFeedbacks { get; set; } = [];
     public virtual Wallet? Wallet { get; set; }
 }

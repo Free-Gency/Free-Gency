@@ -1,4 +1,4 @@
-﻿using FreeGency.Domain.Entities;
+using FreeGency.Domain.Entities;
 
 namespace FreeGency.Domain.Interfaces.Repositories
 {
@@ -6,5 +6,8 @@ namespace FreeGency.Domain.Interfaces.Repositories
     {
         Task<ChatRoomMember?> IsMember(Guid? clientProfileId, Guid? developerProfileId, Guid roomId);
         Task<List<Guid>> GetRoomProfileIdsAsync(Guid roomId);
+        Task<IReadOnlyList<(Guid UserId, string Name, string? RoleLabel, bool CanSend)>> GetDeveloperMembersAsync(
+            Guid roomId,
+            CancellationToken ct = default);
     }
 }

@@ -55,5 +55,16 @@ namespace FreeGency.Application.Features.Teams.Commands
             var userId = _currentUserService.UserId;
             return ApiResponse.Success(team.ToDto(userId == Guid.Empty ? null : userId));
         }
+
+        public async Task<ApiResponse<IReadOnlyList<TeamReviewDto>>> GetReviewsAsync(
+            Guid teamId,
+            CancellationToken ct = default)
+        {
+            if (!await _teamRepository.ExistsAsync(teamId, ct))
+                return ApiResponse.Failure<IReadOnlyList<TeamReviewDto>>(AppError.NotFound(nameof(Team), teamId));
+
+            var feedback = await _teamRepository.GetFeedbackAsync(teamId, 40, ct);
+            return ApiResponse.Success<IReadOnlyList<TeamReviewDto>>(feedback.Select(MapTeamReview).ToList());
+        }
     }
 }

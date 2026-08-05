@@ -50,6 +50,8 @@ namespace FreeGency.Application.Features.Portfolio.DTOs
 
         public string? TestimonialAuthorAvatarUrl { get; init; }
 
+        public bool CanEdit { get; init; }
+
         public PortfolioCreatorDto? Creator { get; init; }
 
         public IReadOnlyList<OwnerReviewDto> OwnerReviews { get; init; } = [];

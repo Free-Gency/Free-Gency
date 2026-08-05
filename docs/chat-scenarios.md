@@ -19,7 +19,7 @@ UI behaviour demo: `FreeGency-Frontend/freegency/public/demo/proposal-milestone-
 | `Proposal` | Client ↔ applicant negotiation (includes plan cards) |
 | `Project` | After Hire (Accept Milestone Plan) |
 | `TeamGroup` | Leader-created internal group |
-| `TeamMain` | Team default room (if used) |
+| `TeamMain` | Default team room — created automatically when the team is created (owner/leader is the first member; new members join on accept) |
 
 | Status | When |
 |--------|------|
@@ -102,7 +102,9 @@ Regular members do **not** see client negotiation chats.
 
 ## Scenario E — Create Team Group
 
-Leader creates group from Management → appears in members’ personal Messages (DeveloperProfile membership).
+Leader creates a private group from **Team → Messages → Create group** (`POST /teams/{id}/chat-groups`) → `RoomType.TeamGroup` with selected DeveloperProfile members. Appears in members’ personal Messages and Team Management inbox.
+
+`TeamMain` (“General”) is created automatically when the team is created (and backfilled for older teams).
 
 ---
 

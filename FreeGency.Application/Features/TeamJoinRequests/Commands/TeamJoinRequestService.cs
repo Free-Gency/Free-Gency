@@ -65,15 +65,19 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
 
             if (request == null)
                 return Result.Failure(TeamErrors.JoinRequestNotFound);
+
+            var team = await _teamRepository.GetByIdAsync(request.TeamId);
+            if (team is null)
+                return Result.Failure(TeamErrors.TeamNotFound);
+
             var isLeader = await _teamMemberRepository.IsLeaderAsync(
                                                         request.TeamId,
-                                                        currentUserService.UserId);
+                                                        currentUserService.UserId)
+                || team.OwnerUserId == currentUserService.UserId;
             if (!isLeader)
                 return Result.Failure(TeamErrors.NotAuthorized);
             if (request.Status != TeamJoinRequestStatus.pending)
                 return Result.Failure(TeamErrors.RequestAlreadyHandled);
-
-           
 
             var member = await _teamMemberRepository.GetEntityWithSpec(
                 new TeamMemberSpecification(request.TeamId, request.UserId));
@@ -87,8 +91,8 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
                 TeamId = request.TeamId,
                 UserId = request.UserId,
                 TeamRole = Role.TeamMember,
-                Job=request.Job
-                // JoinedAt = DateTime.UtcNow
+                Job = request.Job,
+                JoinedAt = DateTime.UtcNow.ToString("O")
             });
 
             request.Status = TeamJoinRequestStatus.Accepted;
@@ -96,6 +100,24 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
             request.RespondedByUserId = currentUserService.UserId.ToString();
 
             _teamJoinRequestRepository.Update(request);
+
+            var chatRoomRepo = unitOfWork.Repository<IChatRoomRepository, ChatRoom>();
+            var userRepo = unitOfWork.Repository<IUserRepository, User>();
+            var mainRoom = await chatRoomRepo.GetTeamMainAsync(request.TeamId);
+            if (mainRoom is not null)
+            {
+                var developerProfileId =
+                    await userRepo.GetDeveloperProfileIdByUserIdAsync(request.UserId);
+                if (developerProfileId is not null)
+                {
+                    await chatRoomRepo.AddMemberAsync(
+                        mainRoom.Id,
+                        clientProfileId: null,
+                        developerProfileId: developerProfileId,
+                        canSend: true,
+                        roleLabel: "Team Member");
+                }
+            }
 
             await unitOfWork.SaveChangesAsync();
 
@@ -108,9 +130,15 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
 
             if (request == null)
                 return Result.Failure(TeamErrors.JoinRequestNotFound);
+
+            var team = await _teamRepository.GetByIdAsync(request.TeamId);
+            if (team is null)
+                return Result.Failure(TeamErrors.TeamNotFound);
+
             var isLeader = await _teamMemberRepository.IsLeaderAsync(
                                                         request.TeamId,
-                                                        currentUserService.UserId);
+                                                        currentUserService.UserId)
+                || team.OwnerUserId == currentUserService.UserId;
             if (!isLeader)
                 return Result.Failure(TeamErrors.NotAuthorized);
             if (request.Status != TeamJoinRequestStatus.pending)
