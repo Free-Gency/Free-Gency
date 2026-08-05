@@ -22,6 +22,7 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
         private readonly IDeveloperProfileRepository developerProfileRepository = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
         private readonly IWalletRepository walletRepository = unitOfWork.Repository<IWalletRepository, Wallet>();
         private readonly IClientNotificationSettingsRepository clientNotificationSettingsRepository = unitOfWork.Repository<IClientNotificationSettingsRepository, ClientNotificationSettings>();
+        private readonly IDeveloperNotificationSettingsRepository developerNotificationSettingsRepository = unitOfWork.Repository<IDeveloperNotificationSettingsRepository, DeveloperNotificationSettings>();
         public async Task<Result<AuthResponseDto>> LoginWithGoogleAsync()
         {
             var info = await signInManager.GetExternalLoginInfoAsync();
@@ -75,6 +76,7 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
                 await developerProfileRepository.AddAsync(developerProfile);
                 await walletRepository.AddAsync(wallet);
                 await clientNotificationSettingsRepository.AddAsync(new ClientNotificationSettings { Id = Guid.NewGuid(), ProfileId = clientProfile.Id });
+                await developerNotificationSettingsRepository.AddAsync(new DeveloperNotificationSettings { Id = Guid.NewGuid(), ProfileId = developerProfile.Id });
                 await unitOfWork.SaveChangesAsync();
                 var loginResult = await userManager.AddLoginAsync(user, info);
                 if (!loginResult.Succeeded)

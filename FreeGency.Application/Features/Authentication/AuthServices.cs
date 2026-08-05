@@ -20,6 +20,7 @@ namespace FreeGency.Application.Features.Authentication
         private readonly int _refreshTokenExpiryDays = 14;
         private readonly IWalletRepository walletRepository = unitOfWork.Repository<IWalletRepository, Wallet>();
         private readonly IClientNotificationSettingsRepository clientNotificationSettingsRepository = unitOfWork.Repository<IClientNotificationSettingsRepository, ClientNotificationSettings>();
+        private readonly IDeveloperNotificationSettingsRepository developerNotificationSettingsRepository = unitOfWork.Repository<IDeveloperNotificationSettingsRepository, DeveloperNotificationSettings>();
         public async Task<Result> RegisterAsync(RegisterRequestDto dto)
         {
             var emailIsExist = await userManager.Users.AnyAsync(x => x.Email == dto.Email);
@@ -59,7 +60,9 @@ namespace FreeGency.Application.Features.Authentication
                     UserId = user.Id,
                     CreatedAt = DateTime.UtcNow
                 };
+                var developerNotification = new DeveloperNotificationSettings { Id = Guid.NewGuid(), ProfileId = developerProfile.Id };
                 await repo.AddAsync(developerProfile);
+                await developerNotificationSettingsRepository.AddAsync(developerNotification);
                 await unitOfWork.SaveChangesAsync();
             }
 

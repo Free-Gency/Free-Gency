@@ -1,5 +1,7 @@
 
 
+using FreeGency.Application.Features.DeveloperNotification.Commands;
+
 namespace FreeGency.Application;
 
 public static class DependencyInjection
@@ -13,6 +15,7 @@ public static class DependencyInjection
             cfg.AddMaps(typeof(ProjectMapping).Assembly);
             cfg.AddMaps(typeof(ProposalMapping).Assembly);
         });
+        services.AddScoped<IDeveloperNotificationService, DeveloperNotificationService>();
         services.AddSingleton<OnlineUsersService>();
         services.AddScoped<IClientNotficationService, ClientNotficationService>();
         services.AddScoped<IChatService, ChatService>();
