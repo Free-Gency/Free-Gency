@@ -1,4 +1,4 @@
-﻿using FreeGency.Application.Features.ChatFeature.Dtos;
+using FreeGency.Application.Features.ChatFeature.Dtos;
 using FreeGency.Domain.Enums;
 
 namespace FreeGency.Application.Features.ChatFeature.Mapping
@@ -12,6 +12,8 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                 Id = Guid.NewGuid(),
                 CreatedByUserId = userId,
                 ProposalId = projectProposal.Id,
+                // Null on purpose — unique ProjectId index is reserved for Project rooms after hire.
+                ProjectId = null,
                 TeamId = projectProposal.TeamId,
                 Title = projectProposal.Project.Title,
                 RoomType = RoomType.Proposal
@@ -32,6 +34,16 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                         .First(m =>
                             (clientProfileId != null && m.ClientProfileId == clientProfileId) ||
                             (developerProfileId != null && m.DeveloperProfileId == developerProfileId)),
+
+                    ClientName =
+                        r.Project != null
+                            ? (r.Project.Client.FristName + " " + r.Project.Client.LastName).Trim()
+                            : r.Proposal != null && r.Proposal.Project != null
+                                ? (r.Proposal.Project.Client.FristName + " " + r.Proposal.Project.Client.LastName).Trim()
+                                : null,
+
+                    TeamName = r.Team != null ? r.Team.Name : null,
+                    TeamLogo = r.Team != null ? r.Team.Logo : null,
 
                     LastMessage = r.Messages
                         .OrderByDescending(m => m.CreatedAt)
@@ -54,8 +66,21 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                 {
                     Id = x.Room.Id,
                     Title = x.Room.Title!,
+                    ClientName = string.IsNullOrWhiteSpace(x.ClientName) ? null : x.ClientName,
+                    TeamId = x.Room.TeamId,
+                    TeamName = x.TeamName,
+                    TeamLogo = x.TeamLogo,
+                    Logo = x.Room.Logo,
+                    // Prefer Proposal.ProjectId for negotiation rooms (legacy rows often left ProjectId null).
+                    ProjectId = x.Room.Proposal != null
+                        ? x.Room.Proposal.ProjectId
+                        : x.Room.ProjectId,
+                    ProposalId = x.Room.ProposalId ?? (x.Room.Proposal != null ? x.Room.Proposal.Id : null),
                     RoomType = x.Room.RoomType.ToString(),
                     Status = x.Room.Status.ToString(),
+                    CreatedAt = x.Room.CreatedAt,
+                    CanSend = x.CurrentMember.CanSend && x.Room.Status != ChatRoomStatus.Archived,
+                    RoleLabel = x.CurrentMember.RoleLabel,
 
                     LastMessage = x.LastMessage != null
                         ? x.LastMessage.Text
@@ -78,41 +103,43 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                           (developerProfileId != null && m.SenderDeveloperProfileId == developerProfileId)) &&
                         (x.CurrentMember.LastReadAt == null ||
                          m.CreatedAt > x.CurrentMember.LastReadAt)),
-                    ArchivedAt=x.Room.ArchivedAt
+                    ArchivedAt = x.Room.ArchivedAt
                 });
         }
 
         public static IQueryable<RoomMessagesDto> ToRoomMessageDto(
             this IQueryable<Message> messages,
             Guid? clientProfileId,
-            Guid? developerProfileId,Guid? otherProfileId)
+            Guid? developerProfileId,
+            Guid? otherProfileId)
         {
             return messages
-                .OrderBy(x => x.CreatedAt)
                 .Select(x => new RoomMessagesDto
                 {
-                Id = x.Id,
-                SenderId = x.SenderClientProfileId ?? x.SenderDeveloperProfileId,
-                SenderProfileType = x.SenderClientProfileId != null
-                    ? nameof(profileMode.Client)
-                    : x.SenderDeveloperProfileId != null
-                        ? nameof(profileMode.Developer)
-                        : null,
-                SenderName = x.SenderClientProfile != null
-                    ? x.SenderClientProfile.User.FristName + " " + x.SenderClientProfile.User.LastName
-                    : x.SenderDeveloperProfile != null
-                        ? x.SenderDeveloperProfile.User.FristName + " " + x.SenderDeveloperProfile.User.LastName
-                        : null,
-                Text = x.Text,
-                FileName = x.FileName,
-                FileUrl = x.FileUrl,
-                CreatedAt = x.CreatedAt,
-                MessageType = x.MessageType.ToString(),
-                IsMine =
-                    (clientProfileId != null && x.SenderClientProfileId == clientProfileId) ||
-                    (developerProfileId != null && x.SenderDeveloperProfileId == developerProfileId),
-                OtherProfileId=otherProfileId
-            });
+                    Id = x.Id,
+                    ChatRoomId = x.ChatRoomId,
+                    SenderId = x.SenderClientProfileId ?? x.SenderDeveloperProfileId,
+                    SenderProfileType = x.SenderClientProfileId != null
+                        ? nameof(profileMode.Client)
+                        : x.SenderDeveloperProfileId != null
+                            ? nameof(profileMode.Developer)
+                            : null,
+                    SenderName = x.SenderClientProfile != null
+                        ? x.SenderClientProfile.User.FristName + " " + x.SenderClientProfile.User.LastName
+                        : x.SenderDeveloperProfile != null
+                            ? x.SenderDeveloperProfile.User.FristName + " " + x.SenderDeveloperProfile.User.LastName
+                            : null,
+                    Text = x.Text,
+                    FileName = x.FileName,
+                    FileUrl = x.FileUrl,
+                    PlanVersionId = x.PlanVersionId,
+                    CreatedAt = x.CreatedAt,
+                    MessageType = x.MessageType.ToString(),
+                    IsMine =
+                        (clientProfileId != null && x.SenderClientProfileId == clientProfileId) ||
+                        (developerProfileId != null && x.SenderDeveloperProfileId == developerProfileId),
+                    OtherProfileId = otherProfileId
+                });
         }
     }
 }

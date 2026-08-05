@@ -166,6 +166,10 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
+                    b.Property<string>("Logo")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<Guid?>("ProjectId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1085,6 +1089,9 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("ChatRoomId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ClientProfileId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -1106,6 +1113,9 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Property<string>("DeletedBy")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<Guid?>("DeveloperProfileId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
@@ -1150,12 +1160,13 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ChatRoomId");
+
+                    b.HasIndex("ClientProfileId");
+
+                    b.HasIndex("DeveloperProfileId");
 
                     b.HasIndex("MessageId");
 
@@ -1167,9 +1178,14 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ClientProfileId", "IsRead");
 
-                    b.ToTable("Notifications");
+                    b.HasIndex("DeveloperProfileId", "IsRead");
+
+                    b.ToTable("Notifications", "core", t =>
+                        {
+                            t.HasCheckConstraint("CK_Notifications_ProfileScope", "(ClientProfileId IS NOT NULL AND DeveloperProfileId IS NULL) OR (ClientProfileId IS NULL AND DeveloperProfileId IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.PaymentTransaction", b =>
@@ -1365,6 +1381,37 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.ToTable("PortfolioImages", "portfolio");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioMetric", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<Guid>("PortfolioProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SortOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PortfolioProjectId", "SortOrder");
+
+                    b.ToTable("PortfolioMetrics", "portfolio");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioProject", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1376,6 +1423,9 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid?>("CategoryId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Challenge")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("CompletionDate")
                         .HasColumnType("datetime2");
@@ -1403,9 +1453,17 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DurationLabel")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("ImageCover")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Industry")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -1426,6 +1484,32 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Property<string>("ProjectUrl")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PrototypeUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Solution")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TeamLeads")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("TestimonialAuthorAvatarUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TestimonialAuthorName")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("TestimonialAuthorTitle")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TestimonialQuote")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -1455,6 +1539,37 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("OwnerUserId");
 
                     b.ToTable("PortfolioProjects", "portfolio");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioRoadmapStep", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDone")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid>("PortfolioProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SortOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PortfolioProjectId", "SortOrder");
+
+                    b.ToTable("PortfolioRoadmapSteps", "portfolio");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioSkill", b =>
@@ -2494,6 +2609,10 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasColumnType("decimal(3,2)")
                         .HasDefaultValue(0m);
 
+                    b.Property<string>("Cover")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -2608,13 +2727,74 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("TeamId")
-                        .IsUnique();
+                    b.HasIndex("TeamId");
 
                     b.HasIndex("TeamId", "CategoryId")
                         .IsUnique();
 
                     b.ToTable("TeamCategories", "teams");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamFeedback", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ReviewerUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewerUserId");
+
+                    b.HasIndex("TeamId", "CreatedAt");
+
+                    b.HasIndex("TeamId", "ReviewerUserId")
+                        .IsUnique();
+
+                    b.ToTable("TeamFeedbacks", "teams");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.TeamJob", b =>
@@ -3836,35 +4016,51 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("FreeGency.Domain.Entities.ChatRoom", "ChatRoom")
                         .WithMany()
-                        .HasForeignKey("ChatRoomId");
+                        .HasForeignKey("ChatRoomId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("FreeGency.Domain.Entities.ClientProfile", "ClientProfile")
+                        .WithMany("Notifications")
+                        .HasForeignKey("ClientProfileId")
+                        .HasPrincipalKey("Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("FreeGency.Domain.Entities.DeveloperProfile", "DeveloperProfile")
+                        .WithMany("Notifications")
+                        .HasForeignKey("DeveloperProfileId")
+                        .HasPrincipalKey("Id")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("FreeGency.Domain.Entities.Message", "Message")
                         .WithMany()
-                        .HasForeignKey("MessageId");
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("FreeGency.Domain.Entities.Milestone", "Milestone")
                         .WithMany()
-                        .HasForeignKey("MilestoneId");
+                        .HasForeignKey("MilestoneId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("FreeGency.Domain.Entities.Project", "Project")
                         .WithMany()
-                        .HasForeignKey("ProjectId");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("FreeGency.Domain.Entities.ProjectProposal", "ProjectProposal")
                         .WithMany()
-                        .HasForeignKey("ProjectProposalId");
+                        .HasForeignKey("ProjectProposalId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("FreeGency.Domain.Entities.Team", "Team")
                         .WithMany()
-                        .HasForeignKey("TeamId");
-
-                    b.HasOne("FreeGency.Domain.Entities.User", "User")
-                        .WithMany("Notifications")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("ChatRoom");
+
+                    b.Navigation("ClientProfile");
+
+                    b.Navigation("DeveloperProfile");
 
                     b.Navigation("Message");
 
@@ -3875,8 +4071,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("ProjectProposal");
 
                     b.Navigation("Team");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.PaymentTransaction", b =>
@@ -3932,6 +4126,17 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("PortfolioProject");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioMetric", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.PortfolioProject", "PortfolioProject")
+                        .WithMany("Metrics")
+                        .HasForeignKey("PortfolioProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PortfolioProject");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioProject", b =>
                 {
                     b.HasOne("FreeGency.Domain.Entities.Category", "Category")
@@ -3954,6 +4159,17 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("OwnerTeam");
 
                     b.Navigation("OwnerUser");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioRoadmapStep", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.PortfolioProject", "PortfolioProject")
+                        .WithMany("RoadmapSteps")
+                        .HasForeignKey("PortfolioProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PortfolioProject");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioSkill", b =>
@@ -4279,6 +4495,25 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+
+                    b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamFeedback", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.User", "ReviewerUser")
+                        .WithMany("TeamFeedbacks")
+                        .HasForeignKey("ReviewerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.Team", "Team")
+                        .WithMany("TeamFeedbacks")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReviewerUser");
 
                     b.Navigation("Team");
                 });
@@ -4643,6 +4878,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("ClientNotificationSettings")
                         .IsRequired();
 
+                    b.Navigation("Notifications");
+
                     b.Navigation("SentMessages");
 
                     b.Navigation("UserInterests");
@@ -4658,6 +4895,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.Navigation("DeveloperNotificationSettings")
                         .IsRequired();
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("SentMessages");
 
@@ -4688,11 +4927,15 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("Feedbacks");
 
+                    b.Navigation("Metrics");
+
                     b.Navigation("PortfolioImages");
 
                     b.Navigation("PortfolioSkills");
 
                     b.Navigation("RecentlyViewedByUsers");
+
+                    b.Navigation("RoadmapSteps");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Project", b =>
@@ -4781,6 +5024,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.Navigation("TeamCategories");
 
+                    b.Navigation("TeamFeedbacks");
+
                     b.Navigation("TeamJobs");
 
                     b.Navigation("TeamJoinRequests");
@@ -4813,8 +5058,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.Navigation("DeveloperProfile");
 
-                    b.Navigation("Notifications");
-
                     b.Navigation("OwnedTeams");
 
                     b.Navigation("PortfolioFeedbacks");
@@ -4838,6 +5081,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("SavedProjects");
 
                     b.Navigation("SocialLinks");
+
+                    b.Navigation("TeamFeedbacks");
 
                     b.Navigation("TeamJoinRequests");
 

@@ -20,6 +20,7 @@ public class ChatRoomConfiguration : IEntityTypeConfiguration<ChatRoom>
             .HasDefaultValue(ChatRoomStatus.Active);
         builder.Property(c => c.ArchivedAt).HasColumnType("datetime2");
         builder.Property(c => c.Title).HasMaxLength(200);
+        builder.Property(c => c.Logo).HasMaxLength(500);
 
         builder.HasIndex(c => c.TeamId)
             .IsUnique()

@@ -1,4 +1,4 @@
-﻿using FreeGency.Application.Common.Hubs;
+using FreeGency.Application.Common.Hubs;
 using FreeGency.Application.Features.ChatFeature.Dtos;
 using FreeGency.Application.Features.ChatFeature.Mapping;
 using FreeGency.Domain.Enums;
@@ -63,6 +63,7 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 Text = sendMessageRequest.Text,
                 FileUrl = fileUrl,
                 FileName = fileName,
+                CreatedAt = DateTime.UtcNow,
                 MessageType = sendMessageRequest.File != null
                     ? MessageType.Attachment
                     : MessageType.Text
@@ -75,6 +76,7 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             var dto = new RoomMessagesDto
             {
                 Id = message.Id,
+                ChatRoomId = ChatRoomId,
                 SenderId = active.Value.ProfileId,
                 SenderProfileType = active.Value.Mode.ToString(),
                 SenderName = $"{currentUserService.FirstName} {currentUserService.LastName}",
@@ -191,6 +193,9 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 RoomType = chatRoom.RoomType.ToString(),
                 Status = chatRoom.Status.ToString(),
                 Title = chatRoom.Title,
+                ProjectId = chatRoom.ProjectId,
+                ProposalId = chatRoom.ProposalId,
+                TeamId = chatRoom.TeamId,
                 LastMessage = message.Text,
                 LastMessageType = message.MessageType.ToString(),
                 LastMessageAt = message.CreatedAt,

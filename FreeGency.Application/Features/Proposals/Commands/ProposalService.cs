@@ -245,6 +245,8 @@ public partial class ProposalService : IProposalService
                 Status = ChatRoomStatus.Active,
                 ProposalId = proposal.Id,
                 TeamId = proposal.TeamId,
+                // Keep null: IX_ChatRooms_ProjectId is unique and is claimed by the Project room on hire.
+                // API list DTO still exposes projectId via Proposal.ProjectId.
                 ProjectId = null,
                 Title = $"{project.Title}",
                 CreatedByUserId = _currentUser.UserId

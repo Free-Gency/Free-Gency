@@ -298,9 +298,11 @@ No cold DMs in MVP.
 
 ## 21. NotificationsController — Notifications
 
+Inbox is **profile-scoped** (active `ClientProfile` or `DeveloperProfile`), same pattern as chat — not `UserId`.
+
 | Method | Path | Notes |
 | ------ | ---- | ----- |
-| GET | `/notifications` · `/notifications/unread-count` | Inbox |
+| GET | `/notifications` · `/notifications/unread-count` | Inbox for active profile |
 | POST | `/notifications/{id}/read` · `/notifications/read-all` | Mark read |
 | DELETE | `/notifications/{id}` | Dismiss |
 

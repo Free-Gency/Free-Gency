@@ -44,6 +44,7 @@ global using FreeGency.Application.Features.skills.Commands;
 global using FreeGency.Application.Features.SocialLinks.Commands;
 global using FreeGency.Application.Features.specialties.Commands;
 global using FreeGency.Application.Features.TeamJobs.Commands;
+global using FreeGency.Application.Features.TeamJoinRequests.Commands;
 global using FreeGency.Application.Features.Teams.Commands;
 global using FreeGency.Application.Features.TeamSuggestions;
 global using FreeGency.Application.Features.WalletFeature.Queries;

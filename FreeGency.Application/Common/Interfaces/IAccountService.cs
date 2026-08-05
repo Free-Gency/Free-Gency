@@ -9,10 +9,12 @@ public interface IAccountService
     Task<Result<ClientAccountResponseDto>> GetClientProfile();
     Task<Result<List<ProfileInterestDto>>> GetClientInterests();
     Task<Result> UpdateClientProfileAsync(UpdateClientAccountDto dto);
+    Task<Result> UpdateDeveloperProfileAsync(UpdateDeveloperAccountDto dto);
     Task<Result> CreateProfileClientAsync();
     Task<Result> CreateProfileDeveloperAsync();
     Task<Result> CompleteOnboardingAsync();
-    Task<Result<string>> SwitchModeAsync();
+    Task<Result<ProfileModesDto>> GetProfileModesAsync();
+    Task<Result<SwitchProfileResponseDto>> SwitchModeAsync(string? targetMode = null);
     Task<Result<DeveloperAccountResponseDto>> GetDeveloperProfile();
     Task<ApiResponse> AddClientInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default);
     Task<ApiResponse> ReplaceClientInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default);

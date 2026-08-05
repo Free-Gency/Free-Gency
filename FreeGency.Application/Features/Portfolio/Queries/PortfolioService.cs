@@ -125,6 +125,7 @@ namespace FreeGency.Application.Features.Portfolio.Commands
             var dto = _mapper.Map<PortfolioProjectDetailsDto>(portfolio);
             var creator = BuildCreator(portfolio);
             var reviews = await LoadReviewsAsync(portfolio, ct);
+            var canEdit = await CanEditPortfolioAsync(portfolio, ct);
 
             return ApiResponse.Success(new PortfolioProjectDetailsDto
             {
@@ -134,17 +135,31 @@ namespace FreeGency.Application.Features.Portfolio.Commands
                 Budget = dto.Budget,
                 ImageCover = dto.ImageCover,
                 ProjectUrl = dto.ProjectUrl,
+                PrototypeUrl = dto.PrototypeUrl,
                 CompletionDate = dto.CompletionDate,
+                UpdatedAt = dto.UpdatedAt,
                 Visibility = dto.Visibility,
                 CategoryName = dto.CategoryName,
                 OwnerName = creator?.DisplayName ?? dto.OwnerName,
                 OwnerType = creator?.Kind ?? portfolio.OwnerType.ToString(),
                 OwnerUserId = portfolio.OwnerUserId,
                 OwnerTeamId = portfolio.OwnerTeamId,
+                Challenge = dto.Challenge,
+                Solution = dto.Solution,
+                DurationLabel = dto.DurationLabel,
+                Industry = dto.Industry,
+                TeamLeads = dto.TeamLeads,
+                TestimonialQuote = dto.TestimonialQuote,
+                TestimonialAuthorName = dto.TestimonialAuthorName,
+                TestimonialAuthorTitle = dto.TestimonialAuthorTitle,
+                TestimonialAuthorAvatarUrl = dto.TestimonialAuthorAvatarUrl,
+                CanEdit = canEdit,
                 Creator = creator,
                 OwnerReviews = reviews,
                 Images = dto.Images,
                 Skills = dto.Skills,
+                RoadmapSteps = dto.RoadmapSteps,
+                Metrics = dto.Metrics,
             });
         }
 
@@ -163,6 +178,14 @@ namespace FreeGency.Application.Features.Portfolio.Commands
             if (portfolio.OwnerUserId == _currentUser.UserId)
                 return ApiResponse.Failure<OwnerReviewDto>(
                     AppError.Forbidden("You cannot review your own portfolio."));
+
+            if (portfolio.OwnerTeamId is Guid teamId)
+            {
+                var memberRepo = _unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
+                if (await memberRepo.IsMemberAsync(teamId, _currentUser.UserId, ct))
+                    return ApiResponse.Failure<OwnerReviewDto>(
+                        AppError.Forbidden("You cannot review a portfolio from your own team."));
+            }
 
             if (request.Rating is < 1 or > 5)
                 return ApiResponse.Failure<OwnerReviewDto>(
@@ -195,7 +218,28 @@ namespace FreeGency.Application.Features.Portfolio.Commands
             await repo.AddFeedbackAsync(feedback, ct);
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return ApiResponse.Success(MapFeedback(feedback));
+            var saved = (await repo.GetFeedbackAsync(portfolioProjectId, 50, ct))
+                .FirstOrDefault(x => x.Id == feedback.Id);
+
+            return ApiResponse.Success(MapFeedback(saved ?? feedback));
+        }
+
+        private async Task<bool> CanEditPortfolioAsync(PortfolioProject portfolio, CancellationToken ct)
+        {
+            var userId = _currentUser.UserId;
+            if (userId == Guid.Empty)
+                return false;
+
+            if (portfolio.OwnerUserId == userId)
+                return true;
+
+            if (Guid.TryParse(portfolio.CreatedBy, out var creatorId) && creatorId == userId)
+                return true;
+
+            if (portfolio.OwnerTeamId is Guid teamId)
+                return await CanManageTeamAsync(teamId, ct);
+
+            return false;
         }
 
         private static PortfolioCreatorDto? BuildCreator(PortfolioProject portfolio)
@@ -288,8 +332,11 @@ namespace FreeGency.Application.Features.Portfolio.Commands
         {
             var user = feedback.ReviewerUser;
             var name = user is null
-                ? "Client"
+                ? string.Empty
                 : $"{user.FristName} {user.LastName}".Trim();
+
+            if (string.IsNullOrWhiteSpace(name))
+                name = user?.UserName?.Trim() ?? "Community member";
 
             return new OwnerReviewDto
             {
@@ -298,9 +345,9 @@ namespace FreeGency.Application.Features.Portfolio.Commands
                 Comment = feedback.Comment,
                 CreatedAt = feedback.CreatedAt,
                 ReviewerUserId = feedback.ReviewerUserId,
-                ReviewerName = string.IsNullOrWhiteSpace(name) ? "Client" : name,
-                ReviewerAvatar = user?.ClientProfile?.ProfileImage
-                    ?? user?.DeveloperProfile?.ProfileImage,
+                ReviewerName = name,
+                ReviewerAvatar = user?.DeveloperProfile?.ProfileImage
+                    ?? user?.ClientProfile?.ProfileImage,
             };
         }
 

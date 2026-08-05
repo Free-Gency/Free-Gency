@@ -3,4 +3,6 @@ obj/
 
 .vs/
 
+artifacts/
+
 appsettings.Development.json

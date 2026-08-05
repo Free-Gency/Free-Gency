@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Features.Portfolio.Validators
+namespace FreeGency.Application.Features.Portfolio.Validators
 {
     public sealed class CreatePortfolioProjectValidator
         : AbstractValidator<CreatePortfolioProjectRequestDto>
@@ -9,8 +9,8 @@
                 .NotEmpty()
                 .MaximumLength(150);
 
+            // Case-study wizard may leave short description empty; Challenge/Solution carry the story.
             RuleFor(x => x.Description)
-                .NotEmpty()
                 .MaximumLength(5000);
 
             RuleFor(x => x.Budget)
@@ -24,8 +24,22 @@
                 .Must(x => Uri.TryCreate(x, UriKind.Absolute, out _))
                 .When(x => !string.IsNullOrWhiteSpace(x.ProjectUrl));
 
+            RuleFor(x => x.PrototypeUrl)
+                .Must(x => Uri.TryCreate(x, UriKind.Absolute, out _))
+                .When(x => !string.IsNullOrWhiteSpace(x.PrototypeUrl));
+
+            RuleFor(x => x.Challenge).MaximumLength(8000);
+            RuleFor(x => x.Solution).MaximumLength(8000);
+            RuleFor(x => x.DurationLabel).MaximumLength(100);
+            RuleFor(x => x.Industry).MaximumLength(120);
+            RuleFor(x => x.TeamLeads).MaximumLength(2000);
+            RuleFor(x => x.TestimonialQuote).MaximumLength(4000);
+            RuleFor(x => x.TestimonialAuthorName).MaximumLength(150);
+            RuleFor(x => x.TestimonialAuthorTitle).MaximumLength(200);
+
+            // Allow "today" in local timezones slightly ahead of UTC.
             RuleFor(x => x.CompletionDate)
-                .LessThanOrEqualTo(DateTime.UtcNow)
+                .LessThanOrEqualTo(DateTime.UtcNow.Date.AddDays(1))
                 .When(x => x.CompletionDate.HasValue);
 
             RuleForEach(x => x.SkillIds)

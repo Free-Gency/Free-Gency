@@ -4,6 +4,8 @@ using FreeGency.Application.Common.Mappings.SkillsMapping;
 using FreeGency.Application.Common.Mappings.TeamJobsMapping;
 using FreeGency.Application.Features.skills.Dtos;
 using FreeGency.Application.Features.TeamJobs.Dtos;
+using FreeGency.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace FreeGency.Application.Features.TeamJobs.Commands;
 
@@ -15,6 +17,9 @@ public partial class TeamJobService
         CancellationToken ct = default)
     {
         var query = _teamJobRepository.Query()
+            .AsNoTracking()
+            .Include(j => j.Team)
+            .Where(j => j.Status == TeamJobStatus.open)
             .ApplyFilters(filter)
             .ApplySearch(filter.Search)
             .ApplySorting(filter);

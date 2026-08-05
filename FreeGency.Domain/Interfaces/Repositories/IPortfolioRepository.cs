@@ -92,6 +92,16 @@ namespace FreeGency.Domain.Interfaces.Repositories
             Guid portfolioProjectId,
             CancellationToken ct = default);
 
+        Task ReplaceRoadmapStepsAsync(
+            Guid portfolioProjectId,
+            IEnumerable<PortfolioRoadmapStep> steps,
+            CancellationToken ct = default);
+
+        Task ReplaceMetricsAsync(
+            Guid portfolioProjectId,
+            IEnumerable<PortfolioMetric> metrics,
+            CancellationToken ct = default);
+
         #endregion
 
         new IQueryable<PortfolioProject> Query();
