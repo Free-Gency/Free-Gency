@@ -57,6 +57,7 @@ namespace FreeGency.Application.Common.Hubs
             var users = ActiveRoomUsers.GetOrAdd(roomId, _ => new());
 
             users[active!.Value.ProfileId] = 0;
+            Console.WriteLine($"Join {Context.ConnectionId} => room-{roomId}");
         }
         public async Task LeaveRoom(Guid roomId)
         {

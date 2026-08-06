@@ -113,7 +113,6 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                     continue;
                 if (ChatHub.IsUserInRoom(ChatRoomId, profileId))
                     continue;
-                var sw = System.Diagnostics.Stopwatch.StartNew();
 
                 await notificationService.CreateNotification(new CreateNotificationRequest
                 {
@@ -128,8 +127,6 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                     MessageId = message.Id,
                     ActionUrl = $"/chat/{ChatRoomId}"
                 });
-                sw.Stop();
-                Console.WriteLine($"CreateNotification: {sw.ElapsedMilliseconds} ms");
             }
     
             return Result.Success(dto);
