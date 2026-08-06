@@ -90,31 +90,6 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 CreatedAt = message.CreatedAt,
                 IsMine = true
             };
-            foreach (var memberRoom in roomMembers)
-            {
-                var profileId = member.ClientProfileId ?? member.DeveloperProfileId!.Value;
-
-                await hub.Clients
-                    .Group($"profile-{profileId}")
-                    .SendAsync("ReceiveMessage", dto);
-                if (profileId == active.Value.ProfileId)
-                    continue;
-                if (ChatHub.IsUserInRoom(ChatRoomId, profileId))
-                    continue;
-                await notificationService.CreateNotification(new CreateNotificationRequest
-                {
-                    Title = "New message",
-                    Body = $"{currentUserService.FirstName} {currentUserService.LastName}: {message.Text ?? "Sent an attachment"}",
-                    Type = NotificationType.NewChatMessage,
-
-                    ClientProfileId = member.ClientProfileId,
-                    DeveloperProfileId = member.DeveloperProfileId,
-
-                    ChatRoomId = ChatRoomId,
-                    MessageId = message.Id,
-                    ActionUrl = $"api/v1/Chat/rooms/{ChatRoomId}/messages"
-                });
-            }
             var roomUpdated = new RoomUpdatedDto
             {
                 RoomId = ChatRoomId,
@@ -122,14 +97,41 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 LastMessageType = message.MessageType.ToString(),
                 LastMessageAt = message.CreatedAt,
                 LastMessageSender = $"{currentUserService.FirstName} {currentUserService.LastName}",
-                SenderId= active.Value.ProfileId
+                SenderId = active.Value.ProfileId
             };
-            foreach (var profileId in roomMembers)
+            foreach (var memberRoom in roomMembers)
             {
+                var profileId = memberRoom.ClientProfileId ?? memberRoom.DeveloperProfileId!.Value;
+
                 await hub.Clients
                     .Group($"profile-{profileId}")
-                    .SendAsync("RoomUpdated", roomUpdated);
+                    .SendAsync("ReceiveMessage", dto);
+                await hub.Clients
+                   .Group($"profile-{profileId}")
+                   .SendAsync("RoomUpdated", roomUpdated);
+                if (profileId == active.Value.ProfileId)
+                    continue;
+                if (ChatHub.IsUserInRoom(ChatRoomId, profileId))
+                    continue;
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Title = "New message",
+                    Body = $"{currentUserService.FirstName} {currentUserService.LastName}: {message.Text ?? "Sent an attachment"}",
+                    Type = NotificationType.NewChatMessage,
+
+                    ClientProfileId = memberRoom.ClientProfileId,
+                    DeveloperProfileId = memberRoom.DeveloperProfileId,
+
+                    ChatRoomId = ChatRoomId,
+                    MessageId = message.Id,
+                    ActionUrl = $"/chat/{ChatRoomId}"
+                });
+                sw.Stop();
+                Console.WriteLine($"CreateNotification: {sw.ElapsedMilliseconds} ms");
             }
+    
             return Result.Success(dto);
         }
 

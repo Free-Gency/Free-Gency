@@ -6,11 +6,13 @@ using FreeGency.Domain.Entities;
 using FreeGency.Infrastructure;
 using FreeGency.Infrastructure.Persistence.Context;
 using FreeGency.Infrastructure.Persistence.Seeding;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 
 namespace FreeGency.Api
@@ -30,7 +32,8 @@ namespace FreeGency.Api
             builder.Services.Configure<StripeSetting>(builder.Configuration.GetSection("StripeSetting"));
             #region
             var JwtSettings = builder.Configuration.GetSection(JwtOptions.NameSection).Get<JwtOptions>();
-
+            builder.Host.UseSerilog((context, configration) =>
+                    configration.ReadFrom.Configuration(context.Configuration));
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -96,9 +99,15 @@ namespace FreeGency.Api
                         .AllowCredentials();
                 });
             });
-           
+            builder.Services.AddHangfire(configration => configration
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
+            builder.Services.AddHangfireServer();
             var app = builder.Build();
             app.UseStaticFiles();
+            app.UseHangfireDashboard("/jobs");
             DatabaseInitializer.InitializeAsync(app.Services).GetAwaiter().GetResult();
 
             // Configure the HTTP request pipeline.
@@ -114,7 +123,7 @@ namespace FreeGency.Api
                     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
                 });
             }
-
+            app.UseSerilogRequestLogging();
             app.UseCors("Frontend");
             app.UseAuthentication();
             app.UseAuthorization();

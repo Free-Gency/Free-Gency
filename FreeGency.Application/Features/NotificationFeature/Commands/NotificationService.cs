@@ -3,6 +3,7 @@ using FreeGency.Application.Features.EmailFeature.Dtos;
 using FreeGency.Application.Features.NotificationFeature.Dtos;
 using FreeGency.Application.Features.NotificationFeature.Mapping;
 using FreeGency.Infrastructure.Persistence.Repositories;
+using Hangfire;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
@@ -42,11 +43,12 @@ namespace FreeGency.Application.Features.NotificationFeature.Commands
                     {
                         var Email = await clientProfileRepository.GetEmail(active.Value.ProfileId);
                         if (Email != null)
-                            await emailService.SendEmail(new SendEmailRequestDto
+                            BackgroundJob.Enqueue(() => emailService.SendEmail(new SendEmailRequestDto
                             {
                                 email = Email,
                                 message = notification.Body
-                            });
+                            }));
+                            
                     }
                 }
                 else
@@ -68,11 +70,11 @@ namespace FreeGency.Application.Features.NotificationFeature.Commands
 
                         if (email != null)
                         {
-                            await emailService.SendEmail(new SendEmailRequestDto
+                            BackgroundJob.Enqueue(() => emailService.SendEmail(new SendEmailRequestDto
                             {
                                 email = email,
                                 message = notification.Body
-                            });
+                            }));
                         }
                     }
                 }
@@ -90,11 +92,11 @@ namespace FreeGency.Application.Features.NotificationFeature.Commands
                 {
                     var Email = await clientProfileRepository.GetEmail(createNotificationRequest.ClientProfileId.Value);
                     if (Email != null)
-                        await emailService.SendEmail(new SendEmailRequestDto
+                        BackgroundJob.Enqueue(() => emailService.SendEmail(new SendEmailRequestDto
                         {
                             email = Email,
                             message = notification.Body
-                        });
+                        }));
                 }
             }
             else if (createNotificationRequest.DeveloperProfileId != null)
@@ -113,11 +115,11 @@ namespace FreeGency.Application.Features.NotificationFeature.Commands
 
                     if (email != null)
                     {
-                        await emailService.SendEmail(new SendEmailRequestDto
+                        BackgroundJob.Enqueue(() => emailService.SendEmail(new SendEmailRequestDto
                         {
-                           email=email,
-                           message=notification.Body
-                        });
+                            email = email,
+                            message = notification.Body
+                        }));
                     }
                 }
             }
