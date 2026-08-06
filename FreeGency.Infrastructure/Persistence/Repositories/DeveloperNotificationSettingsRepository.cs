@@ -15,5 +15,7 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
         {
             return await _dbSet.Where(x => x.ProfileId == profileId).FirstOrDefaultAsync();
         }
+
+      
     }
 }

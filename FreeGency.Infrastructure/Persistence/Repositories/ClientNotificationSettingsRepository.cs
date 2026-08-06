@@ -10,5 +10,10 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
         {
             
         }
+
+        public async Task<ClientNotificationSettings> GetByProfileId(Guid profileId)
+        {
+            return await _dbSet.Where(x => x.ProfileId == profileId).FirstOrDefaultAsync();
+        }
     }
 }

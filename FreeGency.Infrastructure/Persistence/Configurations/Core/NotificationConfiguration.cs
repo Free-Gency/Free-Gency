@@ -13,7 +13,7 @@ public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
         {
             t.HasCheckConstraint(
                 "CK_Notifications_ProfileScope",
-                "(ClientProfileId IS NOT NULL AND DeveloperProfileId IS NULL) OR (ClientProfileId IS NULL AND DeveloperProfileId IS NOT NULL)");
+                "NOT (ClientProfileId IS NOT NULL AND DeveloperProfileId IS NOT NULL)");
         });
 
         builder.HasKey(n => n.Id);

@@ -4,6 +4,7 @@ namespace FreeGency.Domain.Interfaces.Repositories
 {
     public interface INotificationRepository : IGenericRepository<Notification>
     {
+        IQueryable<Notification> GetNotificationAsync(Guid profilId,Guid userId);
         Task<IEnumerable<Notification>> GetByProfileAsync(
             Guid? clientProfileId,
             Guid? developerProfileId,

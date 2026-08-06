@@ -1,15 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
+using System.Collections.Concurrent;
 namespace FreeGency.Application.Common.Hubs
 {
     [Authorize]
     public class ChatHub(ICurrentUserService currentUserService,IUnitOfWork unitOfWork,OnlineUsersService online):Hub
     {
         private readonly IUserRepository _userRepository = unitOfWork.Repository<IUserRepository, User>();
+        public static readonly ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, byte>> ActiveRoomUsers = new();
         public override async Task OnConnectedAsync()
         {
             var active = await _userRepository.GetActiveProfileAsync(currentUserService.UserId);
@@ -44,6 +42,35 @@ namespace FreeGency.Application.Common.Hubs
                 }
             } 
             await base.OnConnectedAsync();
+        }
+        public static bool IsUserInRoom(Guid roomId, Guid profileId)
+        {
+            return ActiveRoomUsers.TryGetValue(roomId, out var users)
+                   && users.ContainsKey(profileId);
+        }
+        public async Task JoinRoom(Guid roomId)
+        {
+            var active = await _userRepository.GetActiveProfileAsync(currentUserService.UserId);
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{roomId}");
+
+            var users = ActiveRoomUsers.GetOrAdd(roomId, _ => new());
+
+            users[active!.Value.ProfileId] = 0;
+        }
+        public async Task LeaveRoom(Guid roomId)
+        {
+            var active = await _userRepository.GetActiveProfileAsync(currentUserService.UserId);
+
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"room-{roomId}");
+
+            if (ActiveRoomUsers.TryGetValue(roomId, out var users))
+            {
+                users.TryRemove(active!.Value.ProfileId, out _);
+
+                if (users.IsEmpty)
+                    ActiveRoomUsers.TryRemove(roomId, out _);
+            }
         }
         public async override Task OnDisconnectedAsync(Exception? exception)
         {

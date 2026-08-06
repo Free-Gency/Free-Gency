@@ -99,7 +99,12 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             {
                 foreach (var id in members)
                 {
-                    if (id != active.Value.ProfileId) otherProfileId = id;
+                    var profileId = member.ClientProfileId ?? member.DeveloperProfileId!.Value;
+                    if (profileId != active.Value.ProfileId)
+                    {
+                        otherProfileId = profileId;
+                        break;
+                    }
                 }
             }
 

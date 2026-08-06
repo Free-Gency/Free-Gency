@@ -70,5 +70,13 @@
             if (clientProfileId.HasValue == developerProfileId.HasValue)
                 throw new ArgumentException("Exactly one of clientProfileId or developerProfileId must be set.");
         }
+
+        public  IQueryable<Notification> GetNotificationAsync(Guid profilId,Guid userId)
+        {
+            return _dbSet.Where(x =>(x.UserId==userId)||
+                                    (x.ClientProfileId!=null && x.ClientProfileId==profilId)||
+                                    (x.DeveloperProfileId!=null&&x.DeveloperProfileId==profilId)
+                                    );
+        }
     }
 }

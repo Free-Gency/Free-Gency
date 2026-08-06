@@ -192,4 +192,9 @@ public sealed class ClientProfileRepository : GenericRepository<ClientProfile>, 
             throw;
         }
     }
+
+    public async Task<string> GetEmail(Guid ProfileId)
+    {
+        return await _dbSet.Include(x => x.User).Where(x => x.Id == ProfileId).Select(x => x.User.Email).FirstOrDefaultAsync();
+    }
 }

@@ -1,3 +1,6 @@
+using AutoMapper.Execution;
+using FreeGency.Application.Features.NotificationFeature.Commands;
+using FreeGency.Application.Features.NotificationFeature.Dtos;
 using FreeGency.Application.Features.Proposals.Dtos;
 using FreeGency.Domain.Interfaces.Repositories.Teams;
 using FreeGency.Infrastructure.Integrations.Cloudinary;
@@ -17,17 +20,18 @@ public partial class ProposalService : IProposalService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IStorageService _storageService;
-
+    private readonly INotificationService _notificationService;
     public ProposalService(
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        IStorageService storageService)
+        IStorageService storageService,INotificationService notificationService)
     {
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _storageService = storageService;
+        _notificationService = notificationService;
         _proposalRepository = _unitOfWork.Repository<IProjectProposalRepository, ProjectProposal>();
         _projectRepository = _unitOfWork.Repository<IProjectRepository, Project>();
         _teamMemberRepository = _unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
@@ -189,13 +193,15 @@ public partial class ProposalService : IProposalService
         await _proposalRepository.UpdateStatusAsync(proposalId, ProposalStatus.InDiscussion, ct);
 
         var existingRoom = await _chatRoomRepository.GetByProposalIdAsync(proposalId, ct);
+        List<(Guid? ClientProfileId, Guid? DeveloperProfileId, bool CanSend, string? RoleLabel)>? members = null;
+        ChatRoom? chatRoom = null;
         if (existingRoom is null)
         {
             var clientProfileId = await _userRepository.GetClientProfileIdByUserIdAsync(project.ClientId, ct);
             if (clientProfileId is null)
                 return ApiResponse.Failure(AppError.Validation("Client profile is required to start a discussion."));
 
-            var members = new List<(Guid? ClientProfileId, Guid? DeveloperProfileId, bool CanSend, string? RoleLabel)>
+             members = new ()
             {
                 (clientProfileId, null, true, "Client")
             };
@@ -239,7 +245,7 @@ public partial class ProposalService : IProposalService
                 }
             }
 
-            var chatRoom = new ChatRoom
+            chatRoom = new ChatRoom
             {
                 RoomType = RoomType.Proposal,
                 Status = ChatRoomStatus.Active,
@@ -264,6 +270,23 @@ public partial class ProposalService : IProposalService
         }
 
         await _unitOfWork.SaveChangesAsync(ct);
+        foreach (var member in members)
+        {
+            if (member.DeveloperProfileId is null)
+                continue;
+
+            await _notificationService.CreateNotification(new CreateNotificationRequest
+            {
+                DeveloperProfileId = member.DeveloperProfileId,
+                Title = "Discussion started",
+                Body = $"A discussion has started for project \"{project.Title}\".",
+                Type = NotificationType.NewChatMessage, // أو اعمل نوع جديد
+                ChatRoomId = chatRoom.Id,
+                ProjectId = project.Id,
+                ProjectProposalId = proposal.Id,
+                ActionUrl = $"api/v1/Chat/rooms/{chatRoom.Id}/messages"
+            });
+        }
         return ApiResponse.Success("Discussion started. Accepting a proposal is not a hire — agree a milestone plan next.");
     }
 

@@ -1,5 +1,6 @@
 using FreeGency.Domain.Abstractions;
 using FreeGency.Domain.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FreeGency.Domain.Entities
 {
@@ -25,6 +26,7 @@ namespace FreeGency.Domain.Entities
         public DateTime? ReadAt { get; set; }
 
         // Owner: exactly one of ClientProfileId / DeveloperProfileId (XOR)
+        public Guid? UserId { get; set; }
         public Guid? ClientProfileId { get; set; }
         public Guid? DeveloperProfileId { get; set; }
 
@@ -37,6 +39,8 @@ namespace FreeGency.Domain.Entities
         public Guid? MessageId { get; set; }
 
         // Navigation Properties
+        [ForeignKey(nameof(UserId))]
+        public virtual User? User { get; set; }
         public virtual ClientProfile? ClientProfile { get; set; }
         public virtual DeveloperProfile? DeveloperProfile { get; set; }
         public virtual Project? Project { get; set; }

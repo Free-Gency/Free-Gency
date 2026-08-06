@@ -1,6 +1,8 @@
 using FreeGency.Application.Common.Hubs;
 using FreeGency.Application.Features.ChatFeature.Dtos;
 using FreeGency.Application.Features.ChatFeature.Mapping;
+using FreeGency.Application.Features.NotificationFeature.Commands;
+using FreeGency.Application.Features.NotificationFeature.Dtos;
 using FreeGency.Domain.Enums;
 using FreeGency.Infrastructure.Integrations.Cloudinary;
 using Microsoft.AspNetCore.SignalR;
@@ -11,7 +13,8 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         IStorageService storageService
-        , IHubContext<ChatHub> hub
+        , IHubContext<ChatHub> hub,
+        INotificationService notificationService
         ) : IChatService
     {
         private readonly IProjectProposalRepository _projectProposalRepository =
@@ -87,11 +90,30 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 CreatedAt = message.CreatedAt,
                 IsMine = true
             };
-            foreach (var profileId in roomMembers)
+            foreach (var memberRoom in roomMembers)
             {
+                var profileId = member.ClientProfileId ?? member.DeveloperProfileId!.Value;
+
                 await hub.Clients
                     .Group($"profile-{profileId}")
                     .SendAsync("ReceiveMessage", dto);
+                if (profileId == active.Value.ProfileId)
+                    continue;
+                if (ChatHub.IsUserInRoom(ChatRoomId, profileId))
+                    continue;
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Title = "New message",
+                    Body = $"{currentUserService.FirstName} {currentUserService.LastName}: {message.Text ?? "Sent an attachment"}",
+                    Type = NotificationType.NewChatMessage,
+
+                    ClientProfileId = member.ClientProfileId,
+                    DeveloperProfileId = member.DeveloperProfileId,
+
+                    ChatRoomId = ChatRoomId,
+                    MessageId = message.Id,
+                    ActionUrl = $"api/v1/Chat/rooms/{ChatRoomId}/messages"
+                });
             }
             var roomUpdated = new RoomUpdatedDto
             {
