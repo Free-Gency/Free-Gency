@@ -5,6 +5,7 @@ using FreeGency.Application.Features.NotificationFeature.Commands;
 using FreeGency.Application.Features.NotificationFeature.Dtos;
 using FreeGency.Domain.Enums;
 using FreeGency.Infrastructure.Integrations.Cloudinary;
+using Hangfire;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FreeGency.Application.Features.ChatFeature.Commands
@@ -120,19 +121,21 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                                     memberRoom.DeveloperProfileId);
                 if (notification == null)
                 {
-                    await notificationService.CreateNotification(new CreateNotificationRequest
-                    {
-                        Title = "New message",
-                        Body = $"{currentUserService.FirstName} {currentUserService.LastName}: {message.Text ?? "Sent an attachment"}",
-                        Type = NotificationType.NewChatMessage,
+                    var senderName =$"{currentUserService.FirstName} {currentUserService.LastName}";
 
-                        ClientProfileId = memberRoom.ClientProfileId,
-                        DeveloperProfileId = memberRoom.DeveloperProfileId,
+                    var body =$"{senderName}: {message.Text ?? "Sent an attachment"}";
+                    BackgroundJob.Enqueue(()=> notificationService.CreateNotification(new CreateNotificationRequest
+                  {
+                      Title = "New message",
+                      Body = body,
+                      Type = NotificationType.NewChatMessage,
+                      ClientProfileId = memberRoom.ClientProfileId,
+                      DeveloperProfileId = memberRoom.DeveloperProfileId,
 
-                        ChatRoomId = ChatRoomId,
-                        MessageId = message.Id,
-                        ActionUrl = $"/chat/{ChatRoomId}"
-                    });
+                      ChatRoomId = ChatRoomId,
+                      MessageId = message.Id,
+                      ActionUrl = $"/chat/{ChatRoomId}"
+                  }));
                 }
                 else
                 {
@@ -144,10 +147,11 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                     notification.MessageId = message.Id;
                     notification.CreatedAt = DateTime.UtcNow;
                     await unitOfWork.SaveChangesAsync();
+
                 }
-               
+
             }
-    
+
             return Result.Success(dto);
         }
 

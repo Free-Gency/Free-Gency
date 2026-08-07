@@ -12,6 +12,7 @@ public enum NotificationType
     MilestonePlanProposed,
     MilestonePlanChangesRequested,
     MilestonePlanAgreed,
+    MilestoneFunded,
     EscrowLocked,
     MilestoneSubmitted,
     MilestoneChangesRequested,

@@ -5,7 +5,9 @@ using FreeGency.Application.Features.Proposals.Dtos;
 using FreeGency.Domain.Interfaces.Repositories.Teams;
 using FreeGency.Infrastructure.Integrations.Cloudinary;
 using FreeGency.Infrastructure.Interfaces;
+using FreeGency.Infrastructure.Persistence;
 using FreeGency.Infrastructure.Persistence.Repositories.Teams;
+using Hangfire;
 
 namespace FreeGency.Application.Features.Proposals.Commands;
 
@@ -123,18 +125,20 @@ public partial class ProposalService : IProposalService
             {
                 applicantName = $"{_currentUser.FirstName} {_currentUser.LastName}";
             }
-            await _notificationService.CreateNotification(new CreateNotificationRequest
+            BackgroundJob.Enqueue(() => _notificationService.CreateNotification(new CreateNotificationRequest
             {
                 ClientProfileId = clientProfileId,
                 Title = "New proposal",
                 Body = $"{applicantName} submitted a proposal for your project.",
                 Type = NotificationType.NewProposal,
-                TeamId=dto.TeamId,
+                TeamId = dto.TeamId,
                 ProjectId = project.Id,
                 ProjectProposalId = proposal.Id,
 
                 ActionUrl = $"/projects/{project.Id}/proposals/{proposal.Id}"
-            });
+            }));
+            
+
         }
         return ApiResponse.Success("Proposal submitted successfully.");
     }
@@ -307,8 +311,7 @@ public partial class ProposalService : IProposalService
         {
             if (member.DeveloperProfileId is null)
                 continue;
-
-            await _notificationService.CreateNotification(new CreateNotificationRequest
+            BackgroundJob.Enqueue(() => _notificationService.CreateNotification(new CreateNotificationRequest
             {
                 DeveloperProfileId = member.DeveloperProfileId,
                 Title = "Discussion started",
@@ -318,8 +321,10 @@ public partial class ProposalService : IProposalService
                 ProjectId = project.Id,
                 ProjectProposalId = proposal.Id,
                 ActionUrl = $"api/v1/Chat/rooms/{chatRoom.Id}/messages"
-            });
+            }));
+             
         }
+
         return ApiResponse.Success("Discussion started. Accepting a proposal is not a hire — agree a milestone plan next.");
     }
 
