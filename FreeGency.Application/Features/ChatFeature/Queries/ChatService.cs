@@ -65,6 +65,23 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                         item.ProjectId = proposal.ProjectId;
                 }
 
+                // Resolve 1:1 peer for online/offline presence.
+                if (item.RoomType is nameof(RoomType.Proposal) or nameof(RoomType.Project))
+                {
+                    var members = await _chatRoomMemberRepository.GetRoomProfileIdsAsync(item.Id);
+                    if (members.Count == 2)
+                    {
+                        foreach (var id in members)
+                        {
+                            if (id != active.Value.ProfileId)
+                            {
+                                item.OtherProfileId = id;
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 enriched.Add(item);
             }
 
