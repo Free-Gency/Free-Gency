@@ -82,8 +82,7 @@ public static class DependencyInjection
                .ValidateOnStart();
         services.AddOptions<CloudinaryOptions>()
                .BindConfiguration(CloudinaryOptions.NameSection)
-               .ValidateDataAnnotations()
-               .ValidateOnStart();
+               .ValidateDataAnnotations();
         return services;
     }
 }

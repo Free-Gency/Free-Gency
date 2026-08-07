@@ -6,6 +6,10 @@ using FreeGency.Domain.Entities;
 using FreeGency.Infrastructure;
 using FreeGency.Infrastructure.Persistence.Context;
 using FreeGency.Infrastructure.Persistence.Seeding;
+using FreeGency.Api.Extensions;
+using FreeGency.Api.OpenApi;
+using FreeGency.AI.Moderation;
+using FreeGency.AI.ReviewModeration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -24,6 +28,9 @@ namespace FreeGency.Api
             builder.Services.AddInfrastructure(builder.Configuration)
                             .AddApplication();
             builder.Services.AddAI(builder.Configuration);
+            builder.Services.AddChatModerationApi(builder.Configuration);
+            builder.Services.AddModeration(builder.Configuration);
+            builder.Services.AddReviewModeration(builder.Configuration);
             builder.Services.AddIdentity<User, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
@@ -79,7 +86,12 @@ namespace FreeGency.Api
             #endregion
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+            builder.Services.AddSingleton<XmlCommentsOpenApiTransformer>();
+            builder.Services.AddOpenApi(options =>
+            {
+                options.AddOperationTransformer<XmlCommentsOpenApiTransformer>();
+                options.AddSchemaTransformer<XmlCommentsOpenApiTransformer>();
+            });
             builder.Services.AddSignalR();
             builder.Services.AddHostedService<FreeGency.Api.BackgroundJobs.MilestoneAutoReleaseWorker>();
             builder.Services.AddCors(options =>
