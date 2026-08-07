@@ -34,4 +34,6 @@ public class Milestone : ISoftDeletableEntity
     public virtual ICollection<ProjectEvent> ProjectEvents { get; set; } = [];
     public virtual ICollection<LedgerEntry> LedgerEntries { get; set; } = [];
     public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; } = [];
+
+    public virtual ICollection<ProjectTask> Tasks { get; set; } = [];
 }
