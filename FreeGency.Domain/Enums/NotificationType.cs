@@ -21,5 +21,9 @@ public enum NotificationType
     NewChatMessage,
     ReviewReminder,
     ProjectPublished,
-    Wallet
+    Wallet,
+
+    TaskAssigned = 100,
+    TaskStatusChanged = 101,
+    TaskCommentAdded = 102
 }
