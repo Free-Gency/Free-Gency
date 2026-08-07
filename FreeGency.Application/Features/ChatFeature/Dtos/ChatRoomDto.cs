@@ -24,5 +24,7 @@ namespace FreeGency.Application.Features.ChatFeature.Dtos
         public string? Logo { get; set; }
         public Guid? ProjectId { get; set; }
         public Guid? ProposalId { get; set; }
+        /// <summary>Other 1:1 peer profile id (null for group rooms).</summary>
+        public Guid? OtherProfileId { get; set; }
     }
 }
