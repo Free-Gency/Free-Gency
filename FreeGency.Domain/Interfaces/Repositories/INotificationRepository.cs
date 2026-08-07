@@ -4,6 +4,11 @@ namespace FreeGency.Domain.Interfaces.Repositories
 {
     public interface INotificationRepository : IGenericRepository<Notification>
     {
+        Task<Notification?> GetUnreadChatNotificationAsync(
+                                                        Guid chatRoomId,
+                                                        Guid? clientProfileId,
+                                                        Guid? developerProfileId);
+        IQueryable<Notification> GetNotificationAsync(Guid profilId,Guid userId);
         Task<IEnumerable<Notification>> GetByProfileAsync(
             Guid? clientProfileId,
             Guid? developerProfileId,

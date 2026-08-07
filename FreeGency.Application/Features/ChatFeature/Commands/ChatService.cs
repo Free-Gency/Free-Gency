@@ -1,6 +1,8 @@
 using FreeGency.Application.Common.Hubs;
 using FreeGency.Application.Features.ChatFeature.Dtos;
 using FreeGency.Application.Features.ChatFeature.Mapping;
+using FreeGency.Application.Features.NotificationFeature.Commands;
+using FreeGency.Application.Features.NotificationFeature.Dtos;
 using FreeGency.Domain.Enums;
 using FreeGency.Infrastructure.Integrations.Cloudinary;
 using Microsoft.AspNetCore.SignalR;
@@ -11,7 +13,8 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         IStorageService storageService
-        , IHubContext<ChatHub> hub
+        , IHubContext<ChatHub> hub,
+        INotificationService notificationService
         ) : IChatService
     {
         private readonly IProjectProposalRepository _projectProposalRepository =
@@ -26,7 +29,7 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             unitOfWork.Repository<IMessageRepository, Message>();
         private readonly IUserRepository _userRepository =
             unitOfWork.Repository<IUserRepository, User>();
-
+        private readonly INotificationRepository notificationRepository = unitOfWork.Repository<INotificationRepository, Notification>();
         public async Task<Result<RoomMessagesDto>> SendMessageAsync(Guid ChatRoomId, SendMessageRequest sendMessageRequest)
         {
             var roomIsExist = await _chatRoomRepository.GetByIdAsync(ChatRoomId);
@@ -87,12 +90,6 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 CreatedAt = message.CreatedAt,
                 IsMine = true
             };
-            foreach (var profileId in roomMembers)
-            {
-                await hub.Clients
-                    .Group($"profile-{profileId}")
-                    .SendAsync("ReceiveMessage", dto);
-            }
             var roomUpdated = new RoomUpdatedDto
             {
                 RoomId = ChatRoomId,
@@ -100,14 +97,57 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 LastMessageType = message.MessageType.ToString(),
                 LastMessageAt = message.CreatedAt,
                 LastMessageSender = $"{currentUserService.FirstName} {currentUserService.LastName}",
-                SenderId= active.Value.ProfileId
+                SenderId = active.Value.ProfileId
             };
-            foreach (var profileId in roomMembers)
+            foreach (var memberRoom in roomMembers)
             {
+                var profileId = memberRoom.ClientProfileId ?? memberRoom.DeveloperProfileId!.Value;
+
                 await hub.Clients
                     .Group($"profile-{profileId}")
-                    .SendAsync("RoomUpdated", roomUpdated);
+                    .SendAsync("ReceiveMessage", dto);
+                await hub.Clients
+                   .Group($"profile-{profileId}")
+                   .SendAsync("RoomUpdated", roomUpdated);
+                if (profileId == active.Value.ProfileId)
+                    continue;
+                if (ChatHub.IsUserInRoom(ChatRoomId, profileId))
+                    continue;
+                var notification =
+                                await notificationRepository.GetUnreadChatNotificationAsync(
+                                    ChatRoomId,
+                                    memberRoom.ClientProfileId,
+                                    memberRoom.DeveloperProfileId);
+                if (notification == null)
+                {
+                    await notificationService.CreateNotification(new CreateNotificationRequest
+                    {
+                        Title = "New message",
+                        Body = $"{currentUserService.FirstName} {currentUserService.LastName}: {message.Text ?? "Sent an attachment"}",
+                        Type = NotificationType.NewChatMessage,
+
+                        ClientProfileId = memberRoom.ClientProfileId,
+                        DeveloperProfileId = memberRoom.DeveloperProfileId,
+
+                        ChatRoomId = ChatRoomId,
+                        MessageId = message.Id,
+                        ActionUrl = $"/chat/{ChatRoomId}"
+                    });
+                }
+                else
+                {
+                    notification.Title = "New message";
+                    notification.Body =
+                        $"{currentUserService.FirstName} {currentUserService.LastName}: " +
+                        (message.Text ?? "Sent an attachment");
+
+                    notification.MessageId = message.Id;
+                    notification.CreatedAt = DateTime.UtcNow;
+                    await unitOfWork.SaveChangesAsync();
+                }
+               
             }
+    
             return Result.Success(dto);
         }
 

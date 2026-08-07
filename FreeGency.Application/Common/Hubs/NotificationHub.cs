@@ -9,6 +9,7 @@ namespace FreeGency.Application.Common.Hubs
     public class NotificationHub(IUnitOfWork unitOfWork, ICurrentUserService currentUserService) : Hub
     {
         public static readonly ConcurrentDictionary<Guid, HashSet<string>> ProfileConnections = new();
+
         private readonly IClientProfileRepository clientProfileRepository = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
         private readonly IDeveloperProfileRepository developerProfileRepository = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
         private readonly IUserRepository userRepository = unitOfWork.Repository<IUserRepository, User>();

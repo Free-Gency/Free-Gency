@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Collections.Concurrent;
 
 namespace FreeGency.Application.Common.Hubs
 {
@@ -10,6 +11,7 @@ namespace FreeGency.Application.Common.Hubs
         OnlineUsersService online) : Hub
     {
         private readonly IUserRepository _userRepository = unitOfWork.Repository<IUserRepository, User>();
+        public static readonly ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, byte>> ActiveRoomUsers = new();
 
         public override async Task OnConnectedAsync()
         {

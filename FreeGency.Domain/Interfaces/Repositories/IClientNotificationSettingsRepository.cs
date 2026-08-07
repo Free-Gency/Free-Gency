@@ -7,5 +7,6 @@ namespace FreeGency.Domain.Interfaces.Repositories
 {
     public interface IClientNotificationSettingsRepository:IGenericRepository<ClientNotificationSettings>
     {
+        Task<ClientNotificationSettings> GetByProfileId(Guid profileId);
     }
 }

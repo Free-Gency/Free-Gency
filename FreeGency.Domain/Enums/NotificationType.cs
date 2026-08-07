@@ -19,5 +19,6 @@ public enum NotificationType
     MilestoneReleased,
     NewChatMessage,
     ReviewReminder,
-    ProjectPublished
+    ProjectPublished,
+    Wallet
 }

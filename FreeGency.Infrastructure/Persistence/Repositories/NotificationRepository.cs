@@ -70,5 +70,22 @@
             if (clientProfileId.HasValue == developerProfileId.HasValue)
                 throw new ArgumentException("Exactly one of clientProfileId or developerProfileId must be set.");
         }
+
+        public  IQueryable<Notification> GetNotificationAsync(Guid profilId,Guid userId)
+        {
+            return _dbSet.Where(x =>(x.UserId==userId)||
+                                    (x.ClientProfileId!=null && x.ClientProfileId==profilId)||
+                                    (x.DeveloperProfileId!=null&&x.DeveloperProfileId==profilId)
+                                    );
+        }
+
+        public async Task<Notification?> GetUnreadChatNotificationAsync(Guid chatRoomId, Guid? clientProfileId, Guid? developerProfileId)
+        {
+            return await _dbSet.Where(x => !x.IsRead &&
+                                        x.ChatRoomId == chatRoomId &&
+                                        x.Type == NotificationType.NewChatMessage &&
+                                        x.ClientProfileId == clientProfileId &&
+                                        x.DeveloperProfileId == developerProfileId).FirstOrDefaultAsync();
+        }
     }
 }
