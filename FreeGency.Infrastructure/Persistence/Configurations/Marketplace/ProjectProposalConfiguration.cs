@@ -29,13 +29,13 @@ public class ProjectProposalConfiguration : IEntityTypeConfiguration<ProjectProp
             .HasDefaultValueSql("GETUTCDATE()");
         builder.Property(pp => pp.ResponseAt).HasColumnType("datetime2");
 
-        builder.HasIndex(pp => new { pp.ProjectId, pp.TeamId })
-            .IsUnique()
-            .HasFilter("[TeamId] IS NOT NULL AND [TeamId] <> '00000000-0000-0000-0000-000000000000'");
-
         builder.HasIndex(pp => new { pp.ProjectId, pp.UserId })
-            .IsUnique()
-            .HasFilter("[UserId] IS NOT NULL AND [UserId] <> '00000000-0000-0000-0000-000000000000'");
+     .IsUnique()
+     .HasFilter("[ApplicantType] = 'User'");
+
+        builder.HasIndex(pp => new { pp.ProjectId, pp.TeamId })
+      .IsUnique()
+      .HasFilter("[ApplicantType] = 'Team'");
 
         builder.HasOne(pp => pp.Project)
             .WithMany(p => p.ProjectProposals)

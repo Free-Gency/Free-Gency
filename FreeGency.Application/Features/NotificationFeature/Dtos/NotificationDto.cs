@@ -8,7 +8,7 @@ namespace FreeGency.Application.Features.NotificationFeature.Dtos
     {
         public string Title { get; set; } = null!;
         public string Body { get; set; } = null!;
-        public NotificationType Type { get; set; }
+        public string Type { get; set; }
 
         public string? ImageUrl { get; set; }
         public string? ActionUrl { get; set; }

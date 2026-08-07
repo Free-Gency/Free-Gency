@@ -40,7 +40,7 @@ namespace FreeGency.Application.Features.NotificationFeature.Mapping
             {
                 Title = n.Title,
                 Body = n.Body,
-                Type = n.Type,
+                Type = n.Type.ToString(),
                 ImageUrl = n.ImageUrl,
                 ActionUrl = n.ActionUrl,
                 Data = n.Data,
@@ -55,7 +55,7 @@ namespace FreeGency.Application.Features.NotificationFeature.Mapping
             {
                 Title = n.Title,
                 Body = n.Body,
-                Type = n.Type,
+                Type = n.Type.ToString(),
                 ImageUrl = n.ImageUrl,
                 ActionUrl = n.ActionUrl,
                 Data = n.Data,

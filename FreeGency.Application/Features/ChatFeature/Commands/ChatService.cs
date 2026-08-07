@@ -29,7 +29,7 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             unitOfWork.Repository<IMessageRepository, Message>();
         private readonly IUserRepository _userRepository =
             unitOfWork.Repository<IUserRepository, User>();
-
+        private readonly INotificationRepository notificationRepository = unitOfWork.Repository<INotificationRepository, Notification>();
         public async Task<Result<RoomMessagesDto>> SendMessageAsync(Guid ChatRoomId, SendMessageRequest sendMessageRequest)
         {
             var roomIsExist = await _chatRoomRepository.GetByIdAsync(ChatRoomId);
@@ -113,20 +113,39 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                     continue;
                 if (ChatHub.IsUserInRoom(ChatRoomId, profileId))
                     continue;
-
-                await notificationService.CreateNotification(new CreateNotificationRequest
+                var notification =
+                                await notificationRepository.GetUnreadChatNotificationAsync(
+                                    ChatRoomId,
+                                    memberRoom.ClientProfileId,
+                                    memberRoom.DeveloperProfileId);
+                if (notification == null)
                 {
-                    Title = "New message",
-                    Body = $"{currentUserService.FirstName} {currentUserService.LastName}: {message.Text ?? "Sent an attachment"}",
-                    Type = NotificationType.NewChatMessage,
+                    await notificationService.CreateNotification(new CreateNotificationRequest
+                    {
+                        Title = "New message",
+                        Body = $"{currentUserService.FirstName} {currentUserService.LastName}: {message.Text ?? "Sent an attachment"}",
+                        Type = NotificationType.NewChatMessage,
 
-                    ClientProfileId = memberRoom.ClientProfileId,
-                    DeveloperProfileId = memberRoom.DeveloperProfileId,
+                        ClientProfileId = memberRoom.ClientProfileId,
+                        DeveloperProfileId = memberRoom.DeveloperProfileId,
 
-                    ChatRoomId = ChatRoomId,
-                    MessageId = message.Id,
-                    ActionUrl = $"/chat/{ChatRoomId}"
-                });
+                        ChatRoomId = ChatRoomId,
+                        MessageId = message.Id,
+                        ActionUrl = $"/chat/{ChatRoomId}"
+                    });
+                }
+                else
+                {
+                    notification.Title = "New message";
+                    notification.Body =
+                        $"{currentUserService.FirstName} {currentUserService.LastName}: " +
+                        (message.Text ?? "Sent an attachment");
+
+                    notification.MessageId = message.Id;
+                    notification.CreatedAt = DateTime.UtcNow;
+                    await unitOfWork.SaveChangesAsync();
+                }
+               
             }
     
             return Result.Success(dto);

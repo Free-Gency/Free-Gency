@@ -78,5 +78,14 @@
                                     (x.DeveloperProfileId!=null&&x.DeveloperProfileId==profilId)
                                     );
         }
+
+        public async Task<Notification?> GetUnreadChatNotificationAsync(Guid chatRoomId, Guid? clientProfileId, Guid? developerProfileId)
+        {
+            return await _dbSet.Where(x => !x.IsRead &&
+                                        x.ChatRoomId == chatRoomId &&
+                                        x.Type == NotificationType.NewChatMessage &&
+                                        x.ClientProfileId == clientProfileId &&
+                                        x.DeveloperProfileId == developerProfileId).FirstOrDefaultAsync();
+        }
     }
 }

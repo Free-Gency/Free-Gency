@@ -5,6 +5,7 @@ using FreeGency.Application.Features.Proposals.Dtos;
 using FreeGency.Domain.Interfaces.Repositories.Teams;
 using FreeGency.Infrastructure.Integrations.Cloudinary;
 using FreeGency.Infrastructure.Interfaces;
+using FreeGency.Infrastructure.Persistence.Repositories.Teams;
 
 namespace FreeGency.Application.Features.Proposals.Commands;
 
@@ -21,17 +22,19 @@ public partial class ProposalService : IProposalService
     private readonly IMapper _mapper;
     private readonly IStorageService _storageService;
     private readonly INotificationService _notificationService;
+    private readonly ITeamRepository _teamRepository;
     public ProposalService(
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        IStorageService storageService,INotificationService notificationService)
+        IStorageService storageService,INotificationService notificationService,ITeamRepository teamRepository)
     {
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _storageService = storageService;
         _notificationService = notificationService;
+        _teamRepository = teamRepository;
         _proposalRepository = _unitOfWork.Repository<IProjectProposalRepository, ProjectProposal>();
         _projectRepository = _unitOfWork.Repository<IProjectRepository, Project>();
         _teamMemberRepository = _unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
@@ -102,7 +105,37 @@ public partial class ProposalService : IProposalService
 
         await _proposalRepository.AddWithAttachmentsAsync(proposal, attachments, ct);
         await _unitOfWork.SaveChangesAsync(ct);
+        var clientProfileId =
+                   await _userRepository.GetClientProfileIdByUserIdAsync(project.ClientId, ct);
 
+        if (clientProfileId.HasValue)
+        {
+            string applicantName;
+
+            if (dto.ApplicantType == ApplicantType.Team)
+            {
+                var team = await _teamRepository.GetByIdAsync(dto.TeamId!.Value, ct);
+                if (team is null)
+                    return ApiResponse.Failure(AppError.NotFound(nameof(Team), dto.TeamId.Value));
+                applicantName = team.Name;
+            }
+            else
+            {
+                applicantName = $"{_currentUser.FirstName} {_currentUser.LastName}";
+            }
+            await _notificationService.CreateNotification(new CreateNotificationRequest
+            {
+                ClientProfileId = clientProfileId,
+                Title = "New proposal",
+                Body = $"{applicantName} submitted a proposal for your project.",
+                Type = NotificationType.NewProposal,
+                TeamId=dto.TeamId,
+                ProjectId = project.Id,
+                ProjectProposalId = proposal.Id,
+
+                ActionUrl = $"/projects/{project.Id}/proposals/{proposal.Id}"
+            });
+        }
         return ApiResponse.Success("Proposal submitted successfully.");
     }
 
