@@ -71,11 +71,12 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                     var members = await _chatRoomMemberRepository.GetRoomProfileIdsAsync(item.Id);
                     if (members.Count == 2)
                     {
-                        foreach (var id in members)
+                        foreach (var roomMember in members)
                         {
-                            if (id != active.Value.ProfileId)
+                            var profileId = roomMember.ClientProfileId ?? roomMember.DeveloperProfileId!.Value;
+                            if (profileId != active.Value.ProfileId)
                             {
-                                item.OtherProfileId = id;
+                                item.OtherProfileId = profileId;
                                 break;
                             }
                         }
@@ -112,11 +113,11 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             var messages = _messageRepository.GetByRoomIdAsync(ChatRoomId);
             var members = await _chatRoomMemberRepository.GetRoomProfileIdsAsync(ChatRoomId);
             Guid? otherProfileId = null;
-            if (members.Count() == 2)
+            if (members.Count == 2)
             {
-                foreach (var id in members)
+                foreach (var roomMember in members)
                 {
-                    var profileId = member.ClientProfileId ?? member.DeveloperProfileId!.Value;
+                    var profileId = roomMember.ClientProfileId ?? roomMember.DeveloperProfileId!.Value;
                     if (profileId != active.Value.ProfileId)
                     {
                         otherProfileId = profileId;

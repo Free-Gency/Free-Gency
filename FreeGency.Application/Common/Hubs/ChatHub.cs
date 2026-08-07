@@ -1,102 +1,126 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
-
 namespace FreeGency.Application.Common.Hubs
 {
     [Authorize]
-    public class ChatHub(
-        ICurrentUserService currentUserService,
-        IUnitOfWork unitOfWork,
-        OnlineUsersService online) : Hub
+    public class ChatHub(ICurrentUserService currentUserService,IUnitOfWork unitOfWork,OnlineUsersService online):Hub
     {
         private readonly IUserRepository _userRepository = unitOfWork.Repository<IUserRepository, User>();
         public static readonly ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, byte>> ActiveRoomUsers = new();
-
         public override async Task OnConnectedAsync()
         {
             var active = await _userRepository.GetActiveProfileAsync(currentUserService.UserId);
             if (active != null)
             {
-                var profileId = active.Value.ProfileId;
-                var groupName = $"profile-{profileId}";
+                var groupName = $"profile-{active.Value.ProfileId}";
                 Context.Items["ProfileGroup"] = groupName;
-                Context.Items["ProfileId"] = profileId;
 
-                await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+                await Groups.AddToGroupAsync(
+                    Context.ConnectionId,
+                    groupName
+                );
+                var profileId = active.Value.ProfileId;
 
                 var connections = online.Users.GetOrAdd(profileId, _ => new());
-                bool firstConnection;
+
+                bool firstConnection = false;
 
                 lock (connections)
                 {
                     connections.Add(Context.ConnectionId);
+
                     firstConnection = connections.Count == 1;
                 }
 
                 if (firstConnection)
                 {
-                    await Clients.Others.SendAsync("ProfileOnline", profileId.ToString());
+                    await Clients.All.SendAsync(
+                        "ProfileOnline",
+                        profileId
+                    );
                 }
             }
-
             await base.OnConnectedAsync();
         }
-
-        public override async Task OnDisconnectedAsync(Exception? exception)
+        public static bool IsUserInRoom(Guid roomId, Guid profileId)
         {
-            if (Context.Items.TryGetValue("ProfileGroup", out var groupName))
+            return ActiveRoomUsers.TryGetValue(roomId, out var users)
+                   && users.ContainsKey(profileId);
+        }
+        public async Task JoinRoom(Guid roomId)
+        {
+            var active = await _userRepository.GetActiveProfileAsync(currentUserService.UserId);
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"room-{roomId}");
+
+            var users = ActiveRoomUsers.GetOrAdd(roomId, _ => new());
+
+            users[active!.Value.ProfileId] = 0;
+            Console.WriteLine($"Join {Context.ConnectionId} => room-{roomId}");
+        }
+        public async Task LeaveRoom(Guid roomId)
+        {
+            var active = await _userRepository.GetActiveProfileAsync(currentUserService.UserId);
+
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"room-{roomId}");
+
+            if (ActiveRoomUsers.TryGetValue(roomId, out var users))
             {
+                users.TryRemove(active!.Value.ProfileId, out _);
+
+                if (users.IsEmpty)
+                    ActiveRoomUsers.TryRemove(roomId, out _);
+            }
+        }
+        public async override Task OnDisconnectedAsync(Exception? exception)
+        {
+            if (Context.Items.TryGetValue(
+            "ProfileGroup",
+            out var groupName))
+            {
+
                 await Groups.RemoveFromGroupAsync(
                     Context.ConnectionId,
-                    groupName!.ToString()!);
+                    groupName!.ToString()!
+                );
             }
-
-            Guid? profileId = null;
-            if (Context.Items.TryGetValue("ProfileId", out var stored)
-                && stored is Guid storedId)
+            var active = await _userRepository.GetActiveProfileAsync(currentUserService.UserId);
+            if (active != null)
             {
-                profileId = storedId;
-            }
-            else
-            {
-                var active = await _userRepository.GetActiveProfileAsync(currentUserService.UserId);
-                profileId = active?.ProfileId;
-            }
-
-            if (profileId is Guid pid
-                && online.Users.TryGetValue(pid, out var connections))
-            {
-                bool lastConnection;
-
-                lock (connections)
+                var profileId = active.Value.ProfileId;
+                if (online.Users.TryGetValue(profileId, out var connections))
                 {
-                    connections.Remove(Context.ConnectionId);
-                    if (connections.Count == 0)
+                    bool lastConnection = false;
+
+                    lock (connections)
                     {
-                        online.Users.TryRemove(pid, out _);
-                        lastConnection = true;
+                        connections.Remove(Context.ConnectionId);
+
+                        if (connections.Count == 0)
+                        {
+                            online.Users.TryRemove(profileId, out _);
+                            lastConnection = true;
+                        }
                     }
-                    else
+
+                    if (lastConnection)
                     {
-                        lastConnection = false;
+                        await Clients.All.SendAsync(
+                            "ProfileOffline",
+                            profileId
+                        );
                     }
                 }
-
-                if (lastConnection)
-                {
-                    await Clients.Others.SendAsync("ProfileOffline", pid.ToString());
-                }
             }
-
-            await base.OnDisconnectedAsync(exception);
+                await base.OnDisconnectedAsync(exception);
         }
-
         public async Task IsOnline(Guid profileId)
         {
             await Clients.Caller.SendAsync(
                 "OnlineStatus",
-                online.Users.ContainsKey(profileId));
+                online.Users.ContainsKey(profileId)
+            );
         }
     }
 }
