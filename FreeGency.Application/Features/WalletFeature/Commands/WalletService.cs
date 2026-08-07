@@ -3,6 +3,7 @@ using FreeGency.Application.Features.NotificationFeature.Dtos;
 using FreeGency.Application.Features.WalletFeature.Dtos;
 using FreeGency.Application.Features.WalletFeature.Mapping;
 using FreeGency.Domain.Specifications;
+using Hangfire;
 using Microsoft.AspNetCore.SignalR;
 using Stripe;
 using System;
@@ -96,7 +97,7 @@ namespace FreeGency.Application.Features.WalletFeature.Queries
                 }),
                 ActionUrl= "/settings/payments"
             };
-            await notificationService.CreateNotification(notificationRequest);
+            BackgroundJob.Enqueue(() => notificationService.CreateNotification(notificationRequest));
             return Result.Success();
         }
         public async  Task<Result> HandleCanceled(PaymentIntent @object)

@@ -146,6 +146,7 @@ namespace FreeGency.Application.Features.NotificationFeature.Commands
                 or NotificationType.MilestoneChangesRequested
                 or NotificationType.MilestoneApproved
                 or NotificationType.MilestoneReleased
+                or NotificationType.MilestoneFunded
                     => settings.MilestoneAddedInApp,
 
                 NotificationType.Wallet
@@ -185,6 +186,7 @@ namespace FreeGency.Application.Features.NotificationFeature.Commands
                 or NotificationType.MilestoneChangesRequested
                 or NotificationType.MilestoneApproved
                 or NotificationType.MilestoneReleased
+                or NotificationType.MilestoneFunded
                     => settings.MilestoneAddedEmail,
 
                 NotificationType.Wallet
@@ -225,6 +227,8 @@ namespace FreeGency.Application.Features.NotificationFeature.Commands
                 or NotificationType.MilestoneChangesRequested
                 or NotificationType.MilestoneApproved
                 or NotificationType.MilestoneReleased
+                or NotificationType.MilestoneFunded
+
                     => settings.MilestonesInApp,
 
                 NotificationType.Wallet
@@ -265,6 +269,8 @@ namespace FreeGency.Application.Features.NotificationFeature.Commands
                 or NotificationType.MilestoneChangesRequested
                 or NotificationType.MilestoneApproved
                 or NotificationType.MilestoneReleased
+                or NotificationType.MilestoneFunded
+
                     => settings.MilestonesEmail,
 
                 NotificationType.Wallet

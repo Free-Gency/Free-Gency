@@ -1,7 +1,9 @@
-﻿using FreeGency.Application.Features.TeamJoinRequests.Dtos;
+﻿using FreeGency.Application.Features.NotificationFeature.Dtos;
+using FreeGency.Application.Features.TeamJoinRequests.Dtos;
 using FreeGency.Application.Features.TeamJoinRequests.Mapping;
 using FreeGency.Domain.Interfaces.Repositories.Teams;
 using FreeGency.Domain.Specifications;
+using Hangfire;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
@@ -9,7 +11,7 @@ using System.Text;
 
 namespace FreeGency.Application.Features.TeamJoinRequests.Commands
 {
-    public partial class TeamJoinRequestService(IUnitOfWork unitOfWork,ICurrentUserService currentUserService) : ITeamJoinRequestService
+    public partial class TeamJoinRequestService(IUnitOfWork unitOfWork,ICurrentUserService currentUserService,INotificationService notificationService ) : ITeamJoinRequestService
     {
         private readonly ITeamJobRepository _teamJobRepository = unitOfWork.Repository<ITeamJobRepository, TeamJob>();
         private readonly ITeamMemberRepository _teamMemberRepository = unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
@@ -33,6 +35,8 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
             var request = teamJob.ToEntity(userId, applyToTeamJob.CoverLetter);
             await _teamJoinRequestRepository.AddAsync(request);
             await unitOfWork.SaveChangesAsync();
+            await NotifyTeamLeadersAsync(teamJob.TeamId);
+
 
             return Result.Success();
         }
@@ -54,6 +58,7 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
             var request = team.ToEntity(userId, joinTeamByCode.CoverLetter);
             await _teamJoinRequestRepository.AddAsync(request);
             await unitOfWork.SaveChangesAsync();
+            await NotifyTeamLeadersAsync(team.Id);
 
             return Result.Success();
         }
@@ -104,10 +109,11 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
             var chatRoomRepo = unitOfWork.Repository<IChatRoomRepository, ChatRoom>();
             var userRepo = unitOfWork.Repository<IUserRepository, User>();
             var mainRoom = await chatRoomRepo.GetTeamMainAsync(request.TeamId);
+            var developerProfileId =
+                   await userRepo.GetDeveloperProfileIdByUserIdAsync(request.UserId);
             if (mainRoom is not null)
             {
-                var developerProfileId =
-                    await userRepo.GetDeveloperProfileIdByUserIdAsync(request.UserId);
+               
                 if (developerProfileId is not null)
                 {
                     await chatRoomRepo.AddMemberAsync(
@@ -121,7 +127,29 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
 
             await unitOfWork.SaveChangesAsync();
 
+           
+
+            if (developerProfileId is not null)
+            {
+                var teamId = request.TeamId;
+                var teamName = team.Name;
+                var profileId = developerProfileId.Value;
+
+                BackgroundJob.Enqueue(() =>
+                    notificationService.CreateNotification(
+                        new CreateNotificationRequest
+                        {
+                            DeveloperProfileId = profileId,
+                            TeamId = teamId,
+                            Title = "Join request accepted",
+                            Body = $"Your request to join team \"{teamName}\" has been accepted.",
+                            Type = NotificationType.JoinRequestAccepted,
+                            ActionUrl = $"/teams/{teamId}"
+                        }));
+            }
+
             return Result.Success();
+
         }
         public async Task<Result> RejectJoinRequestAsync(Guid requestId)
         {
@@ -151,8 +179,49 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
             _teamJoinRequestRepository.Update(request);
 
             await unitOfWork.SaveChangesAsync();
+            var developerProfileId =
+                               await unitOfWork
+                                   .Repository<IUserRepository, User>()
+                                   .GetDeveloperProfileIdByUserIdAsync(request.UserId);
 
+            if (developerProfileId is not null)
+            {
+                var teamId = request.TeamId;
+                var teamName = team.Name;
+                var profileId = developerProfileId.Value;
+
+                BackgroundJob.Enqueue(() =>
+                    notificationService.CreateNotification(
+                        new CreateNotificationRequest
+                        {
+                            DeveloperProfileId = profileId,
+                            TeamId = teamId,
+                            Title = "Join request rejected",
+                            Body = $"Your request to join team \"{teamName}\" has been rejected.",
+                            Type = NotificationType.JoinRequestRejected,
+                            ActionUrl = $"/teams/{teamId}"
+                        }));
+            }
             return Result.Success();
+        }
+        private async Task NotifyTeamLeadersAsync(Guid TeamId)
+        {
+            var TeamLeadersProfileIds = await _teamMemberRepository.GetLeaderDeveloperProfileIdsAsync(TeamId);
+            var senderName =
+                             $"{currentUserService.FirstName} {currentUserService.LastName}";
+            foreach (var ProfileId in TeamLeadersProfileIds)
+            {
+
+                BackgroundJob.Enqueue(() => notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    TeamId = TeamId,
+                    DeveloperProfileId = ProfileId,
+                    Title = "New team join request",
+                    Body = $"{senderName} wants to join your team.",
+                    Type = NotificationType.JoinRequestReceived,
+                    ActionUrl = $"/teams/{TeamId}/join-requests"
+                }));
+            }
         }
     }
 }

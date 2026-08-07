@@ -6,6 +6,7 @@ namespace FreeGency.Domain.Interfaces.Repositories.Teams;
 
 public interface ITeamMemberRepository : IGenericRepository<TeamMember>
 {
+    Task<List<Guid>> GetLeaderDeveloperProfileIdsAsync(Guid teamId);
     Task<IReadOnlyList<TeamMember>> GetByTeamIdAsync(Guid teamId, CancellationToken ct = default);
 
     Task<IReadOnlyList<TeamMember>> GetByUserIdAsync(Guid userId, CancellationToken ct = default);

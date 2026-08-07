@@ -1,7 +1,9 @@
 using FreeGency.Application.Features.ChatFeature.Dtos;
 using FreeGency.Application.Features.Milestones.DTOs;
+using FreeGency.Application.Features.NotificationFeature.Dtos;
 using FreeGency.Domain.Constants;
 using FreeGency.Domain.Interfaces.Repositories.Teams;
+using Hangfire;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FreeGency.Application.Features.Milestones.Commands;
@@ -183,7 +185,24 @@ public partial class MilestoneService
         }
 
         await _unitOfWork.SaveChangesAsync(ct);
+        var clientProfileId =
+    await UserRepo.GetClientProfileIdByUserIdAsync(project.ClientId, ct);
 
+        if (clientProfileId is null)
+            return ApiResponse.Failure<MilestonePlanVersionDto>(
+                AppError.Validation("Client profile was not found."));
+        BackgroundJob.Enqueue(() =>
+    _notificationService.CreateNotification(
+        new CreateNotificationRequest
+        {
+            ClientProfileId = clientProfileId.Value,
+            Title = "Milestone plan proposed",
+            Body = $"A new milestone plan v{nextVersion} has been proposed for project {project.Title}.",
+            Type = NotificationType.MilestonePlanProposed,
+            ProjectId = project.Id,
+            ProjectProposalId = proposal.Id,
+            ActionUrl = $"/projects/{project.Id}/milestones"
+        }));
         // Broadcast must not fail the propose — plan is already committed.
         if (proposalRoom is not null && planMessage is not null)
         {
@@ -256,6 +275,26 @@ public partial class MilestoneService
         }
 
         await _unitOfWork.SaveChangesAsync(ct);
+        var proposerProfileId =
+                            await UserRepo.GetDeveloperProfileIdByUserIdAsync(
+                                plan.ProposedByUserId,
+                                ct);
+
+        if (proposerProfileId is not null)
+        {
+            BackgroundJob.Enqueue(() =>
+                _notificationService.CreateNotification(
+                    new CreateNotificationRequest
+                    {
+                        DeveloperProfileId = proposerProfileId.Value,
+                        Title = "Milestone plan changes requested",
+                        Body = $"The client requested changes on milestone plan v{plan.Version} for project {project.Title}.",
+                        Type = NotificationType.MilestonePlanChangesRequested,
+                        ProjectId = project.Id,
+                        ProjectProposalId = plan.ProposalId,
+                        ActionUrl = $"/projects/{project.Id}/milestones"
+                    }));
+        }
 
         if (proposalRoom is not null && changeMessage is not null)
         {
@@ -433,6 +472,66 @@ public partial class MilestoneService
         }
 
         await _unitOfWork.SaveChangesAsync(ct);
+        var notificationBody =
+    $"Milestone plan v{plan.Version} accepted. You have been hired for project {project.Title}.";
+
+        if (proposal.ApplicantType == ApplicantType.User &&
+            proposal.UserId.HasValue)
+        {
+            var developerProfileId =
+                await UserRepo.GetDeveloperProfileIdByUserIdAsync(
+                    proposal.UserId.Value,
+                    ct);
+
+            if (developerProfileId is not null)
+            {
+                BackgroundJob.Enqueue(() =>
+                    _notificationService.CreateNotification(
+                        new CreateNotificationRequest
+                        {
+                            DeveloperProfileId = developerProfileId.Value,
+                            Title = "Milestone plan accepted",
+                            Body = notificationBody,
+                            Type = NotificationType.ProposalAccepted,
+                            ProjectId = project.Id,
+                            ProjectProposalId = proposal.Id,
+                            ActionUrl = $"/projects/{project.Id}/milestones"
+                        }));
+            }
+        }
+        else if (proposal.ApplicantType == ApplicantType.Team &&
+                 proposal.TeamId.HasValue)
+        {
+            var leaders =
+                await TeamMemberRepo.GetLeadersAsync(
+                    proposal.TeamId.Value,
+                    ct);
+
+            foreach (var leader in leaders)
+            {
+                var developerProfileId =
+                    await UserRepo.GetDeveloperProfileIdByUserIdAsync(
+                        leader.UserId,
+                        ct);
+
+                if (developerProfileId is null)
+                    continue;
+
+                BackgroundJob.Enqueue(() =>
+                    _notificationService.CreateNotification(
+                        new CreateNotificationRequest
+                        {
+                            DeveloperProfileId = developerProfileId.Value,
+                            Title = "Milestone plan accepted",
+                            Body = notificationBody,
+                            Type = NotificationType.ProposalAccepted,
+                            ProjectId = project.Id,
+                            ProjectProposalId = proposal.Id,
+                            ActionUrl = $"/projects/{project.Id}/milestones"
+                        }));
+            }
+        }
+
         return ApiResponse.Success("Milestone plan accepted — hire complete. Fund Milestone #1 to start work.");
     }
 
@@ -501,6 +600,58 @@ public partial class MilestoneService
         }, ct);
 
         await _unitOfWork.SaveChangesAsync(ct);
+        if (project.AssignedUserId.HasValue)
+        {
+            var developerProfileId =
+                await UserRepo.GetDeveloperProfileIdByUserIdAsync(
+                    project.AssignedUserId.Value,
+                    ct);
+
+            if (developerProfileId is not null)
+            {
+                BackgroundJob.Enqueue(() =>
+                    _notificationService.CreateNotification(
+                        new CreateNotificationRequest
+                        {
+                            DeveloperProfileId = developerProfileId.Value,
+                            Title = "Milestone funded",
+                            Body = $"Milestone #{next.SortOrder} has been funded and work can start.",
+                            Type = NotificationType.MilestoneFunded,
+                            ProjectId = project.Id,
+                            ActionUrl = $"/projects/{project.Id}/milestones"
+                        }));
+            }
+        }
+        else if (project.AssignedTeamId.HasValue)
+        {
+            var leaders =
+                await TeamMemberRepo.GetLeadersAsync(
+                    project.AssignedTeamId.Value,
+                    ct);
+
+            foreach (var leader in leaders)
+            {
+                var developerProfileId =
+                    await UserRepo.GetDeveloperProfileIdByUserIdAsync(
+                        leader.UserId,
+                        ct);
+
+                if (developerProfileId is null)
+                    continue;
+
+                BackgroundJob.Enqueue(() =>
+                    _notificationService.CreateNotification(
+                        new CreateNotificationRequest
+                        {
+                            DeveloperProfileId = developerProfileId.Value,
+                            Title = "Milestone funded",
+                            Body = $"Milestone #{next.SortOrder} has been funded and work can start.",
+                            Type = NotificationType.MilestoneFunded,
+                            ProjectId = project.Id,
+                            ActionUrl = $"/projects/{project.Id}/milestones"
+                        }));
+            }
+        }
         return ApiResponse.Success($"Milestone #{next.SortOrder} funded in escrow (${next.Amount}).");
     }
 
@@ -530,6 +681,25 @@ public partial class MilestoneService
         _milestoneRepo.Update(milestone);
 
         await _unitOfWork.SaveChangesAsync(ct);
+        var clientProfileId =
+    await UserRepo.GetClientProfileIdByUserIdAsync(
+        project.ClientId,
+        ct);
+
+        if (clientProfileId is not null)
+        {
+            BackgroundJob.Enqueue(() =>
+                _notificationService.CreateNotification(
+                    new CreateNotificationRequest
+                    {
+                        ClientProfileId = clientProfileId.Value,
+                        Title = "Milestone submitted",
+                        Body = $"Milestone #{milestone.SortOrder} has been submitted for your review.",
+                        Type = NotificationType.MilestoneSubmitted,
+                        ProjectId = project.Id,
+                        ActionUrl = $"/projects/{project.Id}/milestones"
+                    }));
+        }
         return ApiResponse.Success(
             $"Milestone submitted. Client has {MilestonePlanConstants.AutoReleaseDays} days before auto-release.");
     }
@@ -552,6 +722,58 @@ public partial class MilestoneService
 
         await ReleaseFundsInternalAsync(project, milestone, ct);
         await _unitOfWork.SaveChangesAsync(ct);
+        if (project.AssignedUserId.HasValue)
+        {
+            var developerProfileId =
+                await UserRepo.GetDeveloperProfileIdByUserIdAsync(
+                    project.AssignedUserId.Value,
+                    ct);
+
+            if (developerProfileId is not null)
+            {
+                BackgroundJob.Enqueue(() =>
+                    _notificationService.CreateNotification(
+                        new CreateNotificationRequest
+                        {
+                            DeveloperProfileId = developerProfileId.Value,
+                            Title = "Payment released",
+                            Body = $"Milestone #{milestone.SortOrder} was approved and ${milestone.Amount} has been released.",
+                            Type = NotificationType.MilestoneReleased,
+                            ProjectId = project.Id,
+                            ActionUrl = $"/projects/{project.Id}/milestones"
+                        }));
+            }
+        }
+        else if (project.AssignedTeamId.HasValue)
+        {
+            var leaders =
+                await TeamMemberRepo.GetLeadersAsync(
+                    project.AssignedTeamId.Value,
+                    ct);
+
+            foreach (var leader in leaders)
+            {
+                var developerProfileId =
+                    await UserRepo.GetDeveloperProfileIdByUserIdAsync(
+                        leader.UserId,
+                        ct);
+
+                if (developerProfileId is null)
+                    continue;
+
+                BackgroundJob.Enqueue(() =>
+                    _notificationService.CreateNotification(
+                        new CreateNotificationRequest
+                        {
+                            DeveloperProfileId = developerProfileId.Value,
+                            Title = "Payment released",
+                            Body = $"Milestone #{milestone.SortOrder} was approved and ${milestone.Amount} has been released.",
+                            Type = NotificationType.MilestoneReleased,
+                            ProjectId = project.Id,
+                            ActionUrl = $"/projects/{project.Id}/milestones"
+                        }));
+            }
+        }
         return ApiResponse.Success("Funds released from escrow to the assignee.");
     }
 
@@ -577,6 +799,62 @@ public partial class MilestoneService
         milestone.AvailableAt = null;
         _milestoneRepo.Update(milestone);
         await _unitOfWork.SaveChangesAsync(ct);
+        var notificationBody = string.IsNullOrWhiteSpace(comment)
+    ? $"Changes were requested on milestone #{milestone.SortOrder}."
+    : $"Changes were requested on milestone #{milestone.SortOrder}: {comment.Trim()}";
+
+        if (project.AssignedUserId.HasValue)
+        {
+            var developerProfileId =
+                await UserRepo.GetDeveloperProfileIdByUserIdAsync(
+                    project.AssignedUserId.Value,
+                    ct);
+
+            if (developerProfileId is not null)
+            {
+                BackgroundJob.Enqueue(() =>
+                    _notificationService.CreateNotification(
+                        new CreateNotificationRequest
+                        {
+                            DeveloperProfileId = developerProfileId.Value,
+                            Title = "Milestone changes requested",
+                            Body = notificationBody,
+                            Type = NotificationType.MilestoneChangesRequested,
+                            ProjectId = project.Id,
+                            ActionUrl = $"/projects/{project.Id}/milestones"
+                        }));
+            }
+        }
+        else if (project.AssignedTeamId.HasValue)
+        {
+            var leaders =
+                await TeamMemberRepo.GetLeadersAsync(
+                    project.AssignedTeamId.Value,
+                    ct);
+
+            foreach (var leader in leaders)
+            {
+                var developerProfileId =
+                    await UserRepo.GetDeveloperProfileIdByUserIdAsync(
+                        leader.UserId,
+                        ct);
+
+                if (developerProfileId is null)
+                    continue;
+
+                BackgroundJob.Enqueue(() =>
+                    _notificationService.CreateNotification(
+                        new CreateNotificationRequest
+                        {
+                            DeveloperProfileId = developerProfileId.Value,
+                            Title = "Milestone changes requested",
+                            Body = notificationBody,
+                            Type = NotificationType.MilestoneChangesRequested,
+                            ProjectId = project.Id,
+                            ActionUrl = $"/projects/{project.Id}/milestones"
+                        }));
+            }
+        }
 
         return ApiResponse.Success(string.IsNullOrWhiteSpace(comment)
             ? "Work changes requested."
@@ -598,6 +876,28 @@ public partial class MilestoneService
             {
                 await ReleaseFundsInternalAsync(project, milestone, ct);
                 count++;
+                if (project.AssignedUserId.HasValue)
+                {
+                    var developerProfileId =
+                        await UserRepo.GetDeveloperProfileIdByUserIdAsync(
+                            project.AssignedUserId.Value,
+                            ct);
+
+                    if (developerProfileId is not null)
+                    {
+                        BackgroundJob.Enqueue(() =>
+                            _notificationService.CreateNotification(
+                                new CreateNotificationRequest
+                                {
+                                    DeveloperProfileId = developerProfileId.Value,
+                                    Title = "Milestone auto-released",
+                                    Body = $"Milestone #{milestone.SortOrder} was automatically released after the review period.",
+                                    Type = NotificationType.MilestoneReleased,
+                                    ProjectId = project.Id,
+                                    ActionUrl = $"/projects/{project.Id}/milestones"
+                                }));
+                    }
+                }
             }
             catch
             {

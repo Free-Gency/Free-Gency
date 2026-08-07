@@ -111,5 +111,10 @@ public sealed class TeamMemberRepository : GenericRepository<TeamMember>, ITeamM
             await _dbSet.Where(tm => tm.TeamId == teamId).ExecuteDeleteAsync(ct);
     }
 
-
+    public async Task<List<Guid>> GetLeaderDeveloperProfileIdsAsync(Guid teamId)
+    {
+        return await _dbSet.Where(x => x.TeamId == teamId && x.TeamRole == Role.TeamLeader)
+                           .Select(x => x.User.DeveloperProfile.Id)
+                           .ToListAsync();
+    }
 }
