@@ -23,4 +23,15 @@ public static class DeveloperAccountMapping
                 developerProfile.UserSkills)
         };
     }
+
+    public static void UpdateToEntity(this DeveloperProfile developer, UpdateDeveloperAccountDto dto)
+    {
+        developer.User.FristName = dto.FirstName;
+        developer.User.LastName = dto.LastName;
+        if (dto.Country != null)
+        {
+            developer.User.Country = dto.Country;
+        }
+        developer.Bio = dto.Bio;
+    }
 }

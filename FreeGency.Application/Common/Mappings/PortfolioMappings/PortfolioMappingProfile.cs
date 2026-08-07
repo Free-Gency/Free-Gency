@@ -12,6 +12,53 @@ namespace FreeGency.Application.Common.Mappings.PortfolioMappings
                         x.SkillId,
                         x.Skill.Name));
 
+            CreateMap<PortfolioRoadmapStep, PortfolioRoadmapStepDto>();
+            CreateMap<PortfolioMetric, PortfolioMetricDto>();
+
+            CreateMap<CreatePortfolioProjectRequestDto, PortfolioProject>()
+                .ForMember(d => d.Id, o => o.Ignore())
+                .ForMember(d => d.OwnerUserId, o => o.Ignore())
+                .ForMember(d => d.ImageCover, o => o.Ignore())
+                .ForMember(d => d.PortfolioImages, o => o.Ignore())
+                .ForMember(d => d.PortfolioSkills, o => o.Ignore())
+                .ForMember(d => d.RoadmapSteps, o => o.Ignore())
+                .ForMember(d => d.Metrics, o => o.Ignore())
+                .ForMember(d => d.Feedbacks, o => o.Ignore())
+                .ForMember(d => d.RecentlyViewedByUsers, o => o.Ignore())
+                .ForMember(d => d.OwnerUser, o => o.Ignore())
+                .ForMember(d => d.OwnerTeam, o => o.Ignore())
+                .ForMember(d => d.Category, o => o.Ignore())
+                .ForMember(d => d.CreatedAt, o => o.Ignore())
+                .ForMember(d => d.CreatedBy, o => o.Ignore())
+                .ForMember(d => d.UpdatedAt, o => o.Ignore())
+                .ForMember(d => d.UpdatedBy, o => o.Ignore())
+                .ForMember(d => d.IsDeleted, o => o.Ignore())
+                .ForMember(d => d.DeletedAt, o => o.Ignore())
+                .ForMember(d => d.DeletedBy, o => o.Ignore());
+
+            CreateMap<UpdatePortfolioProjectRequestDto, PortfolioProject>()
+                .ForMember(d => d.Id, o => o.Ignore())
+                .ForMember(d => d.OwnerType, o => o.Ignore())
+                .ForMember(d => d.OwnerUserId, o => o.Ignore())
+                .ForMember(d => d.OwnerTeamId, o => o.Ignore())
+                .ForMember(d => d.ImageCover, o => o.Ignore())
+                .ForMember(d => d.PortfolioImages, o => o.Ignore())
+                .ForMember(d => d.PortfolioSkills, o => o.Ignore())
+                .ForMember(d => d.RoadmapSteps, o => o.Ignore())
+                .ForMember(d => d.Metrics, o => o.Ignore())
+                .ForMember(d => d.Feedbacks, o => o.Ignore())
+                .ForMember(d => d.RecentlyViewedByUsers, o => o.Ignore())
+                .ForMember(d => d.OwnerUser, o => o.Ignore())
+                .ForMember(d => d.OwnerTeam, o => o.Ignore())
+                .ForMember(d => d.Category, o => o.Ignore())
+                .ForMember(d => d.CreatedAt, o => o.Ignore())
+                .ForMember(d => d.CreatedBy, o => o.Ignore())
+                .ForMember(d => d.UpdatedAt, o => o.Ignore())
+                .ForMember(d => d.UpdatedBy, o => o.Ignore())
+                .ForMember(d => d.IsDeleted, o => o.Ignore())
+                .ForMember(d => d.DeletedAt, o => o.Ignore())
+                .ForMember(d => d.DeletedBy, o => o.Ignore());
+
             CreateMap<PortfolioProject, PortfolioProjectDto>()
                 .ConstructUsing(x =>
                     new PortfolioProjectDto(
@@ -29,7 +76,6 @@ namespace FreeGency.Application.Common.Mappings.PortfolioMappings
                             : x.OwnerUser != null
                                 ? $"{x.OwnerUser.FristName} {x.OwnerUser.LastName}".Trim()
                                 : null))
-                // Prevent AutoMapper flattening Category.Name (Arabic) over NameEn
                 .ForMember(
                     d => d.CategoryName,
                     o => o.MapFrom(s => s.Category != null ? s.Category.NameEn : null))
@@ -55,7 +101,13 @@ namespace FreeGency.Application.Common.Mappings.PortfolioMappings
                 .ForMember(d => d.Images,
                     o => o.MapFrom(s => s.PortfolioImages.OrderBy(i => i.SortOrder)))
                 .ForMember(d => d.Skills,
-                    o => o.MapFrom(s => s.PortfolioSkills));
+                    o => o.MapFrom(s => s.PortfolioSkills))
+                .ForMember(d => d.RoadmapSteps,
+                    o => o.MapFrom(s => s.RoadmapSteps.OrderBy(r => r.SortOrder)))
+                .ForMember(d => d.Metrics,
+                    o => o.MapFrom(s => s.Metrics.OrderBy(m => m.SortOrder)))
+                .ForMember(d => d.Creator, o => o.Ignore())
+                .ForMember(d => d.OwnerReviews, o => o.Ignore());
         }
     }
 }

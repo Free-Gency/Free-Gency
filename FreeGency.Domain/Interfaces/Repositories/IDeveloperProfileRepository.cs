@@ -4,6 +4,7 @@ namespace FreeGency.Domain.Interfaces.Repositories
 {
     public interface IDeveloperProfileRepository : IGenericRepository<DeveloperProfile>
     {
+        Task<string> GetEmail(Guid profileId);
         Task<DeveloperProfile?> GetByUserIdAsync(Guid userId, CancellationToken ct = default);
         Task<DeveloperProfile?> GetByUserIdWithSkillsAndInterestsAsync(Guid userId, CancellationToken ct = default);
         Task<bool> ExistsForUserAsync(Guid userId, CancellationToken ct = default);

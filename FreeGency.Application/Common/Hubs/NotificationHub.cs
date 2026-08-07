@@ -1,20 +1,19 @@
 ﻿using FreeGency.Domain.Specifications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FreeGency.Application.Common.Hubs
 {
     [Authorize]
     public class NotificationHub(IUnitOfWork unitOfWork, ICurrentUserService currentUserService) : Hub
     {
-        public static readonly ConcurrentDictionary<Guid, HashSet<string>> UserConnections = new();
+        public static readonly ConcurrentDictionary<Guid, HashSet<string>> ProfileConnections = new();
+
         private readonly IClientProfileRepository clientProfileRepository = unitOfWork.Repository<IClientProfileRepository, ClientProfile>();
         private readonly IDeveloperProfileRepository developerProfileRepository = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
         private readonly IUserRepository userRepository = unitOfWork.Repository<IUserRepository, User>();
+
         public override async Task OnConnectedAsync()
         {
             var userId = currentUserService.UserId;
@@ -25,20 +24,19 @@ namespace FreeGency.Application.Common.Hubs
                 {
                     if (user.ActiveProfileMode == profileMode.Client)
                     {
-                        var clientprofile = await clientProfileRepository.GetEntityWithSpec(new ClientAccountSpecifiaction(userId));
-                        AddConnection(clientprofile!.Id, Context.ConnectionId);
+                        var clientProfile = await clientProfileRepository.GetEntityWithSpec(new ClientAccountSpecifiaction(userId));
+                        AddConnection(clientProfile!.Id, Context.ConnectionId);
                     }
                     else
                     {
-                        var devloperprofile = await developerProfileRepository.GetEntityWithSpec(new DeveloperAccountSpecification(userId));
-                        AddConnection(devloperprofile!.Id, Context.ConnectionId);
+                        var developerProfile = await developerProfileRepository.GetEntityWithSpec(new DeveloperAccountSpecification(userId));
+                        AddConnection(developerProfile!.Id, Context.ConnectionId);
                     }
                 }
             }
             await base.OnConnectedAsync();
-            return;
-
         }
+
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var userId = currentUserService.UserId;
@@ -66,7 +64,7 @@ namespace FreeGency.Application.Common.Hubs
                         profileId = profile.Id;
                     }
 
-                    if (UserConnections.TryGetValue(profileId, out var connections))
+                    if (ProfileConnections.TryGetValue(profileId, out var connections))
                     {
                         lock (connections)
                         {
@@ -74,7 +72,7 @@ namespace FreeGency.Application.Common.Hubs
 
                             if (connections.Count == 0)
                             {
-                                UserConnections.TryRemove(profileId, out _);
+                                ProfileConnections.TryRemove(profileId, out _);
                             }
                         }
                     }
@@ -83,9 +81,10 @@ namespace FreeGency.Application.Common.Hubs
 
             await base.OnDisconnectedAsync(exception);
         }
+
         public static List<string> GetConnections(Guid profileId)
         {
-            if (UserConnections.TryGetValue(profileId, out var connections))
+            if (ProfileConnections.TryGetValue(profileId, out var connections))
             {
                 lock (connections)
                 {
@@ -95,12 +94,13 @@ namespace FreeGency.Application.Common.Hubs
 
             return [];
         }
+
         private static void AddConnection(Guid profileId, string connectionId)
         {
-            if (!UserConnections.TryGetValue(profileId, out var connections))
+            if (!ProfileConnections.TryGetValue(profileId, out var connections))
             {
                 connections = new HashSet<string>();
-                UserConnections[profileId] = connections;
+                ProfileConnections[profileId] = connections;
             }
 
             lock (connections)
@@ -110,4 +110,3 @@ namespace FreeGency.Application.Common.Hubs
         }
     }
 }
-

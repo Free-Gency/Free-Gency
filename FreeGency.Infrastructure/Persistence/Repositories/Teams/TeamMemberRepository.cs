@@ -35,6 +35,28 @@ public sealed class TeamMemberRepository : GenericRepository<TeamMember>, ITeamM
             .FirstOrDefaultAsync(ct);
     }
 
+    public async Task<TeamMember?> GetTrackedSingleInTeamAsync(Guid teamId, Guid userId, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .Where(tm => tm.TeamId == teamId && tm.UserId == userId)
+            .FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<TeamMember>> GetByTeamIdWithUserAsync(Guid teamId, CancellationToken ct = default)
+    {
+        var members = await _dbSet
+            .AsNoTracking()
+            .Where(tm => tm.TeamId == teamId)
+            .Include(tm => tm.User).ThenInclude(u => u.DeveloperProfile)
+            .Include(tm => tm.User).ThenInclude(u => u.ClientProfile)
+            .ToListAsync(ct);
+
+        return members
+            .OrderBy(tm => tm.TeamRole == Role.TeamLeader ? 0 : 1)
+            .ThenBy(tm => tm.JoinedAt)
+            .ToList();
+    }
+
     public async Task<int> GetMemberCountAsync(Guid teamId, CancellationToken ct = default)
     {
         return await _dbSet

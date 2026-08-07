@@ -12,6 +12,8 @@ namespace FreeGency.Application.Features.Account.Queries;
 
 public partial class AccountService
 {
+    private readonly IClientNotificationSettingsRepository clientNotificationSettingsRepository = unitOfWork.Repository<IClientNotificationSettingsRepository, ClientNotificationSettings>();
+    private readonly IDeveloperNotificationSettingsRepository developerNotificationSettingsRepository = unitOfWork.Repository<IDeveloperNotificationSettingsRepository, DeveloperNotificationSettings>();
     public async Task<Result> ChangePasswordAsync(ChangePasswordRequestDto dto)
     {
         var userId =currentUserService.UserId;
@@ -59,6 +61,34 @@ public partial class AccountService
         return Result.Success();
     }
 
+    public async Task<Result> UpdateDeveloperProfileAsync(UpdateDeveloperAccountDto dto)
+    {
+        var userId = currentUserService.UserId;
+        if (userId == Guid.Empty) return Result.Failure(UserErrors.UserNotFound);
+        var repo = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
+        var spec = new DeveloperAccountSpecification(userId, true);
+        var developerAccount = await repo.GetEntityWithSpec(spec);
+        if (developerAccount == null) return Result.Failure(UserErrors.UserNotFound);
+        developerAccount.UpdateToEntity(dto);
+        if (dto.ProfileImage != null)
+        {
+            try
+            {
+                developerAccount.ProfileImage = (await storageService.UploadAsync(
+                    dto.ProfileImage,
+                    StorageFolders.ClientProfile)).Url;
+            }
+            catch (Exception)
+            {
+                return Result.Failure(FileErrors.UploadFailed);
+            }
+        }
+
+        repo.Update(developerAccount);
+        await unitOfWork.SaveChangesAsync();
+        return Result.Success();
+    }
+
     public async Task<Result> CreateProfileClientAsync()
     {
         var userId = currentUserService.UserId;
@@ -68,6 +98,7 @@ public partial class AccountService
         if (profile != null) return Result.Failure(ProfileErrors.ClientProfileAlreadyExists);
         var clientProfile = new ClientProfile { Id=Guid.NewGuid(),UserId = userId };
         await _profileRepository.AddAsync(clientProfile);
+        await clientNotificationSettingsRepository.AddAsync(new ClientNotificationSettings { Id = Guid.NewGuid(), ProfileId = clientProfile.Id });
         await unitOfWork.SaveChangesAsync();
         return Result.Success();
     }
@@ -81,6 +112,7 @@ public partial class AccountService
         if (profile != null) return Result.Failure(ProfileErrors.DeveloperProfileAlreadyExists);
         var developerProfile = new DeveloperProfile { Id = Guid.NewGuid(), UserId = userId };
         await _developerProfileRepository.AddAsync(developerProfile);
+        await developerNotificationSettingsRepository.AddAsync(new DeveloperNotificationSettings { Id = Guid.NewGuid(), ProfileId = developerProfile.Id });
         await unitOfWork.SaveChangesAsync();
         return Result.Success();
     }
@@ -101,39 +133,114 @@ public partial class AccountService
         return Result.Success();
     }
 
-    public async Task<Result<string>> SwitchModeAsync()
+    public async Task<Result<ProfileModesDto>> GetProfileModesAsync()
     {
         var userId = currentUserService.UserId;
-        if (userId == Guid.Empty) return Result.Failure<string>(UserErrors.UserNotFound);
+        if (userId == Guid.Empty) return Result.Failure<ProfileModesDto>(UserErrors.UserNotFound);
+
+        var user = await _userRepository.GetEntityWithSpec(new UserSpecification(userId));
+        if (user is null) return Result.Failure<ProfileModesDto>(UserErrors.UserNotFound);
+
+        var hasClient = await _profileRepository.GetEntityWithSpec(new ClientAccountSpecifiaction(userId, false)) is not null;
+        var hasDeveloper = await _developerProfileRepository.GetEntityWithSpec(new DeveloperAccountSpecification(userId)) is not null;
+
+        Guid? activeProfileId = null;
+        if (user.ActiveProfileMode == profileMode.Client && hasClient)
+        {
+            var client = await _profileRepository.GetEntityWithSpec(new ClientAccountSpecifiaction(userId, false));
+            activeProfileId = client?.Id;
+        }
+        else if (user.ActiveProfileMode == profileMode.Developer && hasDeveloper)
+        {
+            var developer = await _developerProfileRepository.GetEntityWithSpec(new DeveloperAccountSpecification(userId));
+            activeProfileId = developer?.Id;
+        }
+
+        return Result.Success(new ProfileModesDto
+        {
+            ActiveProfileMode = user.ActiveProfileMode?.ToString() ?? string.Empty,
+            HasClientProfile = hasClient,
+            HasDeveloperProfile = hasDeveloper,
+            ActiveProfileId = activeProfileId,
+        });
+    }
+
+    public async Task<Result<SwitchProfileResponseDto>> SwitchModeAsync(string? targetMode = null)
+    {
+        var userId = currentUserService.UserId;
+        if (userId == Guid.Empty) return Result.Failure<SwitchProfileResponseDto>(UserErrors.UserNotFound);
         var spec = new UserSpecification(userId);
         var user = await _userRepository.GetEntityWithSpec(spec);
-        if (user == null) return Result.Failure<string>(UserErrors.UserNotFound);
-        if (user.ActiveProfileMode == profileMode.Developer)
+        if (user == null) return Result.Failure<SwitchProfileResponseDto>(UserErrors.UserNotFound);
+
+        var hasClient = await _profileRepository.GetEntityWithSpec(new ClientAccountSpecifiaction(userId, false)) is not null;
+        var hasDeveloper = await _developerProfileRepository.GetEntityWithSpec(new DeveloperAccountSpecification(userId)) is not null;
+
+        profileMode nextMode;
+        if (!string.IsNullOrWhiteSpace(targetMode))
         {
-            user.ActiveProfileMode = profileMode.Client;
-            var specClient = new ClientAccountSpecifiaction(userId);
-            var profile = await _profileRepository.GetEntityWithSpec(specClient);
-            if (profile == null)
-            {
-                var clientProfile = new ClientProfile { Id = Guid.NewGuid(), UserId = userId };
-                await _profileRepository.AddAsync(clientProfile);
-                await unitOfWork.SaveChangesAsync();
-            }
+            nextMode = targetMode.Equals("Developer", StringComparison.OrdinalIgnoreCase)
+                ? profileMode.Developer
+                : profileMode.Client;
         }
         else
         {
-            user.ActiveProfileMode = profileMode.Developer;
-            var specDev = new DeveloperAccountSpecification(userId);
-            var profile = await _developerProfileRepository.GetEntityWithSpec(specDev);
-            if (profile == null)
-            {
-                var developerProfile = new DeveloperProfile { Id = Guid.NewGuid(), UserId = userId };
-                await _developerProfileRepository.AddAsync(developerProfile);
-                await unitOfWork.SaveChangesAsync();
-            }
+            nextMode = user.ActiveProfileMode == profileMode.Developer
+                ? profileMode.Client
+                : profileMode.Developer;
         }
+
+        if (nextMode == user.ActiveProfileMode)
+        {
+            Guid? currentId = null;
+            if (nextMode == profileMode.Client && hasClient)
+                currentId = (await _profileRepository.GetEntityWithSpec(new ClientAccountSpecifiaction(userId, false)))?.Id;
+            else if (nextMode == profileMode.Developer && hasDeveloper)
+                currentId = (await _developerProfileRepository.GetEntityWithSpec(new DeveloperAccountSpecification(userId)))?.Id;
+
+            return Result.Success(new SwitchProfileResponseDto
+            {
+                ActiveProfileMode = nextMode.ToString(),
+                ProfileId = currentId,
+                HasClientProfile = hasClient,
+                HasDeveloperProfile = hasDeveloper,
+            });
+        }
+
+        if (nextMode == profileMode.Client)
+        {
+            if (!hasClient)
+                return Result.Failure<SwitchProfileResponseDto>(ProfileErrors.ClientProfileRequired);
+
+            user.ActiveProfileMode = profileMode.Client;
+            var client = await _profileRepository.GetEntityWithSpec(new ClientAccountSpecifiaction(userId, false));
+            _userRepository.Update(user);
+            await unitOfWork.SaveChangesAsync();
+
+            return Result.Success(new SwitchProfileResponseDto
+            {
+                ActiveProfileMode = nameof(profileMode.Client),
+                ProfileId = client?.Id,
+                HasClientProfile = true,
+                HasDeveloperProfile = hasDeveloper,
+            });
+        }
+
+        if (!hasDeveloper)
+            return Result.Failure<SwitchProfileResponseDto>(ProfileErrors.DeveloperProfileRequired);
+
+        user.ActiveProfileMode = profileMode.Developer;
+        var developer = await _developerProfileRepository.GetEntityWithSpec(new DeveloperAccountSpecification(userId));
+        _userRepository.Update(user);
         await unitOfWork.SaveChangesAsync();
-        return Result.Success(user.ActiveProfileMode.ToString()!);
+
+        return Result.Success(new SwitchProfileResponseDto
+        {
+            ActiveProfileMode = nameof(profileMode.Developer),
+            ProfileId = developer?.Id,
+            HasClientProfile = hasClient,
+            HasDeveloperProfile = true,
+        });
     }
 
     public Task<ApiResponse> AddClientInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default)

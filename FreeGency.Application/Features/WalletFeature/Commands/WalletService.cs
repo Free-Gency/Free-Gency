@@ -1,4 +1,5 @@
 ﻿using FreeGency.Application.Common.Hubs;
+using FreeGency.Application.Features.NotificationFeature.Dtos;
 using FreeGency.Application.Features.WalletFeature.Dtos;
 using FreeGency.Application.Features.WalletFeature.Mapping;
 using FreeGency.Domain.Specifications;
@@ -7,6 +8,7 @@ using Stripe;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 
 namespace FreeGency.Application.Features.WalletFeature.Queries
 {
@@ -77,7 +79,24 @@ namespace FreeGency.Application.Features.WalletFeature.Queries
             var connections = NotificationHub.GetConnections( profileId);
             if (connections.Count > 0)
                 await hub.Clients.Clients(connections).SendAsync("WalletUpdated", wallet.ToDto());
-
+            var notificationRequest = new CreateNotificationRequest
+            {
+                Title = "Wallet topped up",
+                Body = $"{transaction.Amount} {transaction.Currency} has been added to your wallet successfully.",
+                UserId=wallet.OwnerUserId!.Value,
+                Type = NotificationType.Wallet,
+                ClientProfileId = null,
+                DeveloperProfileId = null,
+                Data = JsonSerializer.Serialize(new
+                {
+                    WalletId = wallet.Id,
+                    Amount = transaction.Amount,
+                    Currency = transaction.Currency,
+                    
+                }),
+                ActionUrl= "/settings/payments"
+            };
+            await notificationService.CreateNotification(notificationRequest);
             return Result.Success();
         }
         public async  Task<Result> HandleCanceled(PaymentIntent @object)

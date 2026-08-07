@@ -12,6 +12,7 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
         builder.ToTable("TeamMembers", DbSchemas.Teams);
         builder.HasKey(tm => new { tm.Id, tm.TeamId, tm.UserId });
         builder.HasIndex(tm => new { tm.TeamId, tm.UserId }).IsUnique();
+        builder.HasIndex(tm => tm.UserId);
 
         builder.Property(tm => tm.TeamRole).HasConversion<string>().HasMaxLength(50);
         builder.Property(tm => tm.Job).HasMaxLength(100);

@@ -1,4 +1,4 @@
-﻿using FreeGency.Application.Features.TeamJoinRequests.Dtos;
+using FreeGency.Application.Features.TeamJoinRequests.Dtos;
 using FreeGency.Application.Features.TeamJoinRequests.Mapping;
 using FreeGency.Domain.Specifications;
 using System;
@@ -12,8 +12,15 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
         public async Task<Result<PaginatedResult<TeamJoinRequestResponseDto>>> GetJoinRequestAsync(TeamJoinRequestSpecificationParam param)
         {
             var userId = currentUserService.UserId;
-            var IsLeader = await _teamMemberRepository.IsLeaderAsync(param.TeamId, userId);
-            if (!IsLeader) return Result.Failure<PaginatedResult<TeamJoinRequestResponseDto>>(TeamErrors.UnauthorizedLeader);
+            var team = await _teamRepository.GetByIdAsync(param.TeamId);
+            if (team is null)
+                return Result.Failure<PaginatedResult<TeamJoinRequestResponseDto>>(TeamErrors.TeamNotFound);
+
+            var isLeader = await _teamMemberRepository.IsLeaderAsync(param.TeamId, userId)
+                || team.OwnerUserId == userId;
+            if (!isLeader)
+                return Result.Failure<PaginatedResult<TeamJoinRequestResponseDto>>(TeamErrors.UnauthorizedLeader);
+
             var listSpec = new TeamJoinRequestSpecification(param);
 
             var requests = await _teamJoinRequestRepository.ListAsync(listSpec);

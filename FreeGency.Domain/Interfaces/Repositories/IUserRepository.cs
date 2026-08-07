@@ -9,5 +9,8 @@ namespace FreeGency.Domain.Interfaces.Repositories
         Task<bool> ExistsByEmailAsync(string email, CancellationToken ct = default);
         Task UpdateActiveProfileModeAsync(Guid userId, profileMode mode, CancellationToken ct = default);
         Task<Guid> GetProfileId(Guid userId);
+        Task<(Guid ProfileId, profileMode Mode)?> GetActiveProfileAsync(Guid userId, CancellationToken ct = default);
+        Task<Guid?> GetClientProfileIdByUserIdAsync(Guid userId, CancellationToken ct = default);
+        Task<Guid?> GetDeveloperProfileIdByUserIdAsync(Guid userId, CancellationToken ct = default);
     }
 }

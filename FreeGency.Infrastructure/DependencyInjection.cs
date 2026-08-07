@@ -33,8 +33,10 @@ public static class DependencyInjection
             var options = sp.GetRequiredService<IOptions<CloudinaryOptions>>().Value;
             return new CloudinaryClient(new Account(options.CloudName, options.ApiKey, options.ApiSecret));
         });
+        services.AddScoped<IDeveloperNotificationSettingsRepository, DeveloperNotificationSettingsRepository>();
         services.AddScoped<IChatRoomMemberRepository, ChatRoomMemberRepository>();
         services.AddScoped<IClientNotificationSettingsRepository, ClientNotificationSettingsRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<IPaymentTransactionRepository, PaymentTransactionRepository>();
         services.AddScoped<ISocialLinkRepository, SocialLinkRepository>();
         services.AddScoped<IStorageService, CloudinaryStorageService>();
@@ -71,7 +73,9 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
             options.UseLazyLoadingProxies();
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+            options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"),
+                sql => sql.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
             options.AddInterceptors(
                 sp.GetRequiredService<AuditInterceptor>(),
                 sp.GetRequiredService<SoftDeleteInterceptor>());

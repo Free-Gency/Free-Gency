@@ -221,5 +221,10 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
                     s.SetProperty(dp => dp.AverageRating, avg)
                      .SetProperty(dp => dp.RatingCount, count),
                 ct);
+
+        public async Task<string> GetEmail(Guid profileId)
+        {
+            return await _dbSet.Where(X => X.Id == profileId).Select(x => x.User.Email).FirstOrDefaultAsync();
+        }
     }
 }

@@ -56,8 +56,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PortfolioProject> PortfolioProjects => Set<PortfolioProject>();
     public DbSet<PortfolioImage> PortfolioImages => Set<PortfolioImage>();
     public DbSet<PortfolioSkill> PortfolioSkills => Set<PortfolioSkill>();
+    public DbSet<PortfolioRoadmapStep> PortfolioRoadmapSteps => Set<PortfolioRoadmapStep>();
+    public DbSet<PortfolioMetric> PortfolioMetrics => Set<PortfolioMetric>();
     public DbSet<RecentlyViewedPortfolio> RecentlyViewedPortfolios => Set<RecentlyViewedPortfolio>();
     public DbSet<PortfolioFeedback> PortfolioFeedbacks => Set<PortfolioFeedback>();
+    public DbSet<TeamFeedback> TeamFeedbacks => Set<TeamFeedback>();
 
     // Chat
     public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();
@@ -74,6 +77,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     // Notifications
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<ClientNotificationSettings> clientNotificationSettings => Set<ClientNotificationSettings>();
+    public DbSet<DeveloperNotificationSettings> developerNotificationSettings => Set<DeveloperNotificationSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

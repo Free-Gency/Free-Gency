@@ -1,4 +1,4 @@
-﻿
+
 using FreeGency.Domain.Entities;
 using FreeGency.Domain.Enums;
 
@@ -11,6 +11,10 @@ public interface ITeamMemberRepository : IGenericRepository<TeamMember>
     Task<IReadOnlyList<TeamMember>> GetByUserIdAsync(Guid userId, CancellationToken ct = default);
 
     Task<TeamMember?> GetSingleInTeamAsync(Guid teamId, Guid userId, CancellationToken ct = default);
+
+    Task<TeamMember?> GetTrackedSingleInTeamAsync(Guid teamId, Guid userId, CancellationToken ct = default);
+
+    Task<IReadOnlyList<TeamMember>> GetByTeamIdWithUserAsync(Guid teamId, CancellationToken ct = default);
     
     Task<int> GetMemberCountAsync(Guid teamId, CancellationToken ct = default);
     

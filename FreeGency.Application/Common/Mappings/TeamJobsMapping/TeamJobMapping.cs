@@ -15,7 +15,9 @@ public static class TeamJobMapping
             Title = teamJob.Title,
             Description = teamJob.Description,
             Status = teamJob.Status.ToString(),
-            CreatedAt = teamJob.CreatedAt
+            CreatedAt = teamJob.CreatedAt,
+            TeamName = teamJob.Team?.Name ?? string.Empty,
+            TeamLogo = teamJob.Team?.Logo,
         };
     }
 

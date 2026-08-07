@@ -18,7 +18,9 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
                 .Include(x => x.OwnerTeam)
                 .Include(x => x.PortfolioImages)
                 .Include(x => x.PortfolioSkills)
-                    .ThenInclude(x => x.Skill);
+                    .ThenInclude(x => x.Skill)
+                .Include(x => x.RoadmapSteps)
+                .Include(x => x.Metrics);
         }
 
         public IQueryable<PortfolioProject> GetInspirationQuery(
@@ -130,6 +132,8 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .Include(x => x.ReviewerUser!)
                     .ThenInclude(u => u.ClientProfile)
+                .Include(x => x.ReviewerUser!)
+                    .ThenInclude(u => u.DeveloperProfile)
                 .Where(x => x.PortfolioProjectId == portfolioProjectId)
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(take)
@@ -164,13 +168,23 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
         {
             return await _dbSet
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(x => x.Category)
                 .Include(x => x.PortfolioImages)
                 .Include(x => x.PortfolioSkills)
                     .ThenInclude(x => x.Skill)
+                .Include(x => x.RoadmapSteps)
+                .Include(x => x.Metrics)
                 .Include(x => x.OwnerUser!)
                     .ThenInclude(u => u.DeveloperProfile)
-                .Include(x => x.OwnerTeam)
+                .Include(x => x.OwnerTeam!)
+                    .ThenInclude(t => t.TeamMembers)
+                .Include(x => x.OwnerTeam!)
+                    .ThenInclude(t => t.TeamSpecialties!)
+                        .ThenInclude(s => s.Specialty)
+                .Include(x => x.OwnerTeam!)
+                    .ThenInclude(t => t.TeamSkills!)
+                        .ThenInclude(s => s.Skill)
                 .FirstOrDefaultAsync(
                     x => x.Id == id && x.Visibility == Visibility.Public,
                     ct);
@@ -351,6 +365,76 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
 
             if (skills.Count > 0)
                 _context.RemoveRange(skills);
+
+            var steps = await _context
+                .Set<PortfolioRoadmapStep>()
+                .Where(x => x.PortfolioProjectId == portfolioProjectId)
+                .ToListAsync(ct);
+
+            if (steps.Count > 0)
+                _context.RemoveRange(steps);
+
+            var metrics = await _context
+                .Set<PortfolioMetric>()
+                .Where(x => x.PortfolioProjectId == portfolioProjectId)
+                .ToListAsync(ct);
+
+            if (metrics.Count > 0)
+                _context.RemoveRange(metrics);
+        }
+
+        public async Task ReplaceRoadmapStepsAsync(
+            Guid portfolioProjectId,
+            IEnumerable<PortfolioRoadmapStep> steps,
+            CancellationToken ct = default)
+        {
+            var old = await _context
+                .Set<PortfolioRoadmapStep>()
+                .Where(x => x.PortfolioProjectId == portfolioProjectId)
+                .ToListAsync(ct);
+
+            if (old.Count > 0)
+                _context.RemoveRange(old);
+
+            var list = steps?.ToList() ?? [];
+            if (list.Count == 0)
+                return;
+
+            foreach (var step in list)
+            {
+                if (step.Id == Guid.Empty)
+                    step.Id = Guid.NewGuid();
+                step.PortfolioProjectId = portfolioProjectId;
+            }
+
+            await _context.Set<PortfolioRoadmapStep>().AddRangeAsync(list, ct);
+        }
+
+        public async Task ReplaceMetricsAsync(
+            Guid portfolioProjectId,
+            IEnumerable<PortfolioMetric> metrics,
+            CancellationToken ct = default)
+        {
+            var old = await _context
+                .Set<PortfolioMetric>()
+                .Where(x => x.PortfolioProjectId == portfolioProjectId)
+                .ToListAsync(ct);
+
+            if (old.Count > 0)
+                _context.RemoveRange(old);
+
+            var list = metrics?.ToList() ?? [];
+            if (list.Count == 0)
+                return;
+
+            foreach (var metric in list)
+            {
+                if (metric.Id == Guid.Empty)
+                    metric.Id = Guid.NewGuid();
+                metric.PortfolioProjectId = portfolioProjectId;
+            }
+
+            await _context.Set<PortfolioMetric>().AddRangeAsync(list, ct);
         }
     }
 }

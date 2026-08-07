@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Features.Portfolio.Commands
+namespace FreeGency.Application.Features.Portfolio.Commands
 {
     // Commands
     public partial class PortfolioService : IPortfolioService
@@ -47,18 +47,22 @@
                         : null,
 
                     Title = request.Title.Trim(),
-
                     Description = request.Description.Trim(),
-
                     Budget = request.Budget,
-
                     ProjectUrl = request.ProjectUrl,
-
+                    PrototypeUrl = request.PrototypeUrl,
                     CompletionDate = request.CompletionDate,
-
                     CategoryId = request.CategoryId,
-
-                    Visibility = request.Visibility
+                    Visibility = request.Visibility,
+                    Challenge = request.Challenge,
+                    Solution = request.Solution,
+                    DurationLabel = request.DurationLabel,
+                    Industry = request.Industry,
+                    TeamLeads = request.TeamLeads,
+                    TestimonialQuote = request.TestimonialQuote,
+                    TestimonialAuthorName = request.TestimonialAuthorName,
+                    TestimonialAuthorTitle = request.TestimonialAuthorTitle,
+                    TestimonialAuthorAvatarUrl = request.TestimonialAuthorAvatarUrl,
                 };
 
                 //----------------------------------------------------
@@ -93,6 +97,12 @@
                 await _portfolioRepo.AddWithSkillsAsync(
                     portfolio,
                     request.SkillIds,
+                    ct);
+
+                await ReplaceCaseStudyCollectionsAsync(
+                    portfolio.Id,
+                    request.RoadmapSteps,
+                    request.Metrics,
                     ct);
 
                 //----------------------------------------------------
@@ -150,12 +160,36 @@
             portfolio.Title = request.Title;
             portfolio.Description = request.Description;
             portfolio.ProjectUrl = request.ProjectUrl;
+            portfolio.PrototypeUrl = request.PrototypeUrl;
             portfolio.Budget = request.Budget;
             portfolio.CategoryId = request.CategoryId;
             portfolio.CompletionDate = request.CompletionDate;
             portfolio.Visibility = request.Visibility;
+            portfolio.Challenge = request.Challenge;
+            portfolio.Solution = request.Solution;
+            portfolio.DurationLabel = request.DurationLabel;
+            portfolio.Industry = request.Industry;
+            portfolio.TeamLeads = request.TeamLeads;
+            portfolio.TestimonialQuote = request.TestimonialQuote;
+            portfolio.TestimonialAuthorName = request.TestimonialAuthorName;
+            portfolio.TestimonialAuthorTitle = request.TestimonialAuthorTitle;
+            portfolio.TestimonialAuthorAvatarUrl = request.TestimonialAuthorAvatarUrl;
 
             _portfolioRepo.Update(portfolio);
+
+            if (request.RoadmapSteps is not null || request.Metrics is not null)
+            {
+                await ReplaceCaseStudyCollectionsAsync(
+                    portfolio.Id,
+                    request.RoadmapSteps,
+                    request.Metrics,
+                    ct);
+            }
+
+            if (request.SkillIds is not null)
+            {
+                await _portfolioRepo.ReplaceSkillsAsync(id, request.SkillIds, ct);
+            }
 
             await _unitOfWork.SaveChangesAsync(ct);
 
@@ -341,7 +375,8 @@
             CancellationToken ct = default)
         {
             if (!await CanManageTeamAsync(teamId, ct))
-                return ApiResponse.Failure<Guid>(AppError.Unauthorized());
+                return ApiResponse.Failure<Guid>(
+                    AppError.Forbidden("Only the team owner or a team leader can publish portfolio projects."));
 
             var project = _mapper.Map<PortfolioProject>(request);
 
@@ -349,10 +384,21 @@
             project.OwnerType = owner.Team;
             project.OwnerTeamId = teamId;
             project.OwnerUserId = null;
+            project.CreatedBy = _currentUser.UserId.ToString();
+            project.Title = (request.Title ?? string.Empty).Trim();
+            project.Description = (request.Description ?? string.Empty).Trim();
+            if (project.TeamLeads is { Length: > 2000 })
+                project.TeamLeads = project.TeamLeads[..2000];
 
             await _portfolioRepo.AddWithSkillsAsync(
                 project,
                 request.SkillIds,
+                ct);
+
+            await ReplaceCaseStudyCollectionsAsync(
+                project.Id,
+                request.RoadmapSteps,
+                request.Metrics,
                 ct);
 
             await _unitOfWork.SaveChangesAsync(ct);
@@ -383,6 +429,20 @@
             _mapper.Map(request, portfolio);
 
             _portfolioRepo.Update(portfolio);
+
+            if (request.RoadmapSteps is not null || request.Metrics is not null)
+            {
+                await ReplaceCaseStudyCollectionsAsync(
+                    portfolio.Id,
+                    request.RoadmapSteps,
+                    request.Metrics,
+                    ct);
+            }
+
+            if (request.SkillIds is not null)
+            {
+                await _portfolioRepo.ReplaceSkillsAsync(id, request.SkillIds, ct);
+            }
 
             await _unitOfWork.SaveChangesAsync(ct);
 
@@ -580,6 +640,47 @@
             return await _unitOfWork
                 .Repository<ITeamMemberRepository, TeamMember>()
                 .IsLeaderAsync(teamId, _currentUser.UserId, ct);
+        }
+
+        private async Task ReplaceCaseStudyCollectionsAsync(
+            Guid portfolioProjectId,
+            IEnumerable<PortfolioRoadmapStepDto>? steps,
+            IEnumerable<PortfolioMetricDto>? metrics,
+            CancellationToken ct)
+        {
+            if (steps is not null)
+            {
+                var entities = steps
+                    .Where(s => !string.IsNullOrWhiteSpace(s.Title))
+                    .Select((s, index) => new PortfolioRoadmapStep
+                    {
+                        Id = Guid.NewGuid(),
+                        PortfolioProjectId = portfolioProjectId,
+                        Title = s.Title.Trim(),
+                        SortOrder = s.SortOrder != 0 ? s.SortOrder : index,
+                        IsDone = s.IsDone,
+                    })
+                    .ToList();
+
+                await _portfolioRepo.ReplaceRoadmapStepsAsync(portfolioProjectId, entities, ct);
+            }
+
+            if (metrics is not null)
+            {
+                var entities = metrics
+                    .Where(m => !string.IsNullOrWhiteSpace(m.Value) && !string.IsNullOrWhiteSpace(m.Label))
+                    .Select((m, index) => new PortfolioMetric
+                    {
+                        Id = Guid.NewGuid(),
+                        PortfolioProjectId = portfolioProjectId,
+                        Value = m.Value.Trim(),
+                        Label = m.Label.Trim(),
+                        SortOrder = m.SortOrder != 0 ? m.SortOrder : index,
+                    })
+                    .ToList();
+
+                await _portfolioRepo.ReplaceMetricsAsync(portfolioProjectId, entities, ct);
+            }
         }
 
         #endregion

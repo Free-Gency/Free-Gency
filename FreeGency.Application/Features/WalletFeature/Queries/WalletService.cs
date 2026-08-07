@@ -12,7 +12,7 @@ using System.Text;
 
 namespace FreeGency.Application.Features.WalletFeature.Queries
 {
-    public partial class WalletService (ICurrentUserService currentUserService,IUnitOfWork unitOfWork,IOptions<StripeSetting> options,IHubContext<NotificationHub> hub): IWalletService
+    public partial class WalletService (ICurrentUserService currentUserService,IUnitOfWork unitOfWork,IOptions<StripeSetting> options,IHubContext<NotificationHub> hub,INotificationService notificationService): IWalletService
     {
         private readonly IWalletRepository walletRepository = unitOfWork.Repository<IWalletRepository, Wallet>();
         private readonly IPaymentTransactionRepository paymentTransactionRepository = unitOfWork.Repository<IPaymentTransactionRepository, PaymentTransaction>();

@@ -8,6 +8,10 @@ namespace FreeGency.Application.Common.Interfaces
     public interface IJwtProvider
     {
         (string token, int expiresIn) GenerateToken(User user);
-        Guid? ValidateToken(string token);
+
+        /// <param name="validateLifetime">
+        /// When false, signature is checked but expiry is ignored (needed for refresh/revoke).
+        /// </param>
+        Guid? ValidateToken(string token, bool validateLifetime = true);
     }
 }
