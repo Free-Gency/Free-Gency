@@ -1,11 +1,3 @@
-using EntityFrameworkCore.EncryptColumn.Extension;
-using EntityFrameworkCore.EncryptColumn.Interfaces;
-using EntityFrameworkCore.EncryptColumn.Util;
-using FreeGency.Domain.Entities;
-using FreeGency.Infrastructure.Persistence.Extensions;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 
 namespace FreeGency.Infrastructure.Persistence.Context;
 
@@ -51,6 +43,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<MilestonePlanItem> MilestonePlanItems => Set<MilestonePlanItem>();
     public DbSet<SavedProject> SavedProjects => Set<SavedProject>();
     public DbSet<Review> Reviews => Set<Review>();
+    public DbSet<ProjectTask> ProjectTasks => Set<ProjectTask>();
+    public DbSet<TaskComment> TaskComments => Set<TaskComment>();
+    public DbSet<TaskChecklistItem> TaskChecklistItems => Set<TaskChecklistItem>();
+    public DbSet<TaskAttachment> TaskAttachments => Set<TaskAttachment>();
+    public DbSet<TaskTimeLog> TaskTimeLogs => Set<TaskTimeLog>();
+    public DbSet<TaskSubtask> TaskSubtasks => Set<TaskSubtask>();
+
 
     // Portfolio
     public DbSet<PortfolioProject> PortfolioProjects => Set<PortfolioProject>();

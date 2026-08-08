@@ -1,19 +1,5 @@
+
 using CloudinaryDotNet;
-using EntityFrameworkCore.EncryptColumn.Interfaces;
-using EntityFrameworkCore.EncryptColumn.Util;
-using FreeGency.Domain.Interfaces.Repositories;
-using FreeGency.Infrastructure.Implementations;
-using FreeGency.Infrastructure.Integrations.Cloudinary;
-using FreeGency.Infrastructure.Interfaces;
-using FreeGency.Infrastructure.Persistence.Context;
-using FreeGency.Infrastructure.Persistence.Interceptors;
-using FreeGency.Infrastructure.Persistence.Repositories;
-using FreeGency.Infrastructure.Persistence.Repositories.Reviews;
-using FreeGency.Domain.Interfaces.Repositories.Reviews;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using CloudinaryClient = CloudinaryDotNet.Cloudinary;
 
 namespace FreeGency.Infrastructure;
@@ -67,6 +53,14 @@ public static class DependencyInjection
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<ILedgerEntryRepository, LedgerEntryRepository>();
+
+        services.AddScoped<ITaskRepository, TaskRepository>();
+        services.AddScoped<ITaskCommentRepository, TaskCommentRepository>();
+        services.AddScoped<ITaskChecklistItemRepository, TaskChecklistItemRepository>();
+        services.AddScoped<ITaskAttachmentRepository, TaskAttachmentRepository>();
+        services.AddScoped<ITaskTimeLogRepository, TaskTimeLogRepository>();
+        services.AddScoped<ITaskSubtaskRepository, TaskSubtaskRepository>();
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
