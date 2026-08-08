@@ -5,6 +5,7 @@ namespace FreeGency.Domain.Interfaces.Repositories.Teams;
 
 public interface ITeamRepository : IGenericRepository<Team>
 {
+    IQueryable<Project> GetProjectTeamAccepted(Guid TeamId); 
     Task<IReadOnlyList<TeamHubItem>> GetMyHubItemsAsync(Guid userId, CancellationToken ct = default);
 
     Task<(IReadOnlyList<TeamHubItem> Items, int TotalCount)> GetBrowseHubItemsPagedAsync(

@@ -2,6 +2,7 @@ using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Common.Mappings.TeamsMapping;
 using FreeGency.Application.Features.Teams.Dtos;
+using FreeGency.Application.Features.Teams.DTOs;
 using FreeGency.Infrastructure.Integrations.Cloudinary;
 using FreeGency.Infrastructure.Interfaces;
 
@@ -13,13 +14,19 @@ namespace FreeGency.Application.Features.Teams.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStorageService _storageService;
         private readonly ICurrentUserService _currentUserService;
-
+        private readonly IProjectRepository _projectRepository;
+        private readonly IMilestonePlanVersionRepository _milestonePlanVersionRepository;
+        private readonly IWalletRepository _walletRepository;
         public TeamService(IUnitOfWork unitOfWork, IStorageService storageService, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _storageService = storageService;
             _currentUserService = currentUserService;
+            _walletRepository = _unitOfWork.Repository<IWalletRepository, Wallet>();
             _teamRepository = _unitOfWork.Repository<ITeamRepository, Team>();
+            _projectRepository = _unitOfWork.Repository<IProjectRepository, Project>();
+            _milestonePlanVersionRepository = _unitOfWork.Repository<IMilestonePlanVersionRepository, MilestonePlanVersion>();
+
         }
 
         public async Task<ApiResponse<Guid>> CreateAsync(CreateTeamDto dto, CancellationToken ct = default)
@@ -103,7 +110,14 @@ namespace FreeGency.Application.Features.Teams.Commands
                 MessageType = MessageType.System,
                 Text = $"Team chat created for {team.Name}. Leaders and members can message here."
             }, ct);
-
+            var wallet = new Wallet
+            {
+                Id = Guid.NewGuid(),
+                OwnerType = owner.Team,
+                OwnerTeamId = team.Id,
+                Currency = "USD"
+            };
+            await _walletRepository.AddAsync(wallet);
             await _unitOfWork.SaveChangesAsync(ct);
 
             return ApiResponse.Success(team.Id, "Team created successfully.");
@@ -659,5 +673,7 @@ namespace FreeGency.Application.Features.Teams.Commands
                     ?? user?.ClientProfile?.ProfileImage,
             };
         }
+
+      
     }
 }

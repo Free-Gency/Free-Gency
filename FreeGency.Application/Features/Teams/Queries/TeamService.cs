@@ -2,11 +2,90 @@ using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Common.Mappings.TeamsMapping;
 using FreeGency.Application.Common.Pagination;
 using FreeGency.Application.Features.Teams.Dtos;
+using FreeGency.Application.Features.Teams.DTOs;
+using FreeGency.Application.Features.WalletFeature.Dtos;
 
 namespace FreeGency.Application.Features.Teams.Commands
 {
     public partial class TeamService
     {
+        public async Task<Result<WalletTeamDto>> GetTeamWallet(Guid teamid)
+        { 
+            var wallet = await _walletRepository.GetByOwnerAsync(owner.Team, teamid);
+            if (wallet == null) return Result.Failure<WalletTeamDto>(WalletErrors.NotFound);
+            var WalletTeamDto = new WalletTeamDto
+            {
+                Id = wallet.Id,
+                Currency = wallet.Currency,
+                Pending = wallet.Pending,
+                Available = wallet.Available,
+                Reserved = wallet.Reserved,
+                TeamId=wallet.OwnerTeamId.Value
+            };
+            return Result.Success(WalletTeamDto);
+        }
+        public async Task<Result<PaginatedResult<TeamProjectEarningsDto>>>
+      GetTeamProjectEarnings(TeamProjectsFilter teamProjectsFilter)
+        {
+            var teamProjects = _teamRepository
+                .GetProjectTeamAccepted(teamProjectsFilter.TeamId);
+
+            var query = teamProjects.Select(project => new TeamProjectEarningsDto
+            {
+                ProjectId = project.Id,
+                ProjectTitle = project.Title,
+                Currency = project.Currency,
+
+                TotalBudget = project.MilestonePlanVersions
+                    .Where(v => v.Status == PlanVersionStatus.Accepted)
+                    .SelectMany(v => v.Items)
+                    .Sum(x => x.Amount),
+
+                ReleasedAmount = project.Milestones
+                    .Sum(x => x.ReleasedAmount),
+
+                Members = project.TeamPayoutSplits
+                    .Select(split => new TeamMemberEarningDto
+                    {
+                        UserId = split.UserId,
+
+                        Name = split.User.FristName + " " + split.User.LastName,
+
+                        Percentage = split.Value,
+
+                        Amount =
+                            project.MilestonePlanVersions
+                                .Where(v => v.Status == PlanVersionStatus.Accepted)
+                                .SelectMany(v => v.Items)
+                                .Sum(x => x.Amount)
+                            * split.Value / 100,
+
+                        ReleasedAmount =
+                            project.Milestones
+                                .Sum(x => x.ReleasedAmount)
+                            * split.Value / 100,
+
+                        Status =
+                            project.Milestones.Sum(x => x.ReleasedAmount) == 0
+                                ? "Pending"
+                                : project.Milestones.Sum(x => x.ReleasedAmount)
+                                    >= project.MilestonePlanVersions
+                                        .Where(v => v.Status == PlanVersionStatus.Accepted)
+                                        .SelectMany(v => v.Items)
+                                        .Sum(x => x.Amount)
+                                    ? "Released"
+                                    : "Partially Released"
+                    })
+                    .ToList()
+            });
+
+            var result = await PaginatedResult<TeamProjectEarningsDto>.CreateAsync(
+                query,
+                teamProjectsFilter.PageNumber,
+                teamProjectsFilter.PageSize);
+
+            return Result.Success(result);
+        }
         public async Task<ApiResponse<PaginatedResult<TeamDto>>> BrowseAsync(
             FilterTeamsRequestDto filter,
             CancellationToken ct = default)
