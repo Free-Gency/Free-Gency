@@ -1,6 +1,5 @@
 using FreeGency.Application.Features.Teams.Dtos;
-using FreeGency.Domain.Enums;
-using FreeGency.Domain.Interfaces.Repositories.Teams;
+
 
 namespace FreeGency.Application.Common.Mappings.TeamsMapping;
 

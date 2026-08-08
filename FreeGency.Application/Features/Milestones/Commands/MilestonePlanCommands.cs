@@ -657,6 +657,15 @@ public partial class MilestoneService
 
     public async Task<ApiResponse> SubmitMilestoneAsync(Guid milestoneId, CancellationToken ct = default)
     {
+        // Check for open tasks before submission
+        var openTasks = await _unitOfWork.Repository<ITaskRepository, ProjectTask>().CountIncompleteAsync(milestoneId, ct);
+        var hasTasks = await _unitOfWork.Repository<ITaskRepository, ProjectTask>().Query()
+            .AnyAsync(t => t.MilestoneId == milestoneId, ct);
+        if (hasTasks && openTasks > 0)
+            return ApiResponse.Failure(AppError.Validation(
+                "Complete all tasks before submitting the milestone."));
+
+
         var milestone = await _milestoneRepo.GetByIdAsync(milestoneId, ct);
         if (milestone is null)
             return ApiResponse.Failure(AppError.NotFound(nameof(Milestone), milestoneId));
