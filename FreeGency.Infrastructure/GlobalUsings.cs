@@ -1,5 +1,13 @@
 ﻿global using Microsoft.EntityFrameworkCore;
-
+global using Microsoft.EntityFrameworkCore.Metadata.Builders;
+global using EntityFrameworkCore.EncryptColumn.Interfaces;
+global using EntityFrameworkCore.EncryptColumn.Util;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Options;
+global using EntityFrameworkCore.EncryptColumn.Extension;
+global using Microsoft.AspNetCore.Identity;
+global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 
 global using FreeGency.Domain.Interfaces;
@@ -17,3 +25,13 @@ global using FreeGency.Domain.Enums;
 global using FreeGency.Domain.Interfaces.Repositories.Reviews;
 
 global using FreeGency.Domain.Interfaces.Repositories;
+global using FreeGency.Domain.Interfaces.Repositories.Tasks;
+
+global using FreeGency.Infrastructure.Persistence.Schemas;
+
+global using FreeGency.Infrastructure.Integrations.Cloudinary;
+global using FreeGency.Infrastructure.Persistence.Repositories;
+global using FreeGency.Infrastructure.Persistence.Repositories.Reviews;
+global using FreeGency.Infrastructure.Persistence.Repositories.Tasks;
+
+global using FreeGency.Infrastructure.Persistence.Extensions;
