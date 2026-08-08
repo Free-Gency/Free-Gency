@@ -1,8 +1,5 @@
 
 
-using FreeGency.Application.Features.DeveloperNotification.Commands;
-using FreeGency.Application.Features.NotificationFeature.Commands;
-
 namespace FreeGency.Application;
 
 public static class DependencyInjection
@@ -15,6 +12,7 @@ public static class DependencyInjection
         {
             cfg.AddMaps(typeof(ProjectMapping).Assembly);
             cfg.AddMaps(typeof(ProposalMapping).Assembly);
+            cfg.AddMaps(typeof(TaskMapping).Assembly);
         });
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IDeveloperNotificationService, DeveloperNotificationService>();
@@ -51,6 +49,8 @@ public static class DependencyInjection
         services.AddScoped<IMilestoneService, MilestoneService>();
         services.AddScoped<IEscrowService, EscrowService>();
         services.AddScoped<IProjectEventService, ProjectEventService>();
+
+        services.AddScoped<ITaskService, TaskService>();
 
         services.AddFluentValidationAutoValidation()
                 .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

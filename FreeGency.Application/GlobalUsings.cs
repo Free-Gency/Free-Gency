@@ -1,6 +1,20 @@
 global using AutoMapper;
 global using AutoMapper.QueryableExtensions;
 global using FluentValidation;
+global using System.Diagnostics;
+
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.EntityFrameworkCore;
+global using System.Text.Json.Serialization;
+global using FluentValidation.AspNetCore;
+global using Microsoft.AspNetCore.Identity;
+global using Microsoft.Extensions.DependencyInjection;
+global using System.Reflection;
+
+global using Hangfire;
+
+
+
 global using FreeGency.Application.Common.Errors;
 global using FreeGency.Application.Common.Exceptions;
 global using FreeGency.Application.Common.Extensions.QueryExtensions.Projects;
@@ -16,12 +30,7 @@ global using FreeGency.Domain.Interfaces;
 global using FreeGency.Domain.Interfaces.Repositories;
 global using FreeGency.Domain.Interfaces.Repositories.Teams;
 global using FreeGency.Infrastructure.Interfaces;
-global using Microsoft.AspNetCore.Http;
-global using Microsoft.EntityFrameworkCore;
-global using System.Text.Json.Serialization;
-
 global using FreeGency.Application.Features.TeamSuggestions.DTOs;
-global using FluentValidation.AspNetCore;
 global using FreeGency.Application.Common.Helpers;
 global using FreeGency.Application.Common.Mappings.PortfolioMappings;
 global using FreeGency.Application.Common.Mappings.ProjectMappings;
@@ -48,12 +57,20 @@ global using FreeGency.Application.Features.TeamJoinRequests.Commands;
 global using FreeGency.Application.Features.Teams.Commands;
 global using FreeGency.Application.Features.TeamSuggestions;
 global using FreeGency.Application.Features.WalletFeature.Queries;
-global using Microsoft.AspNetCore.Identity;
-global using Microsoft.Extensions.DependencyInjection;
-global using System.Reflection;
 global using FreeGency.Application.Features.ClientNotification.Commands;
 global using FreeGency.Application.Features.ChatFeature.Commands;
 
-global using System.Diagnostics;
 global using FreeGency.AI.DTOs;
 global using FreeGency.AI.TeamSuggestions;
+
+global using FreeGency.Application.Features.Tasks.DTOs;
+global using FreeGency.Application.Features.NotificationFeature.Dtos;
+global using FreeGency.Domain.Interfaces.Repositories.Tasks;
+
+global using FreeGency.Application.Features.Tasks.Validators;
+global using FreeGency.Infrastructure.Integrations.Cloudinary;
+
+global using FreeGency.Application.Common.Mappings.TaskMappings;
+global using FreeGency.Application.Features.DeveloperNotification.Commands;
+global using FreeGency.Application.Features.NotificationFeature.Commands;
+global using FreeGency.Application.Features.Tasks.Commands;
