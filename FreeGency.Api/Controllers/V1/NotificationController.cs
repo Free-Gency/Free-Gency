@@ -16,5 +16,11 @@ namespace FreeGency.Api.Controllers.V1
             var result = await notificationService.GetNotificationAsync(notificationFilter);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
+        [HttpGet("unread-count")]
+        public async Task<ActionResult<UnreadNotificationCountDto>> GetUnreadNotificationCount()
+        {
+            var result = await notificationService.GetNotificationUnreadCount();
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
     }
 }

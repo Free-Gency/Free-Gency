@@ -9,7 +9,14 @@ public sealed class TeamRepository : GenericRepository<Team>, ITeamRepository
     public TeamRepository(ApplicationDbContext context) : base(context) { }
 
     private const int HubAvatarLimit = 3;
-
+    public IQueryable<Project> GetProjectTeamAccepted(Guid TeamId)
+    {
+        return _context.Projects
+       .Where(x =>
+           x.AssignedTeamId == TeamId &&
+           x.MilestonePlanVersions.Any(v =>
+               v.Status == PlanVersionStatus.Accepted));
+    }
     public async Task<IReadOnlyList<TeamHubItem>> GetMyHubItemsAsync(Guid userId, CancellationToken ct = default)
     {
         var teamIds = await _dbSet
@@ -477,4 +484,6 @@ public sealed class TeamRepository : GenericRepository<Team>, ITeamRepository
 
         return result;
     }
+
+   
 }
