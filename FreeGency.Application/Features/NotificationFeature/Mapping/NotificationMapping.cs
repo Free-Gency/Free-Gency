@@ -38,6 +38,7 @@ namespace FreeGency.Application.Features.NotificationFeature.Mapping
         {
             return new NotificationDto
             {
+                Id=n.Id,
                 Title = n.Title,
                 Body = n.Body,
                 Type = n.Type.ToString(),
@@ -53,6 +54,7 @@ namespace FreeGency.Application.Features.NotificationFeature.Mapping
         {
             return notifications.Select(n => new NotificationDto
             {
+                Id=n.Id,
                 Title = n.Title,
                 Body = n.Body,
                 Type = n.Type.ToString(),

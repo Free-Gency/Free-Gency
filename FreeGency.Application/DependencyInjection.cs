@@ -1,5 +1,7 @@
 
 
+using FreeGency.Application.Features.LedgerEntryFeature.Queries;
+
 namespace FreeGency.Application;
 
 public static class DependencyInjection
@@ -14,6 +16,7 @@ public static class DependencyInjection
             cfg.AddMaps(typeof(ProposalMapping).Assembly);
             cfg.AddMaps(typeof(TaskMapping).Assembly);
         });
+        services.AddScoped<ILedgerEntryService, LedgerEntryService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IDeveloperNotificationService, DeveloperNotificationService>();
         services.AddSingleton<OnlineUsersService>();

@@ -6,8 +6,21 @@ public class LedgerEntryRepository : GenericRepository<LedgerEntry>, ILedgerEntr
 {
     public LedgerEntryRepository(ApplicationDbContext context) : base(context) { }
 
-
-
+    public Task<decimal> GetTotalEarningsAsync(Guid walletId)
+    {
+        return _context.LedgerEntries
+            .Where(x =>
+                x.WalletId == walletId &&
+                x.EntryType == EntryType.TeamSplit)
+            .SumAsync(x => x.Amount);
+    }
+    public IQueryable<LedgerEntry> GetByWalletId(Guid walletId)
+    {
+        return _dbSet
+            .AsNoTracking()
+            .Where(x => x.WalletId == walletId)
+            .OrderByDescending(x => x.CreatedAt);
+    }
     public async Task<IReadOnlyList<LedgerEntry>> GetByWalletIdAsync(Guid walletId, CancellationToken cancellationToken = default)
     {
         return await _dbSet

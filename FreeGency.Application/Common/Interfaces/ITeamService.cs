@@ -1,10 +1,13 @@
 using FreeGency.Application.Common.Pagination;
 using FreeGency.Application.Features.Teams.Dtos;
+using FreeGency.Application.Features.Teams.DTOs;
+using FreeGency.Application.Features.WalletFeature.Dtos;
 
 namespace FreeGency.Application.Common.Interfaces;
 
 public interface ITeamService
 {
+    Task<Result<WalletTeamDto>> GetTeamWallet(Guid teamid);
     Task<ApiResponse<PaginatedResult<TeamDto>>> BrowseAsync(FilterTeamsRequestDto filter, CancellationToken ct = default);
     Task<ApiResponse<TeamDto>> GetByIdAsync(Guid id, CancellationToken ct = default);
     Task<ApiResponse<IEnumerable<TeamDto>>> GetMineAsync(CancellationToken ct = default);
@@ -22,4 +25,5 @@ public interface ITeamService
     Task<ApiResponse<IReadOnlyList<TeamChatRoomMemberDto>>> GetTeamChatRoomMembersAsync(Guid teamId, Guid roomId, CancellationToken ct = default);
     Task<ApiResponse<IReadOnlyList<TeamReviewDto>>> GetReviewsAsync(Guid teamId, CancellationToken ct = default);
     Task<ApiResponse<TeamReviewDto>> AddReviewAsync(Guid teamId, CreateTeamFeedbackRequestDto request, CancellationToken ct = default);
+    Task<Result<PaginatedResult<TeamProjectEarningsDto>>> GetTeamProjectEarnings(TeamProjectsFilter teamProjectsFilter);
 }

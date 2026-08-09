@@ -1,11 +1,26 @@
+using FreeGency.Api.Extensions;
 using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Features.Teams.Dtos;
+using FreeGency.Application.Features.Teams.DTOs;
 
 namespace FreeGency.Api.Controllers.V1;
 
 [Route("api/v1/teams")]
 public class TeamsController(ITeamService _teamService) : BaseApiController
 {
+    [HttpGet("wallet/{teamId}")]
+    public async Task<IActionResult> GetWalletTeam([FromRoute]Guid teamId)
+    {
+        var result = await _teamService.GetTeamWallet(teamId);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+    [HttpGet("Project-Team")]
+    [Authorize]
+    public async Task<IActionResult> GetTeamProject([FromQuery]TeamProjectsFilter teamProjectsFilter)
+    {
+        var result = await _teamService.GetTeamProjectEarnings(teamProjectsFilter);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> Create([FromForm] CreateTeamDto dto, CancellationToken ct)

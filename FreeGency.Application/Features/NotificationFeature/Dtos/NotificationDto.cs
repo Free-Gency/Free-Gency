@@ -6,6 +6,7 @@ namespace FreeGency.Application.Features.NotificationFeature.Dtos
 {
     public class NotificationDto
     {
+        public Guid Id { get; set; }
         public string Title { get; set; } = null!;
         public string Body { get; set; } = null!;
         public string Type { get; set; }
