@@ -13,6 +13,9 @@ namespace FreeGency.Application.Features.Teams.Commands
         { 
             var wallet = await _walletRepository.GetByOwnerAsync(owner.Team, teamid);
             if (wallet == null) return Result.Failure<WalletTeamDto>(WalletErrors.NotFound);
+            if (wallet.OwnerTeamId == null)
+                return Result.Failure<WalletTeamDto>(WalletErrors.NotFound);
+            var TotalEarning = await _ledgerEntryRepository.GetTotalEarningsAsync(wallet.Id);
             var WalletTeamDto = new WalletTeamDto
             {
                 Id = wallet.Id,
@@ -20,7 +23,8 @@ namespace FreeGency.Application.Features.Teams.Commands
                 Pending = wallet.Pending,
                 Available = wallet.Available,
                 Reserved = wallet.Reserved,
-                TeamId=wallet.OwnerTeamId.Value
+                TeamId=wallet.OwnerTeamId.Value,
+                TotalEarnings=TotalEarning
             };
             return Result.Success(WalletTeamDto);
         }

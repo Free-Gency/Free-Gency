@@ -12,5 +12,6 @@ namespace FreeGency.Application.Features.WalletFeature.Dtos
         public decimal Available { get; set; }
         public decimal Reserved { get; set; }
         public decimal Pending { get; set; }
+        public decimal TotalEarnings { get; set; }
     }
 }

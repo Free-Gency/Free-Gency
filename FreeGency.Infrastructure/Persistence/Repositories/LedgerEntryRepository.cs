@@ -6,7 +6,14 @@ public class LedgerEntryRepository : GenericRepository<LedgerEntry>, ILedgerEntr
 {
     public LedgerEntryRepository(ApplicationDbContext context) : base(context) { }
 
-
+    public Task<decimal> GetTotalEarningsAsync(Guid walletId)
+    {
+        return _context.LedgerEntries
+            .Where(x =>
+                x.WalletId == walletId &&
+                x.EntryType == EntryType.TeamSplit)
+            .SumAsync(x => x.Amount);
+    }
     public IQueryable<LedgerEntry> GetByWalletId(Guid walletId)
     {
         return _dbSet

@@ -17,6 +17,7 @@ namespace FreeGency.Application.Features.Teams.Commands
         private readonly IProjectRepository _projectRepository;
         private readonly IMilestonePlanVersionRepository _milestonePlanVersionRepository;
         private readonly IWalletRepository _walletRepository;
+        private readonly ILedgerEntryRepository _ledgerEntryRepository;
         public TeamService(IUnitOfWork unitOfWork, IStorageService storageService, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
@@ -26,6 +27,7 @@ namespace FreeGency.Application.Features.Teams.Commands
             _teamRepository = _unitOfWork.Repository<ITeamRepository, Team>();
             _projectRepository = _unitOfWork.Repository<IProjectRepository, Project>();
             _milestonePlanVersionRepository = _unitOfWork.Repository<IMilestonePlanVersionRepository, MilestonePlanVersion>();
+            _ledgerEntryRepository = _unitOfWork.Repository<ILedgerEntryRepository, LedgerEntry>();
 
         }
 
