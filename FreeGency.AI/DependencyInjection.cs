@@ -1,6 +1,5 @@
 using FreeGency.AI.ProjectDrafting;
 using FreeGency.AI.ProposalAssistant;
-using FreeGency.AI.TeamSuggestions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -19,7 +18,6 @@ public static class DependencyInjection
         
         services.AddScoped<ProjectDraftService>();
         services.AddScoped<ProposalAssistantChatService>();
-        services.AddScoped<TeamSuggestionChatService>();
 
         services.AddAIFoundation(configuration);
 

@@ -30,7 +30,6 @@ global using FreeGency.Domain.Interfaces;
 global using FreeGency.Domain.Interfaces.Repositories;
 global using FreeGency.Domain.Interfaces.Repositories.Teams;
 global using FreeGency.Infrastructure.Interfaces;
-global using FreeGency.Application.Features.TeamSuggestions.DTOs;
 global using FreeGency.Application.Common.Helpers;
 global using FreeGency.Application.Common.Mappings.PortfolioMappings;
 global using FreeGency.Application.Common.Mappings.ProjectMappings;
@@ -55,13 +54,11 @@ global using FreeGency.Application.Features.specialties.Commands;
 global using FreeGency.Application.Features.TeamJobs.Commands;
 global using FreeGency.Application.Features.TeamJoinRequests.Commands;
 global using FreeGency.Application.Features.Teams.Commands;
-global using FreeGency.Application.Features.TeamSuggestions;
 global using FreeGency.Application.Features.WalletFeature.Queries;
 global using FreeGency.Application.Features.ClientNotification.Commands;
 global using FreeGency.Application.Features.ChatFeature.Commands;
 
 global using FreeGency.AI.DTOs;
-global using FreeGency.AI.TeamSuggestions;
 
 global using FreeGency.Application.Features.Tasks.DTOs;
 global using FreeGency.Application.Features.NotificationFeature.Dtos;

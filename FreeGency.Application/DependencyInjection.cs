@@ -42,9 +42,6 @@ public static class DependencyInjection
         services.AddScoped<IProposalRankingService, ProposalRankingService>();
         services.AddScoped<IProposalAssistantService, ProposalAssistantService>();
 
-        // Team Suggestions
-        services.AddScoped<ITeamSuggestionService, TeamSuggestionService>();
-
         // Portfolio
         services.AddScoped<IPortfolioService, PortfolioService>();
 
