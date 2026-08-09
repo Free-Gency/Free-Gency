@@ -106,6 +106,22 @@ public partial class TaskService : ITaskService
         return (project, task);
     }
 
+    /// <summary>
+    /// Loads the task tracked WITHOUT its navigation graph so Update/Delete
+    /// only affect the task row (attaching the full graph would conflict with
+    /// the separately tracked project or cascade into unrelated rows).
+    /// </summary>
+    private async Task<(Project? Project, ProjectTask? Task)> LoadProjectAndTaskForWriteAsync(Guid taskId, CancellationToken ct)
+    {
+        var task = await TaskRepo.GetByIdAsync(taskId, ct);
+        if (task is null)
+            return (null, null);
+
+        var milestone = await MilestoneRepo.GetByIdAsync(task.MilestoneId, ct);
+        var project = milestone is null ? null : await ProjectRepo.GetByIdAsync(milestone.ProjectId, ct);
+        return (project, task);
+    }
+
     private static bool CanTransit(Domain.Enums.TaskStatus from, Domain.Enums.TaskStatus to, bool isManager)
     {
         if (from == to)
@@ -136,30 +152,34 @@ public partial class TaskService : ITaskService
         }, ct);
     }
 
-    private Task NotifyAsync(
+    /// <summary>
+    /// Enqueues a notification as a Hangfire background job. Hangfire only
+    /// serializes calls to public methods, so we call
+    /// <see cref="INotificationService.CreateNotification"/> directly instead
+    /// of a private helper.
+    /// </summary>
+    private void EnqueueNotification(
         Guid? targetUserId,
         string title,
         string body,
         NotificationType type,
         Guid? projectId = null,
-        Guid? milestoneId = null,
-        CancellationToken ct = default)
+        Guid? milestoneId = null)
     {
         if (targetUserId is null || targetUserId == UserId)
-            return Task.CompletedTask;
+            return;
 
-        return _notificationService.CreateNotification(new CreateNotificationRequest
+        BackgroundJob.Enqueue(() => _notificationService.CreateNotification(new CreateNotificationRequest
         {
-            UserId = targetUserId,
+            UserId = targetUserId.Value,
             Title = title,
             Body = body,
             Type = type,
             ProjectId = projectId,
             MilestoneId = milestoneId,
             ActionUrl = projectId.HasValue ? $"/projects/{projectId}" : null
-        });
+        }));
     }
-    
 
     private async Task<bool> IsValidAssigneeAsync(Project project, Guid assigneeUserId, CancellationToken ct)
     {
@@ -225,13 +245,13 @@ public partial class TaskService : ITaskService
 
         if (dto.AssigneeUserId.HasValue)
         {
-            BackgroundJob.Enqueue(() => NotifyAsync(
+            EnqueueNotification(
                 dto.AssigneeUserId.Value,
                 "New task assigned",
                 $"You were assigned a new task: {task.Title}",
                 NotificationType.TaskAssigned,
                 project.Id,
-                milestoneId));
+                milestoneId);
         }
 
         var dtoResult = await MapToDtoAsync(project, task, ct);
@@ -242,7 +262,7 @@ public partial class TaskService : ITaskService
     {
         new UpdateTaskValidator().ValidateAndThrow(dto);
 
-        var (project, task) = await LoadProjectAndTaskAsync(taskId, ct);
+        var (project, task) = await LoadProjectAndTaskForWriteAsync(taskId, ct);
         if (project is null || task is null)
             return ApiResponse.Failure<TaskDto>(AppError.NotFound(nameof(ProjectTask), taskId));
 
@@ -259,12 +279,13 @@ public partial class TaskService : ITaskService
         TaskRepo.Update(task);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        return ApiResponse.Success(await MapToDtoAsync(project, task, ct), "Task updated.");
+        var updatedTask = await GetTaskAsync(taskId, ct);
+        return ApiResponse.Success(await MapToDtoAsync(project, updatedTask ?? task, ct), "Task updated.");
     }
 
     public async Task<ApiResponse> DeleteAsync(Guid taskId, CancellationToken ct = default)
     {
-        var (project, task) = await LoadProjectAndTaskAsync(taskId, ct);
+        var (project, task) = await LoadProjectAndTaskForWriteAsync(taskId, ct);
         if (project is null || task is null)
             return ApiResponse.Failure(AppError.NotFound(nameof(ProjectTask), taskId));
 
@@ -281,7 +302,7 @@ public partial class TaskService : ITaskService
     {
         new ChangeTaskStatusValidator().ValidateAndThrow(dto);
 
-        var (project, task) = await LoadProjectAndTaskAsync(taskId, ct);
+        var (project, task) = await LoadProjectAndTaskForWriteAsync(taskId, ct);
         if (project is null || task is null)
             return ApiResponse.Failure<TaskDto>(AppError.NotFound(nameof(ProjectTask), taskId));
 
@@ -305,17 +326,19 @@ public partial class TaskService : ITaskService
         await RecordEventAsync(project.Id, task.MilestoneId, EventType.TaskStatusChanged, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
+        var updatedTask = await GetTaskAsync(taskId, ct);
+
         // notify the assignee (skip when assignee is the actor)
         var actorIsAssignee = task.AssigneeUserId == UserId;
         if (!actorIsAssignee && task.AssigneeUserId.HasValue)
         {
-            BackgroundJob.Enqueue(() => NotifyAsync(
+            EnqueueNotification(
                 task.AssigneeUserId.Value,
                 "Task status changed",
                 $"Task '{task.Title}' is now {dto.Status}.",
                 NotificationType.TaskStatusChanged,
                 project.Id,
-                task.MilestoneId));
+                task.MilestoneId);
         }
         else if (actorIsAssignee)
         {
@@ -323,22 +346,22 @@ public partial class TaskService : ITaskService
             var leaderIds = await TeamMemberRepo.GetLeadersAsync(project.AssignedTeamId ?? Guid.Empty, ct);
             foreach (var leader in leaderIds)
             {
-                BackgroundJob.Enqueue(() => NotifyAsync(
+                EnqueueNotification(
                     leader.UserId,
                     "Task awaits review",
                     $"Task '{task.Title}' is now {dto.Status}.",
                     NotificationType.TaskStatusChanged,
                     project.Id,
-                    task.MilestoneId));
+                    task.MilestoneId);
             }
         }
 
-        return ApiResponse.Success(await MapToDtoAsync(project, task, ct), "Status updated.");
+        return ApiResponse.Success(await MapToDtoAsync(project, updatedTask ?? task, ct), "Status updated.");
     }
 
     public async Task<ApiResponse<TaskDto>> AssignAsync(Guid taskId, AssignTaskDto dto, CancellationToken ct = default)
     {
-        var (project, task) = await LoadProjectAndTaskAsync(taskId, ct);
+        var (project, task) = await LoadProjectAndTaskForWriteAsync(taskId, ct);
         if (project is null || task is null)
             return ApiResponse.Failure<TaskDto>(AppError.NotFound(nameof(ProjectTask), taskId));
 
@@ -355,16 +378,17 @@ public partial class TaskService : ITaskService
 
         if (dto.AssigneeUserId.HasValue)
         {
-            BackgroundJob.Enqueue(() => NotifyAsync(
+            EnqueueNotification(
                 dto.AssigneeUserId.Value,
                 "Task assigned",
                 $"You were assigned: {task.Title}",
                 NotificationType.TaskAssigned,
                 project.Id,
-                task.MilestoneId));
+                task.MilestoneId);
         }
 
-        return ApiResponse.Success(await MapToDtoAsync(project, task, ct), "Assignee updated.");
+        var updatedTask = await GetTaskAsync(taskId, ct);
+        return ApiResponse.Success(await MapToDtoAsync(project, updatedTask ?? task, ct), "Assignee updated.");
     }
     #endregion
 
@@ -412,14 +436,13 @@ public partial class TaskService : ITaskService
         
         if (task.AssigneeUserId.HasValue && task.AssigneeUserId != UserId)
         {
-
-            BackgroundJob.Enqueue(() => NotifyAsync(
+            EnqueueNotification(
                 task.AssigneeUserId.Value,
                 "New comment on your task",
                 $"{FullName(user)} commented on '{task.Title}'.",
                 NotificationType.TaskCommentAdded,
                 project.Id,
-                task.MilestoneId));
+                task.MilestoneId);
         }
 
         return ApiResponse.Success(new TaskCommentDto
@@ -624,7 +647,7 @@ public partial class TaskService : ITaskService
     {
         new LogTimeValidator().ValidateAndThrow(dto);
 
-        var (project, task) = await LoadProjectAndTaskAsync(taskId, ct);
+        var (project, task) = await LoadProjectAndTaskForWriteAsync(taskId, ct);
         if (project is null || task is null)
             return ApiResponse.Failure<TaskTimeLogDto>(AppError.NotFound(nameof(ProjectTask), taskId));
 

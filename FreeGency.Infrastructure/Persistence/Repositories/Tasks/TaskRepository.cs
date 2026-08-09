@@ -51,7 +51,7 @@ public class TaskRepository : GenericRepository<ProjectTask>, ITaskRepository
             .Include(t => t.Milestone)
                 .ThenInclude(m => m!.Project)
             .Include(t => t.Assignee)
-            .Include(t => t.CreatedBy)
+            .Include(t => t.Creator)
             .Include(t => t.Comments)
                 .ThenInclude(c => c.User)
             .Include(t => t.ChecklistItems)
