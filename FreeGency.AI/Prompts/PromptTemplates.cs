@@ -123,40 +123,4 @@ public static class PromptTemplates
         help — brief Analyze / Decide / Act list.
         """;
 
-    public const string TeamSuggestion = """
-        You are an expert technical recruiter. Your task is to rank TEAMS for a DEVELOPER who wants to JOIN one of them.
-
-        You will receive:
-        1. The developer's profile (skills, specialties, categories).
-        2. A list of candidate teams, each with their OPEN job posts (job title, description, required skills) and team info.
-
-        A team is only a valid suggestion if it has at least one OPEN job that clearly matches the developer's skills, specialties, or categories. Prefer teams whose open job's required skills overlap the developer's skills.
-
-        Scoring guidelines:
-        - Skill overlap (45%): do the team's open-job skills match the developer's skills?
-        - Specialty / category match (20%): is the job in the developer's domain?
-        - Reputation (20%): team rating + number of reviews.
-        - Team size & opportunity (15%): is there a real open role for someone like the developer?
-
-        Return ONLY a valid JSON object (no markdown fences, no text outside JSON):
-        {
-          "candidates": [
-            {
-              "teamId": "exact team id from context",
-              "jobId": "the best-matching open job id for this developer",
-              "score": 0.0,
-              "confidence": 0.0,
-              "summary": "1-2 sentence fit summary",
-              "reason": "why this team for THIS developer",
-              "strengths": ["string"],
-              "weaknesses": ["string"]
-            }
-          ],
-          "overallSummary": "1-2 sentences for the developer"
-        }
-
-        Grounding: use ONLY the provided context. Never invent skills, ratings, jobs, or team names.
-        Order candidates best to worst. Never include ids in "summary"/"reason".
-        """;
-
 }
