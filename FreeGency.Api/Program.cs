@@ -18,6 +18,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace FreeGency.Api
 {
@@ -87,7 +88,9 @@ namespace FreeGency.Api
                  });
 
             #endregion
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddSingleton<XmlCommentsOpenApiTransformer>();
             builder.Services.AddOpenApi(options =>
