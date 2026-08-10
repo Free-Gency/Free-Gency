@@ -1,5 +1,3 @@
-using FreeGency.Domain.Abstractions;
-using FreeGency.Domain.Enums;
 
 namespace FreeGency.Domain.Entities;
 
@@ -36,4 +34,6 @@ public class Milestone : ISoftDeletableEntity
     public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; } = [];
 
     public virtual ICollection<ProjectTask> Tasks { get; set; } = [];
+
+    public virtual ICollection<MilestoneAssignment> Assignments { get; set; } = [];
 }

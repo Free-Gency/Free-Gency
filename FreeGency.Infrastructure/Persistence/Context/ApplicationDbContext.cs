@@ -40,6 +40,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ProjectFile> ProjectFiles => Set<ProjectFile>();
     public DbSet<ProjectEvent> ProjectEvents => Set<ProjectEvent>();
     public DbSet<Milestone> Milestones => Set<Milestone>();
+    public DbSet<MilestoneAssignment> MilestoneAssignments => Set<MilestoneAssignment>();
     public DbSet<MilestonePlanVersion> MilestonePlanVersions => Set<MilestonePlanVersion>();
     public DbSet<MilestonePlanItem> MilestonePlanItems => Set<MilestonePlanItem>();
     public DbSet<SavedProject> SavedProjects => Set<SavedProject>();
