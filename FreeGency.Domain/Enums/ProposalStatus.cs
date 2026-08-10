@@ -8,4 +8,6 @@ public enum ProposalStatus
     Rejected = 3,
     Withdrawn = 4,
     Expired = 5,
+    /// <summary>Hired — milestone plan accepted for this proposal.</summary>
+    Accepted = 6,
 }

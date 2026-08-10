@@ -34,7 +34,18 @@ public class ProposalMapping : Profile
                 opt => opt.MapFrom(src => src.Status.ToString()))
 
             .ForMember(dest => dest.ChatRoomId,
-                opt => opt.MapFrom(src => src.ChatRoom != null ? (Guid?)src.ChatRoom.Id : null))
+                opt => opt.MapFrom(src =>
+                    src.Status == ProposalStatus.Accepted
+                        ? src.Project.ChatRooms
+                              .Where(c => c.RoomType == RoomType.Project && !c.IsDeleted)
+                              .Select(c => (Guid?)c.Id)
+                              .FirstOrDefault()
+                          ?? (src.ChatRoom != null && !src.ChatRoom.IsDeleted
+                              ? (Guid?)src.ChatRoom.Id
+                              : null)
+                        : (src.ChatRoom != null && !src.ChatRoom.IsDeleted
+                            ? (Guid?)src.ChatRoom.Id
+                            : null)))
 
             .ForMember(dest => dest.AttachmentUrls,
                 opt => opt.MapFrom(src => src.ProposalAttachments.Select(a => a.FileUrl)))

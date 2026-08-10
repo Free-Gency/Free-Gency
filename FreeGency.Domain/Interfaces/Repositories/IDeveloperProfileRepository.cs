@@ -15,5 +15,9 @@ namespace FreeGency.Domain.Interfaces.Repositories
         Task ReplaceSpecialtiesAsync(Guid userId, IEnumerable<Guid> specialtyIds, CancellationToken ct = default);
         Task UpdateRatingAsync(Guid userId, decimal avg, int count, CancellationToken ct = default);
         Task<IEnumerable<DeveloperProfile>> SearchBySkillsAsync(IEnumerable<Guid> skillIds, CancellationToken ct = default);
+
+        Task<IReadOnlyList<DeveloperFeedback>> GetFeedbackAsync(Guid developerUserId, int take, CancellationToken ct = default);
+        Task<bool> HasFeedbackAsync(Guid developerUserId, Guid reviewerUserId, CancellationToken ct = default);
+        Task AddFeedbackAsync(DeveloperFeedback feedback, CancellationToken ct = default);
     }
 }

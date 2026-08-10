@@ -14,7 +14,7 @@ public interface IProposalService
     Task<ApiResponse> UpdateAsync(UpdateProposalDto dto, CancellationToken ct = default);
 
     Task<ApiResponse> ViewAsync(Guid proposalId, CancellationToken ct = default);
-    Task<ApiResponse> StartDiscussionAsync(Guid proposalId, CancellationToken ct = default);
+    Task<ApiResponse<Guid>> StartDiscussionAsync(Guid proposalId, CancellationToken ct = default);
     Task<ApiResponse> CloseDiscussionAsync(Guid proposalId, CancellationToken ct = default);
     Task<ApiResponse> RejectAsync(Guid proposalId, CancellationToken ct = default);
 

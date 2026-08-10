@@ -34,6 +34,8 @@ public class ReviewRepository : GenericRepository<Review>, IReviewRepository
             .AsNoTracking()
             .Include(r => r.ReviewerUser)
                 .ThenInclude(u => u.ClientProfile)
+            .Include(r => r.ReviewerUser)
+                .ThenInclude(u => u.DeveloperProfile)
             .AsQueryable();
 
         if (type == RevieweeType.Team)

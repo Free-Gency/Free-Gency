@@ -222,6 +222,35 @@ namespace FreeGency.Infrastructure.Persistence.Repositories
                      .SetProperty(dp => dp.RatingCount, count),
                 ct);
 
+        public async Task<IReadOnlyList<DeveloperFeedback>> GetFeedbackAsync(
+            Guid developerUserId,
+            int take,
+            CancellationToken ct = default)
+        {
+            return await _context.Set<DeveloperFeedback>()
+                .AsNoTracking()
+                .Where(f => f.DeveloperUserId == developerUserId
+                            && f.ModerationStatus != FreeGency.Domain.Enums.ModerationStatus.Hidden)
+                .Include(f => f.ReviewerUser)
+                    .ThenInclude(u => u.ClientProfile)
+                .Include(f => f.ReviewerUser)
+                    .ThenInclude(u => u.DeveloperProfile)
+                .OrderByDescending(f => f.CreatedAt)
+                .Take(take)
+                .ToListAsync(ct);
+        }
+
+        public Task<bool> HasFeedbackAsync(
+            Guid developerUserId,
+            Guid reviewerUserId,
+            CancellationToken ct = default)
+            => _context.Set<DeveloperFeedback>().AnyAsync(
+                f => f.DeveloperUserId == developerUserId && f.ReviewerUserId == reviewerUserId,
+                ct);
+
+        public Task AddFeedbackAsync(DeveloperFeedback feedback, CancellationToken ct = default)
+            => _context.Set<DeveloperFeedback>().AddAsync(feedback, ct).AsTask();
+
         public async Task<string> GetEmail(Guid profileId)
         {
             return await _dbSet.Where(X => X.Id == profileId).Select(x => x.User.Email).FirstOrDefaultAsync();

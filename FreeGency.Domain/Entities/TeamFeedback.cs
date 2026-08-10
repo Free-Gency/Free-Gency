@@ -1,4 +1,5 @@
 using FreeGency.Domain.Abstractions;
+using FreeGency.Domain.Enums;
 
 namespace FreeGency.Domain.Entities;
 
@@ -17,6 +18,9 @@ public class TeamFeedback : ISoftDeletableEntity
     public Guid ReviewerUserId { get; set; }
     public int Rating { get; set; }
     public string? Comment { get; set; }
+    public ModerationStatus ModerationStatus { get; set; } = ModerationStatus.Visible;
+    public string? ModerationNote { get; set; }
+    public string? ModeratedText { get; set; }
 
     public virtual Team Team { get; set; } = null!;
     public virtual User ReviewerUser { get; set; } = null!;

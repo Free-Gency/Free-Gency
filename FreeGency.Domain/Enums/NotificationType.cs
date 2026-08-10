@@ -25,5 +25,9 @@ public enum NotificationType
 
     TaskAssigned = 100,
     TaskStatusChanged = 101,
-    TaskCommentAdded = 102
+    TaskCommentAdded = 102,
+
+    InviteReceived = 110,
+    InviteAccepted = 111,
+    InviteRejected = 112,
 }

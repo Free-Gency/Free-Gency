@@ -26,12 +26,19 @@ public sealed class InMemoryVectorStore : IVectorStore
         return Task.CompletedTask;
     }
 
-    public Task<IReadOnlyList<VectorSearchResult>> SearchAsync(string collection, float[] queryVector, int topK = 10, double? minScore = null, CancellationToken ct = default)
+    public Task<IReadOnlyList<VectorSearchResult>> SearchAsync(
+        string collection,
+        float[] queryVector,
+        int topK = 10,
+        double? minScore = null,
+        IReadOnlyDictionary<string, string>? payloadFilters = null,
+        CancellationToken ct = default)
     {
         if (!_collections.TryGetValue(collection, out var items))
             return Task.FromResult<IReadOnlyList<VectorSearchResult>>([]);
 
         var results = items.Values
+            .Where(e => MatchesFilters(e.Metadata, payloadFilters))
             .Select(e => new VectorSearchResult
             {
                 Id = e.Id,
@@ -63,6 +70,26 @@ public sealed class InMemoryVectorStore : IVectorStore
     public Task<bool> CollectionExistsAsync(string collection, CancellationToken ct = default)
     {
         return Task.FromResult(_collections.ContainsKey(collection));
+    }
+
+    private static bool MatchesFilters(IDictionary<string, string>? metadata, IReadOnlyDictionary<string, string>? filters)
+    {
+        if (filters is null || filters.Count == 0)
+            return true;
+
+        if (metadata is null)
+            return false;
+
+        foreach (var filter in filters)
+        {
+            if (!metadata.TryGetValue(filter.Key, out var value) ||
+                !string.Equals(value, filter.Value, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static double CosineSimilarity(float[] a, float[] b)

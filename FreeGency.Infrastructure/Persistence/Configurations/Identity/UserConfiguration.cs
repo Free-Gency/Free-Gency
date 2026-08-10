@@ -10,6 +10,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.ToTable("Users", DbSchemas.Identity);
+        builder.Property(u => u.ModerationMutedUntil).HasColumnType("datetime2");
 
         builder.Property(u => u.FristName).IsRequired().HasMaxLength(200);
         builder.Property(u => u.LastName).IsRequired().HasMaxLength(200);

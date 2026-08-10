@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IProjectProposalRepository, ProjectProposalRepository>();
+        services.AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>();
         services.AddScoped<IMilestoneRepository, MilestoneRepository>();
         services.AddScoped<IMilestonePlanVersionRepository, MilestonePlanVersionRepository>();
         services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();

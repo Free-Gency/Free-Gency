@@ -12,5 +12,6 @@ namespace FreeGency.Application.Common.Interfaces
         Task<Result<RoomMessagesDto>> SendMessageAsync(Guid ChatRoomId, SendMessageRequest sendMessageRequest);
         Task<Result<PaginatedResult<ChatRoomDto>>> GetChatRoomAsync(ChatRoomFilter filter);
         Task<Result> MarkAsRead(Guid roomId);
+        Task<Result> ArchiveRoomAsync(Guid roomId);
     }
 }

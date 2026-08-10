@@ -2,8 +2,11 @@ using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Common.Mappings.TeamJobsMapping;
 using FreeGency.Application.Features.TeamJobs.Dtos;
+using FreeGency.Domain.Enums;
 using FreeGency.Domain.Interfaces.Repositories.Teams;
 using FreeGency.Infrastructure.Interfaces;
+using Hangfire;
+using Microsoft.EntityFrameworkCore;
 
 namespace FreeGency.Application.Features.TeamJobs.Commands;
 
@@ -35,6 +38,8 @@ public partial class TeamJobService : ITeamJobService
         await _teamJobRepository.AddWithSkillsAsync(job, dto.SkillIds, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
+        BackgroundJob.Enqueue<ISuggestionService>(s => s.IndexTeamJobAsync(job.Id, CancellationToken.None));
+
         return ApiResponse.Success(job.Id, "Team job created successfully.");
     }
 
@@ -50,6 +55,8 @@ public partial class TeamJobService : ITeamJobService
 
         _teamJobRepository.Update(job);
         await _unitOfWork.SaveChangesAsync(ct);
+
+        BackgroundJob.Enqueue<ISuggestionService>(s => s.IndexTeamJobAsync(job.Id, CancellationToken.None));
 
         return ApiResponse.Success("Team job updated successfully.");
     }
@@ -78,6 +85,8 @@ public partial class TeamJobService : ITeamJobService
         await _teamJobRepository.AddWithSkillsAsync(newJob, dto.SkillIds, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
+        BackgroundJob.Enqueue<ISuggestionService>(s => s.IndexTeamJobAsync(newJob.Id, CancellationToken.None));
+
         return ApiResponse.Success("Team job skills updated successfully.");
     }
 
@@ -91,9 +100,50 @@ public partial class TeamJobService : ITeamJobService
         if (job.Status != TeamJobStatus.open)
             return ApiResponse.Failure(AppError.TeamJobAlreadyClosed(id));
 
+        var teamId = job.TeamId;
         await _teamJobRepository.CloseAsync(id, DateTime.UtcNow, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
+        BackgroundJob.Enqueue<ISuggestionService>(s => s.RemoveTeamJobAsync(id, teamId, CancellationToken.None));
+
         return ApiResponse.Success("Team job closed successfully.");
+    }
+
+    public async Task<ApiResponse<int>> EnrichWeakDescriptionsAsync(CancellationToken ct = default)
+    {
+        var jobs = await _teamJobRepository.Query()
+            .Where(j => j.Status == TeamJobStatus.open)
+            .ToListAsync(ct);
+
+        var touched = new List<Guid>();
+        foreach (var job in jobs)
+        {
+            var current = (job.Description ?? string.Empty).Trim();
+            if (current.Length >= 80)
+                continue;
+
+            job.Description = BuildAttractiveDescription(job.Title);
+            _teamJobRepository.Update(job);
+            touched.Add(job.Id);
+        }
+
+        if (touched.Count == 0)
+            return ApiResponse.Success(0, "No weak job descriptions needed updating.");
+
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        foreach (var jobId in touched)
+            BackgroundJob.Enqueue<ISuggestionService>(s => s.IndexTeamJobAsync(jobId, CancellationToken.None));
+
+        return ApiResponse.Success(touched.Count, $"Updated {touched.Count} team job description(s).");
+    }
+
+    private static string BuildAttractiveDescription(string title)
+    {
+        var role = string.IsNullOrWhiteSpace(title) ? "teammate" : title.Trim();
+        return
+            $"We're looking for a {role} to join our team on real client projects. " +
+            "You'll collaborate closely, own your slice from idea to handoff, and ship quality work with clear communication. " +
+            "If you care about craft, teamwork, and growth - tell us about a project you're proud of when you apply.";
     }
 }

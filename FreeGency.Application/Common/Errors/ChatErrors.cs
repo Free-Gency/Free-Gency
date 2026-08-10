@@ -1,4 +1,4 @@
-﻿using FreeGency.Application.Common.Models;
+using FreeGency.Application.Common.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -97,6 +97,27 @@ namespace FreeGency.Application.Common.Errors
                 "An active client or developer profile is required for chat.",
                 StatusCodes.Status400BadRequest
             );
+
+        public static Error Moderated(string message) =>
+            new(
+                "Chat.Moderated",
+                message,
+                StatusCodes.Status422UnprocessableEntity
+            );
+
+        public static Error TemporarilyRestricted(string message) =>
+            new(
+                "Chat.TemporarilyRestricted",
+                message,
+                StatusCodes.Status403Forbidden
+            );
+        public static readonly Error OnlyClientCanArchive =
+            new(
+                "Chat.OnlyClientCanArchive",
+                "Only the client participant can archive this chat room.",
+                StatusCodes.Status403Forbidden
+            );
+
         public static readonly Error ProfileNotFound =
             new(
                 "Chat.ProfileNotFound",

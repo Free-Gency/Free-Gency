@@ -76,6 +76,12 @@ public partial class MilestoneService
         if (project is null)
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.NotFound(nameof(Project), dto.ProjectId));
 
+        var budgetError = ValidatePlanTotalAgainstProjectBudget(
+            project,
+            dto.Milestones.Sum(m => m.Amount));
+        if (budgetError is not null)
+            return ApiResponse.Failure<MilestonePlanVersionDto>(budgetError);
+
         if (project.AssignedUserId is not null || project.AssignedTeamId is not null)
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Validation("Project already has a hired assignee."));
 
@@ -201,7 +207,7 @@ public partial class MilestoneService
             Type = NotificationType.MilestonePlanProposed,
             ProjectId = project.Id,
             ProjectProposalId = proposal.Id,
-            ActionUrl = $"/projects/{project.Id}/milestones"
+            ActionUrl = $"/projects/{project.Id}?tab=milestones"
         }));
         // Broadcast must not fail the propose — plan is already committed.
         if (proposalRoom is not null && planMessage is not null)
@@ -292,7 +298,7 @@ public partial class MilestoneService
                         Type = NotificationType.MilestonePlanChangesRequested,
                         ProjectId = project.Id,
                         ProjectProposalId = plan.ProposalId,
-                        ActionUrl = $"/projects/{project.Id}/milestones"
+                        ActionUrl = $"/projects/{project.Id}?tab=milestones"
                     }));
         }
 
@@ -336,6 +342,12 @@ public partial class MilestoneService
         if (proposal is null || proposal.Status != ProposalStatus.InDiscussion)
             return ApiResponse.Failure(AppError.Validation("Linked proposal must be In Discussion."));
 
+        var acceptBudgetError = ValidatePlanTotalAgainstProjectBudget(
+            project,
+            plan.Items.Sum(i => i.Amount));
+        if (acceptBudgetError is not null)
+            return ApiResponse.Failure(acceptBudgetError);
+
         // Materialize milestones from accepted plan
         var existing = (await _milestoneRepo.GetByProjectIdAsync(plan.ProjectId, ct)).ToList();
         foreach (var m in existing)
@@ -362,6 +374,8 @@ public partial class MilestoneService
         plan.Status = PlanVersionStatus.Accepted;
         PlanRepo.Update(plan);
 
+        await ProposalRepo.UpdateStatusAsync(proposal.Id, ProposalStatus.Accepted, ct);
+
         await _projectRepo.SetAssigneeAsync(
             plan.ProjectId,
             proposal.ApplicantType == ApplicantType.User ? proposal.UserId : null,
@@ -370,9 +384,9 @@ public partial class MilestoneService
 
         await EscrowRepo.UpdatePlanStatusAsync(plan.ProjectId, PlanStatus.PlanAgreed, ct);
 
-        // Reject cascade — only at Hire
-        var others = await ProposalRepo.GetCascadeRejectCandidatesAsync(plan.ProjectId, proposal.Id, ct);
-        foreach (var other in others)
+        // Reject cascade — only at Hire: every other open proposal becomes Rejected
+        var rejectedOthers = (await ProposalRepo.GetCascadeRejectCandidatesAsync(plan.ProjectId, proposal.Id, ct)).ToList();
+        foreach (var other in rejectedOthers)
         {
             await ProposalRepo.UpdateStatusAsync(
                 other.Id,
@@ -472,64 +486,28 @@ public partial class MilestoneService
         }
 
         await _unitOfWork.SaveChangesAsync(ct);
-        var notificationBody =
-    $"Milestone plan v{plan.Version} accepted. You have been hired for project {project.Title}.";
 
-        if (proposal.ApplicantType == ApplicantType.User &&
-            proposal.UserId.HasValue)
+        await NotifyProposalApplicantsAsync(
+            proposal,
+            title: "Proposal accepted",
+            body: $"Your proposal for \"{project.Title}\" was accepted. You've been hired — open milestones to continue.",
+            type: NotificationType.ProposalAccepted,
+            projectId: project.Id,
+            proposalId: proposal.Id,
+            actionUrl: $"/projects/{project.Id}?tab=milestones",
+            ct);
+
+        foreach (var other in rejectedOthers)
         {
-            var developerProfileId =
-                await UserRepo.GetDeveloperProfileIdByUserIdAsync(
-                    proposal.UserId.Value,
-                    ct);
-
-            if (developerProfileId is not null)
-            {
-                BackgroundJob.Enqueue(() =>
-                    _notificationService.CreateNotification(
-                        new CreateNotificationRequest
-                        {
-                            DeveloperProfileId = developerProfileId.Value,
-                            Title = "Milestone plan accepted",
-                            Body = notificationBody,
-                            Type = NotificationType.ProposalAccepted,
-                            ProjectId = project.Id,
-                            ProjectProposalId = proposal.Id,
-                            ActionUrl = $"/projects/{project.Id}/milestones"
-                        }));
-            }
-        }
-        else if (proposal.ApplicantType == ApplicantType.Team &&
-                 proposal.TeamId.HasValue)
-        {
-            var leaders =
-                await TeamMemberRepo.GetLeadersAsync(
-                    proposal.TeamId.Value,
-                    ct);
-
-            foreach (var leader in leaders)
-            {
-                var developerProfileId =
-                    await UserRepo.GetDeveloperProfileIdByUserIdAsync(
-                        leader.UserId,
-                        ct);
-
-                if (developerProfileId is null)
-                    continue;
-
-                BackgroundJob.Enqueue(() =>
-                    _notificationService.CreateNotification(
-                        new CreateNotificationRequest
-                        {
-                            DeveloperProfileId = developerProfileId.Value,
-                            Title = "Milestone plan accepted",
-                            Body = notificationBody,
-                            Type = NotificationType.ProposalAccepted,
-                            ProjectId = project.Id,
-                            ProjectProposalId = proposal.Id,
-                            ActionUrl = $"/projects/{project.Id}/milestones"
-                        }));
-            }
+            await NotifyProposalApplicantsAsync(
+                other,
+                title: "Proposal rejected",
+                body: $"Your proposal for \"{project.Title}\" was rejected. {MilestonePlanConstants.HiredAnotherCandidateReason}.",
+                type: NotificationType.ProposalRejected,
+                projectId: project.Id,
+                proposalId: other.Id,
+                actionUrl: "/developer/manage-work",
+                ct);
         }
 
         return ApiResponse.Success("Milestone plan accepted — hire complete. Fund Milestone #1 to start work.");
@@ -618,7 +596,7 @@ public partial class MilestoneService
                             Body = $"Milestone #{next.SortOrder} has been funded and work can start.",
                             Type = NotificationType.MilestoneFunded,
                             ProjectId = project.Id,
-                            ActionUrl = $"/projects/{project.Id}/milestones"
+                            ActionUrl = $"/projects/{project.Id}?tab=milestones"
                         }));
             }
         }
@@ -648,7 +626,7 @@ public partial class MilestoneService
                             Body = $"Milestone #{next.SortOrder} has been funded and work can start.",
                             Type = NotificationType.MilestoneFunded,
                             ProjectId = project.Id,
-                            ActionUrl = $"/projects/{project.Id}/milestones"
+                            ActionUrl = $"/projects/{project.Id}?tab=milestones"
                         }));
             }
         }
@@ -706,7 +684,7 @@ public partial class MilestoneService
                         Body = $"Milestone #{milestone.SortOrder} has been submitted for your review.",
                         Type = NotificationType.MilestoneSubmitted,
                         ProjectId = project.Id,
-                        ActionUrl = $"/projects/{project.Id}/milestones"
+                        ActionUrl = $"/projects/{project.Id}?tab=milestones"
                     }));
         }
         return ApiResponse.Success(
@@ -749,7 +727,7 @@ public partial class MilestoneService
                             Body = $"Milestone #{milestone.SortOrder} was approved and ${milestone.Amount} has been released.",
                             Type = NotificationType.MilestoneReleased,
                             ProjectId = project.Id,
-                            ActionUrl = $"/projects/{project.Id}/milestones"
+                            ActionUrl = $"/projects/{project.Id}?tab=milestones"
                         }));
             }
         }
@@ -779,7 +757,7 @@ public partial class MilestoneService
                             Body = $"Milestone #{milestone.SortOrder} was approved and ${milestone.Amount} has been released.",
                             Type = NotificationType.MilestoneReleased,
                             ProjectId = project.Id,
-                            ActionUrl = $"/projects/{project.Id}/milestones"
+                            ActionUrl = $"/projects/{project.Id}?tab=milestones"
                         }));
             }
         }
@@ -830,7 +808,7 @@ public partial class MilestoneService
                             Body = notificationBody,
                             Type = NotificationType.MilestoneChangesRequested,
                             ProjectId = project.Id,
-                            ActionUrl = $"/projects/{project.Id}/milestones"
+                            ActionUrl = $"/projects/{project.Id}?tab=milestones"
                         }));
             }
         }
@@ -860,7 +838,7 @@ public partial class MilestoneService
                             Body = notificationBody,
                             Type = NotificationType.MilestoneChangesRequested,
                             ProjectId = project.Id,
-                            ActionUrl = $"/projects/{project.Id}/milestones"
+                            ActionUrl = $"/projects/{project.Id}?tab=milestones"
                         }));
             }
         }
@@ -903,7 +881,7 @@ public partial class MilestoneService
                                     Body = $"Milestone #{milestone.SortOrder} was automatically released after the review period.",
                                     Type = NotificationType.MilestoneReleased,
                                     ProjectId = project.Id,
-                                    ActionUrl = $"/projects/{project.Id}/milestones"
+                                    ActionUrl = $"/projects/{project.Id}?tab=milestones"
                                 }));
                     }
                 }
@@ -1064,6 +1042,122 @@ public partial class MilestoneService
             return await TeamMemberRepo.IsLeaderAsync(project.AssignedTeamId.Value, _currentUser.UserId, ct);
 
         return false;
+    }
+
+    private async Task NotifyProposalApplicantsAsync(
+        ProjectProposal proposal,
+        string title,
+        string body,
+        NotificationType type,
+        Guid projectId,
+        Guid proposalId,
+        string actionUrl,
+        CancellationToken ct)
+    {
+        if (proposal.ApplicantType == ApplicantType.User && proposal.UserId.HasValue)
+        {
+            var developerProfileId =
+                await UserRepo.GetDeveloperProfileIdByUserIdAsync(proposal.UserId.Value, ct);
+            if (developerProfileId is null)
+                return;
+
+            BackgroundJob.Enqueue(() =>
+                _notificationService.CreateNotification(
+                    new CreateNotificationRequest
+                    {
+                        DeveloperProfileId = developerProfileId.Value,
+                        Title = title,
+                        Body = body,
+                        Type = type,
+                        ProjectId = projectId,
+                        ProjectProposalId = proposalId,
+                        ActionUrl = actionUrl
+                    }));
+            return;
+        }
+
+        if (proposal.ApplicantType != ApplicantType.Team || !proposal.TeamId.HasValue)
+            return;
+
+        var leaders = await TeamMemberRepo.GetLeadersAsync(proposal.TeamId.Value, ct);
+        var notified = new HashSet<Guid>();
+
+        foreach (var leader in leaders)
+        {
+            var developerProfileId =
+                await UserRepo.GetDeveloperProfileIdByUserIdAsync(leader.UserId, ct);
+            if (developerProfileId is null || !notified.Add(developerProfileId.Value))
+                continue;
+
+            BackgroundJob.Enqueue(() =>
+                _notificationService.CreateNotification(
+                    new CreateNotificationRequest
+                    {
+                        DeveloperProfileId = developerProfileId.Value,
+                        Title = title,
+                        Body = body,
+                        Type = type,
+                        ProjectId = projectId,
+                        ProjectProposalId = proposalId,
+                        TeamId = proposal.TeamId,
+                        ActionUrl = actionUrl
+                    }));
+        }
+
+        if (proposal.UserId.HasValue)
+        {
+            var speakerProfileId =
+                await UserRepo.GetDeveloperProfileIdByUserIdAsync(proposal.UserId.Value, ct);
+            if (speakerProfileId is null || !notified.Add(speakerProfileId.Value))
+                return;
+
+            BackgroundJob.Enqueue(() =>
+                _notificationService.CreateNotification(
+                    new CreateNotificationRequest
+                    {
+                        DeveloperProfileId = speakerProfileId.Value,
+                        Title = title,
+                        Body = body,
+                        Type = type,
+                        ProjectId = projectId,
+                        ProjectProposalId = proposalId,
+                        TeamId = proposal.TeamId,
+                        ActionUrl = actionUrl
+                    }));
+        }
+    }
+
+    /// <summary>
+    /// Fixed price: plan total must equal the project budget.
+    /// Range: plan total must stay within BudgetMin..BudgetMax.
+    /// </summary>
+    private static AppError? ValidatePlanTotalAgainstProjectBudget(Project project, decimal planTotal)
+    {
+        if (project.IsFixedPrice)
+        {
+            var fixedBudget = project.BudgetMax > 0 ? project.BudgetMax : project.BudgetMin;
+            if (fixedBudget <= 0)
+                return AppError.Validation("Project fixed budget is not configured.");
+
+            if (planTotal != fixedBudget)
+            {
+                return AppError.Validation(
+                    $"For a fixed-price project, milestone total must equal the project budget ({fixedBudget:0.##}). Current total: {planTotal:0.##}.");
+            }
+
+            return null;
+        }
+
+        if (project.BudgetMax < project.BudgetMin)
+            return AppError.Validation("Project budget range is invalid.");
+
+        if (planTotal < project.BudgetMin || planTotal > project.BudgetMax)
+        {
+            return AppError.Validation(
+                $"Milestone total ({planTotal:0.##}) must be within the client budget range ({project.BudgetMin:0.##} – {project.BudgetMax:0.##}).");
+        }
+
+        return null;
     }
 
     private static MilestonePlanVersionDto MapPlanVersion(MilestonePlanVersion v) => new()

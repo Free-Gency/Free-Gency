@@ -49,4 +49,12 @@ public class TeamJobsController(ITeamJobService _teamJobService) : BaseApiContro
     [HttpPost("jobs/{id:guid}/close")]
     public async Task<IActionResult> Close(Guid id, CancellationToken ct)
         => HandleResult(await _teamJobService.CloseAsync(id, ct));
+
+    /// <summary>
+    /// Backfill short/empty open job descriptions with a clearer role pitch.
+    /// </summary>
+    [Authorize(Roles = "Admin")]
+    [HttpPost("jobs/enrich-descriptions")]
+    public async Task<IActionResult> EnrichDescriptions(CancellationToken ct)
+        => HandleResult(await _teamJobService.EnrichWeakDescriptionsAsync(ct));
 }

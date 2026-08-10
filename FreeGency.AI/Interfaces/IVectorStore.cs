@@ -4,7 +4,13 @@ public interface IVectorStore
 {
     Task UpsertAsync(string collection, string id, float[] vector, IDictionary<string, string>? metadata = null, CancellationToken ct = default);
     Task UpsertBatchAsync(string collection, IEnumerable<VectorStoreEntry> entries, CancellationToken ct = default);
-    Task<IReadOnlyList<VectorSearchResult>> SearchAsync(string collection, float[] queryVector, int topK = 10, double? minScore = null, CancellationToken ct = default);
+    Task<IReadOnlyList<VectorSearchResult>> SearchAsync(
+        string collection,
+        float[] queryVector,
+        int topK = 10,
+        double? minScore = null,
+        IReadOnlyDictionary<string, string>? payloadFilters = null,
+        CancellationToken ct = default);
     Task DeleteAsync(string collection, string id, CancellationToken ct = default);
     Task DeleteCollectionAsync(string collection, CancellationToken ct = default);
     Task<bool> CollectionExistsAsync(string collection, CancellationToken ct = default);

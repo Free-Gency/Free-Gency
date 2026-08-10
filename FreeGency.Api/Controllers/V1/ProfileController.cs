@@ -1,4 +1,4 @@
-﻿using FreeGency.Api.Extensions;
+using FreeGency.Api.Extensions;
 using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Features.Account.Dtos;
 using Microsoft.AspNetCore.Authorization;
@@ -80,6 +80,54 @@ public class ProfileController(IAccountService accountService) : BaseApiControll
     public async Task<IActionResult> GetDeveloperProfile()
     {
         var result = await accountService.GetDeveloperProfile();
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
+    /// <summary>Browse developers for hire talent discovery.</summary>
+    [HttpGet("developers")]
+    [AllowAnonymous]
+    public async Task<IActionResult> BrowseDevelopers(
+        [FromQuery] FilterDevelopersRequestDto filter,
+        CancellationToken ct)
+    {
+        var result = await accountService.BrowseDevelopersAsync(filter, ct);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
+    /// <summary>Public developer portfolio profile by user id.</summary>
+    [HttpGet("developers/{userId:guid}")]
+    public async Task<IActionResult> GetDeveloperPublicProfile(Guid userId)
+    {
+        var result = await accountService.GetDeveloperPublicProfileAsync(userId);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
+    /// <summary>Marketplace + community reviews for a developer (public portfolio).</summary>
+    [HttpGet("developers/{userId:guid}/reviews")]
+    public async Task<IActionResult> GetDeveloperReviews(Guid userId, CancellationToken ct)
+    {
+        var result = await accountService.GetDeveloperReviewsAsync(userId, ct);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
+    [HttpPost("developers/{userId:guid}/reviews")]
+    public async Task<IActionResult> AddDeveloperReview(
+        Guid userId,
+        [FromBody] CreateDeveloperReviewRequestDto dto,
+        CancellationToken ct)
+    {
+        var result = await accountService.AddDeveloperReviewAsync(userId, dto, ct);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
+    [HttpGet("developer/me/reviews")]
+    public async Task<IActionResult> GetMyDeveloperReviews(CancellationToken ct)
+    {
+        var me = await accountService.GetDeveloperProfile();
+        if (!me.IsSuccess)
+            return me.ToProblem();
+
+        var result = await accountService.GetDeveloperReviewsAsync(me.Value.UserId, ct);
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 

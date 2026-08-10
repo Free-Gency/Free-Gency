@@ -1,4 +1,4 @@
-﻿using FreeGency.Application.Common.Interfaces;
+using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Features.Account.Dtos;
 
 namespace FreeGency.Application.Common.Interfaces;
@@ -16,6 +16,15 @@ public interface IAccountService
     Task<Result<ProfileModesDto>> GetProfileModesAsync();
     Task<Result<SwitchProfileResponseDto>> SwitchModeAsync(string? targetMode = null);
     Task<Result<DeveloperAccountResponseDto>> GetDeveloperProfile();
+    Task<Result<DeveloperAccountResponseDto>> GetDeveloperPublicProfileAsync(Guid userId);
+    Task<Result<PaginatedResult<DeveloperBrowseDto>>> BrowseDevelopersAsync(
+        FilterDevelopersRequestDto filter,
+        CancellationToken ct = default);
+    Task<Result<IReadOnlyList<DeveloperReviewDto>>> GetDeveloperReviewsAsync(Guid userId, CancellationToken ct = default);
+    Task<Result<DeveloperReviewDto>> AddDeveloperReviewAsync(
+        Guid developerUserId,
+        CreateDeveloperReviewRequestDto request,
+        CancellationToken ct = default);
     Task<ApiResponse> AddClientInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default);
     Task<ApiResponse> ReplaceClientInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default);
     Task<ApiResponse> AddDeveloperInterestsAsync(ProfileInterestsDto dto, CancellationToken ct = default);

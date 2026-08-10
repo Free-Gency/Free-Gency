@@ -60,6 +60,7 @@ public partial class ProposalService
             .Include(p => p.User).ThenInclude(u => u!.DeveloperProfile).ThenInclude(dp => dp!.UserSpecialties).ThenInclude(us => us.Specialty)
             .Include(p => p.ProposalAttachments)
             .Include(p => p.ChatRoom)
+            .Include(p => p.Project).ThenInclude(pr => pr.ChatRooms)
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id, ct);
 

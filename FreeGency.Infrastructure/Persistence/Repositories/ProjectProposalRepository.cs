@@ -127,7 +127,8 @@ public class ProjectProposalRepository
                 p.Id != exceptProposalId &&
                 p.Status != ProposalStatus.Rejected &&
                 p.Status != ProposalStatus.Withdrawn &&
-                p.Status != ProposalStatus.Expired)
+                p.Status != ProposalStatus.Expired &&
+                p.Status != ProposalStatus.Accepted)
             .ToListAsync(ct);
     }
 

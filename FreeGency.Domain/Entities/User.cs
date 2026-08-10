@@ -24,7 +24,12 @@ public class User : IdentityUser<Guid>, ISoftDeletableEntity
     public DateTime? DeletedAt { get; set; }
     public string? DeletedBy { get; set; }
 
+    /// <summary>When set in the future, user cannot send chat/reviews until this UTC time.</summary>
+    public DateTime? ModerationMutedUntil { get; set; }
+
     public virtual ClientProfile? ClientProfile { get; set; }
+    public virtual ICollection<ModerationCase> ModerationCases { get; set; } = [];
+    public virtual ICollection<UserModerationStrike> ModerationStrikes { get; set; } = [];
     public virtual DeveloperProfile? DeveloperProfile { get; set; }
     public virtual ICollection<Team> OwnedTeams { get; set; } = [];
     public virtual ICollection<Project> PostedProjects { get; set; } = [];
@@ -40,6 +45,7 @@ public class User : IdentityUser<Guid>, ISoftDeletableEntity
     public virtual ICollection<RecentlyViewedPortfolio> RecentlyViewedPortfolios { get; set; } = [];
     public virtual ICollection<PortfolioFeedback> PortfolioFeedbacks { get; set; } = [];
     public virtual ICollection<TeamFeedback> TeamFeedbacks { get; set; } = [];
+    public virtual ICollection<DeveloperFeedback> DeveloperFeedbacks { get; set; } = [];
     public virtual Wallet? Wallet { get; set; }
     public virtual ICollection<TeamPayoutSplit> TeamPayoutSplits { get; set; } = [];
     public virtual ICollection<TeamJob> CreatedTeamJobs { get; set; } = [];
