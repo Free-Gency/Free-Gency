@@ -6,3 +6,5 @@ global using Microsoft.AspNetCore.Mvc;
 
 global using FreeGency.Application.Features.Tasks.DTOs;
 
+global using FreeGency.Application.Features.Teams.DTOs;
+

@@ -13,6 +13,8 @@ global using System.Reflection;
 
 global using Hangfire;
 
+global using FreeGency.Application.Common.Mappings.TeamsMapping;
+
 
 
 global using FreeGency.Application.Common.Errors;
@@ -63,7 +65,6 @@ global using FreeGency.Application.Features.WalletFeature.Queries;
 global using FreeGency.Application.Features.ClientNotification.Commands;
 global using FreeGency.Application.Features.ChatFeature.Commands;
 
-global using FreeGency.AI.DTOs;
 
 global using FreeGency.Application.Features.Tasks.DTOs;
 global using FreeGency.Application.Features.NotificationFeature.Dtos;
@@ -76,3 +77,7 @@ global using FreeGency.Application.Common.Mappings.TaskMappings;
 global using FreeGency.Application.Features.DeveloperNotification.Commands;
 global using FreeGency.Application.Features.NotificationFeature.Commands;
 global using FreeGency.Application.Features.Tasks.Commands;
+
+global using FreeGency.Application.Features.Teams.Dtos;
+global using FreeGency.Application.Features.Teams.DTOs;
+global using FreeGency.Application.Features.WalletFeature.Dtos;

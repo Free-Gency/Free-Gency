@@ -24,6 +24,9 @@ public partial class TaskService : ITaskService
     private IProjectEventRepository EventRepo;
     private IUserRepository UserRepo;
 
+    private IProjectMemberRepository ProjectMemberRepo;
+    private IMilestoneAssignmentRepository MilestoneAssignmentRepo;
+
     #endregion
 
     #region Constructor
@@ -47,6 +50,8 @@ public partial class TaskService : ITaskService
         TeamMemberRepo = _unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
         EventRepo = _unitOfWork.Repository<IProjectEventRepository, ProjectEvent>();
         UserRepo = _unitOfWork.Repository<IUserRepository, User>();
+        ProjectMemberRepo = _unitOfWork.Repository<IProjectMemberRepository, ProjectMember>();
+        MilestoneAssignmentRepo = _unitOfWork.Repository<IMilestoneAssignmentRepository, MilestoneAssignment>();
     }
     #endregion
 
@@ -779,14 +784,25 @@ public partial class TaskService : ITaskService
 
         if (project.AssignedTeamId.HasValue)
         {
-            var members = await TeamMemberRepo.GetByTeamIdWithUserAsync(project.AssignedTeamId.Value, ct);
-            assignees = members.Select(m => new TaskAssigneeDto
+            var milestoneAssignments = (await MilestoneAssignmentRepo.GetByMilestoneIdAsync(milestoneId, ct)).ToList();
+            var eligibleUserIds = milestoneAssignments.Count > 0
+                ? milestoneAssignments.Select(a => a.UserId).ToList()
+                : (await ProjectMemberRepo.GetByProjectIdAsync(project.Id, ct)).Select(pm => pm.UserId).ToList();
+
+            if (eligibleUserIds.Count > 0)
             {
-                UserId = m.UserId,
-                Name = FullName(m.User),
-                ImageUrl = m.User?.DeveloperProfile?.ProfileImage,
-                Job = m.Job
-            }).ToList();
+                var users = await UserRepo.Query()
+                    .Include(u => u.DeveloperProfile)
+                    .Where(u => eligibleUserIds.Contains(u.Id))
+                    .ToListAsync(ct);
+
+                assignees = users.Select(u => new TaskAssigneeDto
+                {
+                    UserId = u.Id,
+                    Name = FullName(u),
+                    ImageUrl = u.DeveloperProfile?.ProfileImage
+                }).ToList();
+            }
         }
         else if (project.AssignedUserId.HasValue)
         {

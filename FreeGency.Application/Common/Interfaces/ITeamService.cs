@@ -1,7 +1,4 @@
-using FreeGency.Application.Common.Pagination;
-using FreeGency.Application.Features.Teams.Dtos;
-using FreeGency.Application.Features.Teams.DTOs;
-using FreeGency.Application.Features.WalletFeature.Dtos;
+
 
 namespace FreeGency.Application.Common.Interfaces;
 
@@ -26,4 +23,13 @@ public interface ITeamService
     Task<ApiResponse<IReadOnlyList<TeamReviewDto>>> GetReviewsAsync(Guid teamId, CancellationToken ct = default);
     Task<ApiResponse<TeamReviewDto>> AddReviewAsync(Guid teamId, CreateTeamFeedbackRequestDto request, CancellationToken ct = default);
     Task<Result<PaginatedResult<TeamProjectEarningsDto>>> GetTeamProjectEarnings(TeamProjectsFilter teamProjectsFilter);
+
+    // For team projects
+    Task<ApiResponse<IEnumerable<TeamProjectCardDto>>> GetTeamProjectsAsync(Guid teamId, CancellationToken ct = default);
+    Task<ApiResponse<IEnumerable<ProjectMemberDto>>> GetProjectMembersAsync(Guid projectId, CancellationToken ct = default);
+    Task<ApiResponse<ProjectMemberDto>> AssignProjectMemberAsync(Guid projectId, AssignProjectMemberDto dto, CancellationToken ct = default);
+    Task<ApiResponse> RemoveProjectMemberAsync(Guid projectId, Guid userId, CancellationToken ct = default);
+    Task<ApiResponse<IEnumerable<MilestoneAssignmentDto>>> GetMilestoneAssignmentsAsync(Guid milestoneId, CancellationToken ct = default);
+    Task<ApiResponse> SetMilestoneAssignmentsAsync(Guid milestoneId, SetMilestoneAssignmentsDto dto, CancellationToken ct = default);
+    Task<ApiResponse<IEnumerable<MilestoneAssigneeDto>>> GetMilestoneAssigneesAsync(Guid milestoneId, CancellationToken ct = default);
 }
