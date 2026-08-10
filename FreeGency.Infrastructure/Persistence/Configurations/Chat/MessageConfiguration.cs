@@ -62,5 +62,13 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
             .HasForeignKey(m => m.PlanVersionId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
+
+        builder.HasOne(m => m.Milestone)
+            .WithMany()
+            .HasForeignKey(m => m.MilestoneId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
+
+        builder.HasIndex(m => m.MilestoneId);
     }
 }

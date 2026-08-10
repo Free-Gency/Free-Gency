@@ -612,7 +612,21 @@ public partial class MilestoneService
         }, ct);
 
         await RecordEventAsync(projectId, next.Id, EventType.EscrowLocked, null, ct);
+
+        var chatQueued = await TryQueueProjectMilestoneChatAsync(
+            project,
+            next,
+            MessageType.MilestoneFunded,
+            $"Milestone #{next.SortOrder} funded · ${next.Amount:0.##} · work can start",
+            profileMode.Client,
+            ct);
+
         await _unitOfWork.SaveChangesAsync(ct);
+        await TryBroadcastQueuedChatAsync(
+            chatQueued,
+            $"Milestone #{next.SortOrder} funded",
+            ct);
+
         if (project.AssignedUserId.HasValue)
         {
             var developerProfileId =
@@ -668,7 +682,10 @@ public partial class MilestoneService
         return ApiResponse.Success($"Milestone #{next.SortOrder} funded in escrow (${next.Amount}).");
     }
 
-    public async Task<ApiResponse> SubmitMilestoneAsync(Guid milestoneId, CancellationToken ct = default)
+    public async Task<ApiResponse> SubmitMilestoneAsync(
+        Guid milestoneId,
+        string? note = null,
+        CancellationToken ct = default)
     {
         // Check for open tasks before submission
         var openTasks = await _unitOfWork.Repository<ITaskRepository, ProjectTask>().CountIncompleteAsync(milestoneId, ct);
@@ -707,7 +724,26 @@ public partial class MilestoneService
         _milestoneRepo.Update(milestone);
 
         await RecordEventAsync(project.Id, milestone.Id, EventType.MilestoneSubmitted, null, ct);
+
+        var trimmedNote = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+        var chatText = trimmedNote is null
+            ? $"Milestone #{milestone.SortOrder} submitted for review: {milestone.Title}"
+            : $"Milestone #{milestone.SortOrder} submitted for review: {milestone.Title}\n\n{trimmedNote}";
+
+        var chatQueued = await TryQueueProjectMilestoneChatAsync(
+            project,
+            milestone,
+            MessageType.WorkSubmitted,
+            chatText,
+            profileMode.Developer,
+            ct);
+
         await _unitOfWork.SaveChangesAsync(ct);
+        await TryBroadcastQueuedChatAsync(
+            chatQueued,
+            $"Milestone #{milestone.SortOrder} submitted for review",
+            ct);
+
         var clientProfileId =
     await UserRepo.GetClientProfileIdByUserIdAsync(
         project.ClientId,
@@ -751,10 +787,32 @@ public partial class MilestoneService
         if (milestone.WorkStatus != WorkStatus.Submitted || milestone.ReleaseStatus != ReleaseStatus.Pending)
             return ApiResponse.Failure(AppError.Validation("Milestone is not awaiting approval."));
 
-        await ReleaseFundsInternalAsync(project, milestone, ct);
+        try
+        {
+            await ReleaseFundsInternalAsync(project, milestone, ct);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return ApiResponse.Failure(AppError.Validation(ex.Message));
+        }
+
         await RecordEventAsync(project.Id, milestone.Id, EventType.MilestoneApproved, null, ct);
         await RecordEventAsync(project.Id, milestone.Id, EventType.MilestoneReleased, null, ct);
+
+        var chatQueued = await TryQueueProjectMilestoneChatAsync(
+            project,
+            milestone,
+            MessageType.MilestoneReleased,
+            $"Milestone #{milestone.SortOrder} approved · ${milestone.Amount:0.##} released",
+            profileMode.Client,
+            ct);
+
         await _unitOfWork.SaveChangesAsync(ct);
+        await TryBroadcastQueuedChatAsync(
+            chatQueued,
+            $"Milestone #{milestone.SortOrder} approved & released",
+            ct);
+
         if (project.AssignedUserId.HasValue)
         {
             var developerProfileId =
@@ -836,7 +894,26 @@ public partial class MilestoneService
         milestone.AvailableAt = null;
         _milestoneRepo.Update(milestone);
         await RecordEventAsync(project.Id, milestone.Id, EventType.MilestoneChangesRequested, null, ct);
+
+        var trimmed = string.IsNullOrWhiteSpace(comment) ? null : comment.Trim();
+        var chatText = trimmed is null
+            ? $"Changes requested on milestone #{milestone.SortOrder}: {milestone.Title}"
+            : $"Changes requested on milestone #{milestone.SortOrder}: {trimmed}";
+
+        var chatQueued = await TryQueueProjectMilestoneChatAsync(
+            project,
+            milestone,
+            MessageType.WorkChangesRequested,
+            chatText,
+            profileMode.Client,
+            ct);
+
         await _unitOfWork.SaveChangesAsync(ct);
+        await TryBroadcastQueuedChatAsync(
+            chatQueued,
+            $"Changes requested on milestone #{milestone.SortOrder}",
+            ct);
+
         var notificationBody = string.IsNullOrWhiteSpace(comment)
     ? $"Changes were requested on milestone #{milestone.SortOrder}."
     : $"Changes were requested on milestone #{milestone.SortOrder}: {comment.Trim()}";
@@ -1034,7 +1111,7 @@ public partial class MilestoneService
     }
 
     /// <summary>
-    /// Team release: apply project override splits → team defaults → else 100% team wallet.
+    /// Team release: milestone splits → project override → team defaults → else 100% team wallet.
     /// </summary>
     private async Task CreditTeamReleaseAsync(
         Project project,
@@ -1044,9 +1121,11 @@ public partial class MilestoneService
     {
         var teamId = project.AssignedTeamId!.Value;
 
-        var splits = (await SplitRepo.GetByTeamAndProjectAsync(teamId, project.Id, ct)).ToList();
+        var splits = (await SplitRepo.GetByScopeAsync(teamId, project.Id, milestone.Id, ct)).ToList();
         if (splits.Count == 0)
-            splits = (await SplitRepo.GetByTeamAndProjectAsync(teamId, null, ct)).ToList();
+            splits = (await SplitRepo.GetByScopeAsync(teamId, project.Id, null, ct)).ToList();
+        if (splits.Count == 0)
+            splits = (await SplitRepo.GetByScopeAsync(teamId, null, null, ct)).ToList();
 
         var useSplits = splits.Count > 0 &&
                         await SplitRepo.ValidateSplitsAsync(splits, milestone.Amount, ct);
@@ -1154,6 +1233,55 @@ public partial class MilestoneService
     private IUserRepository UserRepo =>
         _unitOfWork.Repository<IUserRepository, User>();
 
+    private async Task<(ChatRoom Room, Message Message)?> TryQueueProjectMilestoneChatAsync(
+        Project project,
+        Milestone milestone,
+        MessageType type,
+        string text,
+        profileMode senderMode,
+        CancellationToken ct)
+    {
+        var room = await ChatRoomRepo.GetByProjectIdAsync(project.Id, ct);
+        if (room is null)
+            return null;
+
+        var senderProfiles = await ResolveSenderProfilesForModeAsync(senderMode, ct);
+        if (senderProfiles is null)
+            return null;
+
+        var message = new Message
+        {
+            Id = Guid.NewGuid(),
+            ChatRoomId = room.Id,
+            SenderClientProfileId = senderProfiles.Value.ClientProfileId,
+            SenderDeveloperProfileId = senderProfiles.Value.DeveloperProfileId,
+            MessageType = type,
+            Text = text,
+            MilestoneId = milestone.Id,
+            CreatedAt = DateTime.UtcNow
+        };
+        await MessageRepo.AddAsync(message, ct);
+        room.UpdatedAt = DateTime.UtcNow;
+        return (room, message);
+    }
+
+    private async Task TryBroadcastQueuedChatAsync(
+        (ChatRoom Room, Message Message)? queued,
+        string preview,
+        CancellationToken ct)
+    {
+        if (queued is null)
+            return;
+        try
+        {
+            await BroadcastChatMessageAsync(queued.Value.Room.Id, queued.Value.Message, preview, ct);
+        }
+        catch
+        {
+            // Realtime is best-effort.
+        }
+    }
+
     private async Task BroadcastChatMessageAsync(
         Guid roomId,
         Message message,
@@ -1179,6 +1307,7 @@ public partial class MilestoneService
             FileName = message.FileName,
             FileUrl = message.FileUrl,
             PlanVersionId = message.PlanVersionId,
+            MilestoneId = message.MilestoneId,
             CreatedAt = message.CreatedAt,
             IsMine = true
         };

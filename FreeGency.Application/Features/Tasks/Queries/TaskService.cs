@@ -44,15 +44,30 @@ public partial class TaskService
         return ApiResponse.Success<IEnumerable<TaskDto>>(dtos);
     }
 
-    public async Task<ApiResponse<IEnumerable<TaskDto>>> GetMyTasksAsync(CancellationToken ct = default)
+    public async Task<ApiResponse<IEnumerable<TaskDto>>> GetMyTasksAsync(
+        Guid? teamId = null,
+        CancellationToken ct = default)
     {
         var tasks = await TaskRepo.GetAssignedToUserAsync(UserId, ct);
 
         var dtos = new List<TaskDto>();
         foreach (var task in tasks)
         {
-            if (task.Milestone?.Project is null) continue;
-            dtos.Add(await MapToDtoAsync(task.Milestone.Project, task, ct));
+            var project = task.Milestone?.Project;
+            if (project is null) continue;
+
+            if (teamId.HasValue)
+            {
+                // Team workspace: only tasks on this team's hired projects.
+                if (project.AssignedTeamId != teamId.Value) continue;
+            }
+            else
+            {
+                // Manage Work: solo hired projects only.
+                if (project.AssignedUserId != UserId) continue;
+            }
+
+            dtos.Add(await MapToDtoAsync(project, task, ct));
         }
 
         return ApiResponse.Success<IEnumerable<TaskDto>>(dtos);

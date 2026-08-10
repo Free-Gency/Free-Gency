@@ -4,6 +4,7 @@ using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FreeGency.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260810214540_AddMessageMilestoneId")]
+    partial class AddMessageMilestoneId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1028,69 +1031,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("Milestones", "marketplace");
-                });
-
-            modelBuilder.Entity("FreeGency.Domain.Entities.MilestoneAssignment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("AssignedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("AssignedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasDefaultValue("system");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedBy")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<Guid>("MilestoneId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Percentage")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("MilestoneId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("MilestoneAssignments", "marketplace");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.MilestonePlanItem", b =>
@@ -3881,9 +3821,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<Guid?>("MilestoneId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("ProjectId")
                         .HasColumnType("uniqueidentifier");
 
@@ -3910,13 +3847,11 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MilestoneId");
-
                     b.HasIndex("ProjectId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("TeamId");
 
-                    b.HasIndex("TeamId", "ProjectId", "MilestoneId", "UserId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("TeamPayoutSplits", "finance");
                 });
@@ -4849,25 +4784,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("FreeGency.Domain.Entities.MilestoneAssignment", b =>
-                {
-                    b.HasOne("FreeGency.Domain.Entities.Milestone", "Milestone")
-                        .WithMany("Assignments")
-                        .HasForeignKey("MilestoneId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FreeGency.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Milestone");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("FreeGency.Domain.Entities.MilestonePlanItem", b =>
                 {
                     b.HasOne("FreeGency.Domain.Entities.MilestonePlanVersion", "PlanVersion")
@@ -5658,11 +5574,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("FreeGency.Domain.Entities.TeamPayoutSplit", b =>
                 {
-                    b.HasOne("FreeGency.Domain.Entities.Milestone", "Milestone")
-                        .WithMany("TeamPayoutSplits")
-                        .HasForeignKey("MilestoneId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("FreeGency.Domain.Entities.Project", "Project")
                         .WithMany("TeamPayoutSplits")
                         .HasForeignKey("ProjectId")
@@ -5679,8 +5590,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Milestone");
 
                     b.Navigation("Project");
 
@@ -5989,8 +5898,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Milestone", b =>
                 {
-                    b.Navigation("Assignments");
-
                     b.Navigation("LedgerEntries");
 
                     b.Navigation("PaymentTransactions");
@@ -6000,8 +5907,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("ProjectFiles");
 
                     b.Navigation("Tasks");
-
-                    b.Navigation("TeamPayoutSplits");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.MilestonePlanVersion", b =>

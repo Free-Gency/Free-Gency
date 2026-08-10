@@ -27,63 +27,79 @@ public partial class TeamService
   GetTeamProjectEarnings(TeamProjectsFilter teamProjectsFilter)
     {
         var teamProjects = _teamRepository
-            .GetProjectTeamAccepted(teamProjectsFilter.TeamId);
+            .GetProjectTeamAccepted(teamProjectsFilter.TeamId)
+            .Include(p => p.MilestonePlanVersions)
+                .ThenInclude(v => v.Items)
+            .Include(p => p.Milestones);
 
-        var query = teamProjects.Select(project => new TeamProjectEarningsDto
-        {
-            ProjectId = project.Id,
-            ProjectTitle = project.Title,
-            Currency = project.Currency,
-
-            TotalBudget = project.MilestonePlanVersions
-                .Where(v => v.Status == PlanVersionStatus.Accepted)
-                .SelectMany(v => v.Items)
-                .Sum(x => x.Amount),
-
-            ReleasedAmount = project.Milestones
-                .Sum(x => x.ReleasedAmount),
-
-            Members = project.TeamPayoutSplits
-                .Select(split => new TeamMemberEarningDto
-                {
-                    UserId = split.UserId,
-
-                    Name = split.User.FristName + " " + split.User.LastName,
-
-                    Percentage = split.Value,
-
-                    Amount =
-                        project.MilestonePlanVersions
-                            .Where(v => v.Status == PlanVersionStatus.Accepted)
-                            .SelectMany(v => v.Items)
-                            .Sum(x => x.Amount)
-                        * split.Value / 100,
-
-                    ReleasedAmount =
-                        project.Milestones
-                            .Sum(x => x.ReleasedAmount)
-                        * split.Value / 100,
-
-                    Status =
-                        project.Milestones.Sum(x => x.ReleasedAmount) == 0
-                            ? "Pending"
-                            : project.Milestones.Sum(x => x.ReleasedAmount)
-                                >= project.MilestonePlanVersions
-                                    .Where(v => v.Status == PlanVersionStatus.Accepted)
-                                    .SelectMany(v => v.Items)
-                                    .Sum(x => x.Amount)
-                                ? "Released"
-                                : "Partially Released"
-                })
-                .ToList()
-        });
-
-        var result = await PaginatedResult<TeamProjectEarningsDto>.CreateAsync(
-            query,
+        var page = await PaginatedResult<Project>.CreateAsync(
+            teamProjects,
             teamProjectsFilter.PageNumber,
             teamProjectsFilter.PageSize);
 
-        return Result.Success(result);
+        var items = new List<TeamProjectEarningsDto>();
+        foreach (var project in page.Items)
+        {
+            var totalBudget = project.MilestonePlanVersions
+                .Where(v => v.Status == PlanVersionStatus.Accepted)
+                .SelectMany(v => v.Items)
+                .Sum(x => x.Amount);
+
+            var releasedAmount = project.Milestones.Sum(x => x.ReleasedAmount);
+
+            var splits = project.AssignedTeamId is Guid teamId
+                ? (await _payoutSplitRepository.GetByProjectAsync(teamId, project.Id)).ToList()
+                : [];
+
+            // Prefer project-level rows when present; otherwise average milestone % per user.
+            var projectLevel = splits.Where(s => s.MilestoneId is null).ToList();
+            var source = projectLevel.Count > 0
+                ? projectLevel
+                : splits.Where(s => s.MilestoneId is not null).ToList();
+
+            var members = source
+                .GroupBy(s => s.UserId)
+                .Select(g =>
+                {
+                    var pct = g.Average(x => x.Value);
+                    var user = g.First().User;
+                    var name = user is null
+                        ? string.Empty
+                        : $"{user.FristName} {user.LastName}".Trim();
+                    return new TeamMemberEarningDto
+                    {
+                        UserId = g.Key,
+                        Name = name,
+                        Role = null,
+                        Percentage = Math.Round(pct, 2, MidpointRounding.AwayFromZero),
+                        Amount = totalBudget * pct / 100m,
+                        ReleasedAmount = releasedAmount * pct / 100m,
+                        Status = releasedAmount == 0
+                            ? "Pending"
+                            : releasedAmount >= totalBudget && totalBudget > 0
+                                ? "Released"
+                                : "Partially Released"
+                    };
+                })
+                .OrderByDescending(m => m.Percentage)
+                .ToList();
+
+            items.Add(new TeamProjectEarningsDto
+            {
+                ProjectId = project.Id,
+                ProjectTitle = project.Title,
+                Currency = project.Currency,
+                TotalBudget = totalBudget,
+                ReleasedAmount = releasedAmount,
+                Members = members
+            });
+        }
+
+        return Result.Success(PaginatedResult<TeamProjectEarningsDto>.FromList(
+            items,
+            page.PageNumber,
+            page.PageSize,
+            page.TotalCount));
     }
     public async Task<ApiResponse<PaginatedResult<TeamDto>>> BrowseAsync(
         FilterTeamsRequestDto filter,
@@ -406,9 +422,12 @@ public partial class TeamService
 
         if (project.AssignedTeamId.HasValue)
         {
-            var milestoneAssignments = await _milestoneAssignmentRepository.GetByMilestoneIdAsync(milestoneId, ct);
-            var eligibleUserIds = milestoneAssignments.Count > 0
-                ? milestoneAssignments.Select(a => a.UserId).ToList()
+            var teamId = project.AssignedTeamId.Value;
+            var milestoneSplits = (await _payoutSplitRepository.GetByScopeAsync(
+                teamId, project.Id, milestoneId, ct)).ToList();
+
+            var eligibleUserIds = milestoneSplits.Count > 0
+                ? milestoneSplits.Select(a => a.UserId).ToList()
                 : (await _projectMemberRepository.GetByProjectIdAsync(project.Id, ct))
                     .Select(m => m.UserId).ToList();
 

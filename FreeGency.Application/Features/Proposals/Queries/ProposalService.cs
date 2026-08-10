@@ -33,9 +33,8 @@ public partial class ProposalService
         var userId = _currentUser.UserId;
 
         var myProposals = _proposalRepository.Query()
-            .Where(p => p.UserId == userId ||
-                        (p.TeamId != null &&
-                         _teamMemberRepository.Query().Any(tm => tm.TeamId == p.TeamId && tm.UserId == userId)))
+            // Manage Work: personal proposals only. Team applications live under Teams.
+            .Where(p => p.UserId == userId && p.TeamId == null)
             .ApplyFilters(filter)
             .ApplySearch(filter)
             .ApplySorting(filter);

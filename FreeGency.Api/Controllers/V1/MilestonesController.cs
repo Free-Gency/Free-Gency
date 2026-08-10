@@ -43,8 +43,11 @@ public class MilestonesController(IMilestoneService milestoneService) : BaseApiC
         => HandleResult(await milestoneService.FundNextMilestoneAsync(projectId, ct));
 
     [HttpPost("milestones/{milestoneId:guid}/submit")]
-    public async Task<IActionResult> Submit([FromRoute] Guid milestoneId, CancellationToken ct)
-        => HandleResult(await milestoneService.SubmitMilestoneAsync(milestoneId, ct));
+    public async Task<IActionResult> Submit(
+        [FromRoute] Guid milestoneId,
+        [FromBody] SubmitMilestoneBody? body,
+        CancellationToken ct)
+        => HandleResult(await milestoneService.SubmitMilestoneAsync(milestoneId, body?.Note, ct));
 
     [HttpPost("milestones/{milestoneId:guid}/approve-release")]
     public async Task<IActionResult> ApproveRelease([FromRoute] Guid milestoneId, CancellationToken ct)
@@ -57,6 +60,11 @@ public class MilestonesController(IMilestoneService milestoneService) : BaseApiC
         CancellationToken ct)
         => HandleResult(await milestoneService.RequestMilestoneWorkChangesAsync(
             milestoneId, body?.Comment ?? string.Empty, ct));
+}
+
+public sealed class SubmitMilestoneBody
+{
+    public string? Note { get; init; }
 }
 
 public sealed class RequestWorkChangesBody

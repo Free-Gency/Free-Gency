@@ -9,4 +9,7 @@ public interface IPayoutSplitService
 
     Task<ApiResponse<PayoutSplitsDto>> GetProjectSplitsAsync(Guid projectId, CancellationToken ct = default);
     Task<ApiResponse<PayoutSplitsDto>> ReplaceProjectSplitsAsync(Guid projectId, ReplacePayoutSplitsDto dto, CancellationToken ct = default);
+
+    Task<ApiResponse<PayoutSplitsDto>> GetMilestoneSplitsAsync(Guid milestoneId, CancellationToken ct = default);
+    Task<ApiResponse<PayoutSplitsDto>> ReplaceMilestoneSplitsAsync(Guid milestoneId, ReplacePayoutSplitsDto dto, CancellationToken ct = default);
 }

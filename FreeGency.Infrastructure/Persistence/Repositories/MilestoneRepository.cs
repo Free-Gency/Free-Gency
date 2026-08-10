@@ -13,7 +13,11 @@ public class MilestoneRepository:GenericRepository<Milestone>,IMilestoneReposito
     }
     public async Task<IEnumerable<Milestone>> GetByProjectIdAsync(Guid projectId,CancellationToken ct = default)
     {
-        return await _dbSet.AsNoTracking().Where(m => m.ProjectId == projectId).OrderBy(m => m.SortOrder).ToListAsync(ct);
+        return await _dbSet.AsNoTracking()
+            .Include(m => m.ProjectFiles)
+            .Where(m => m.ProjectId == projectId)
+            .OrderBy(m => m.SortOrder)
+            .ToListAsync(ct);
     }
 
     public async Task<Milestone?> GetNextUnfundedAsync(Guid projectId, CancellationToken ct = default)

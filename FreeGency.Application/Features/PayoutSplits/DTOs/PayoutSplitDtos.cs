@@ -10,6 +10,7 @@ public sealed class PayoutSplitsDto
 {
     public Guid TeamId { get; init; }
     public Guid? ProjectId { get; init; }
+    public Guid? MilestoneId { get; init; }
     public string SplitType { get; init; } = "Percent";
     public IReadOnlyList<PayoutSplitItemDto> Items { get; init; } = [];
 }

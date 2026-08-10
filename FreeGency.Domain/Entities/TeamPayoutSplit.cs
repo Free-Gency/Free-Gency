@@ -16,11 +16,14 @@ public class TeamPayoutSplit : ISoftDeletableEntity
 
     public Guid TeamId { get; set; }
     public Guid? ProjectId { get; set; }
+    /// <summary>Null = team/project-level split. Set = milestone-specific payout share.</summary>
+    public Guid? MilestoneId { get; set; }
     public Guid UserId { get; set; }
     public SplitType SplitType { get; set; }
     public decimal Value { get; set; }
 
     public virtual Team Team { get; set; } = null!;
     public virtual Project? Project { get; set; }
+    public virtual Milestone? Milestone { get; set; }
     public virtual User User { get; set; } = null!;
 }

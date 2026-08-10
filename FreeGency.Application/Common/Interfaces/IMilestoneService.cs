@@ -16,7 +16,7 @@ public interface IMilestoneService
     Task<ApiResponse> AcceptPlanAsync(Guid planVersionId, CancellationToken ct = default);
 
     Task<ApiResponse> FundNextMilestoneAsync(Guid projectId, CancellationToken ct = default);
-    Task<ApiResponse> SubmitMilestoneAsync(Guid milestoneId, CancellationToken ct = default);
+    Task<ApiResponse> SubmitMilestoneAsync(Guid milestoneId, string? note = null, CancellationToken ct = default);
     Task<ApiResponse> ApproveAndReleaseAsync(Guid milestoneId, CancellationToken ct = default);
     Task<ApiResponse> RequestMilestoneWorkChangesAsync(Guid milestoneId, string comment, CancellationToken ct = default);
 

@@ -12,6 +12,7 @@ namespace FreeGency.Application.Features.ChatFeature.Dtos
         public string? FileName { get; set; }
         public string? FileUrl { get; set; }
         public Guid? PlanVersionId { get; set; }
+        public Guid? MilestoneId { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsMine { get; set; }
         public Guid? OtherProfileId { get; set; }
