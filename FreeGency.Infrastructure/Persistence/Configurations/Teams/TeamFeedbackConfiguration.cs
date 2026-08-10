@@ -1,4 +1,5 @@
 using FreeGency.Domain.Entities;
+using FreeGency.Domain.Enums;
 using FreeGency.Infrastructure.Persistence.Schemas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -17,6 +18,12 @@ public class TeamFeedbackConfiguration : IEntityTypeConfiguration<TeamFeedback>
 
         builder.Property(x => x.Rating).IsRequired();
         builder.Property(x => x.Comment).HasMaxLength(500);
+        builder.Property(x => x.ModerationStatus)
+            .HasConversion<string>()
+            .HasMaxLength(40)
+            .HasDefaultValue(ModerationStatus.Visible);
+        builder.Property(x => x.ModerationNote).HasMaxLength(500);
+        builder.Property(x => x.ModeratedText).HasMaxLength(500);
 
         builder.HasOne(x => x.Team)
             .WithMany(t => t.TeamFeedbacks)

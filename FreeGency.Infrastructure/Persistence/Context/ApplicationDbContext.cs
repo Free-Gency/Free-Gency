@@ -35,6 +35,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ProjectSpecialty> ProjectSpecialties => Set<ProjectSpecialty>();
     public DbSet<ProjectMember> ProjectMembers => Set<ProjectMember>();
     public DbSet<ProjectProposal> ProjectProposals => Set<ProjectProposal>();
+    public DbSet<ProjectInvitation> ProjectInvitations => Set<ProjectInvitation>();
     public DbSet<ProposalAttachment> ProposalAttachments => Set<ProposalAttachment>();
     public DbSet<ProjectFile> ProjectFiles => Set<ProjectFile>();
     public DbSet<ProjectEvent> ProjectEvents => Set<ProjectEvent>();
@@ -60,6 +61,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<RecentlyViewedPortfolio> RecentlyViewedPortfolios => Set<RecentlyViewedPortfolio>();
     public DbSet<PortfolioFeedback> PortfolioFeedbacks => Set<PortfolioFeedback>();
     public DbSet<TeamFeedback> TeamFeedbacks => Set<TeamFeedback>();
+    public DbSet<DeveloperFeedback> DeveloperFeedbacks => Set<DeveloperFeedback>();
 
     // Chat
     public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();
@@ -77,6 +79,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<ClientNotificationSettings> clientNotificationSettings => Set<ClientNotificationSettings>();
     public DbSet<DeveloperNotificationSettings> developerNotificationSettings => Set<DeveloperNotificationSettings>();
+
+    // Moderation
+    public DbSet<ModerationCase> ModerationCases => Set<ModerationCase>();
+    public DbSet<UserModerationStrike> UserModerationStrikes => Set<UserModerationStrike>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

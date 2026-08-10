@@ -1,6 +1,6 @@
 
-
 using FreeGency.Application.Features.LedgerEntryFeature.Queries;
+using FreeGency.Application.Features.Moderation;
 
 namespace FreeGency.Application;
 
@@ -36,11 +36,18 @@ public static class DependencyInjection
         services.AddScoped<ITeamJobService, TeamJobService>();
         services.AddScoped<ITeamJoinRequestService, TeamJoinRequestService>();
         services.AddScoped<IProposalService, ProposalService>();
+        services.AddScoped<IProjectInvitationService, ProjectInvitationService>();
         services.AddScoped<ITeamService, TeamService>();
 
         // Proposal Ranking
         services.AddScoped<IProposalRankingService, ProposalRankingService>();
         services.AddScoped<IProposalAssistantService, ProposalAssistantService>();
+
+        // RAG Suggestions
+        services.AddScoped<ISuggestionService, SuggestionService>();
+
+        // Content moderation
+        services.AddScoped<IContentModerationService, ContentModerationService>();
 
         // Portfolio
         services.AddScoped<IPortfolioService, PortfolioService>();

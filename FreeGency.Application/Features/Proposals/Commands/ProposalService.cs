@@ -135,7 +135,7 @@ public partial class ProposalService : IProposalService
                 ProjectId = project.Id,
                 ProjectProposalId = proposal.Id,
 
-                ActionUrl = $"/projects/{project.Id}/proposals/{proposal.Id}"
+                ActionUrl = $"/projects/{project.Id}?tab=proposals"
             }));
             
 
@@ -199,46 +199,66 @@ public partial class ProposalService : IProposalService
 
     /// <summary>
     /// Opens discussion only — does NOT hire and does NOT cascade-reject other proposals.
+    /// Returns the proposal chat room id for client navigation.
     /// </summary>
-    public async Task<ApiResponse> StartDiscussionAsync(Guid proposalId, CancellationToken ct = default)
+    public async Task<ApiResponse<Guid>> StartDiscussionAsync(Guid proposalId, CancellationToken ct = default)
     {
         var proposal = await _proposalRepository.GetByIdAsync(proposalId, ct);
         if (proposal is null)
-            return ApiResponse.Failure(AppError.NotFound(nameof(ProjectProposal), proposalId));
+            return ApiResponse.Failure<Guid>(AppError.NotFound(nameof(ProjectProposal), proposalId));
 
         var project = await _projectRepository.GetByIdAsync(proposal.ProjectId, ct);
         if (project is null)
-            return ApiResponse.Failure(AppError.NotFound(nameof(Project), proposal.ProjectId));
+            return ApiResponse.Failure<Guid>(AppError.NotFound(nameof(Project), proposal.ProjectId));
 
         if (project.ClientId != _currentUser.UserId)
-            return ApiResponse.Failure(AppError.Forbidden("Only the project's client can start a discussion."));
+            return ApiResponse.Failure<Guid>(AppError.Forbidden("Only the project's client can start a discussion."));
 
         if (project.Status != ProjectStatus.Open)
-            return ApiResponse.Failure(AppError.Validation("Project is not open for new discussions."));
+            return ApiResponse.Failure<Guid>(AppError.Validation("Project is not open for new discussions."));
 
-        if (proposal.Status is ProposalStatus.Rejected or ProposalStatus.Withdrawn or ProposalStatus.Expired)
-            return ApiResponse.Failure(AppError.Validation("Cannot discuss a closed proposal."));
+        if (proposal.Status is ProposalStatus.Rejected or ProposalStatus.Withdrawn or ProposalStatus.Expired or ProposalStatus.Accepted)
+            return ApiResponse.Failure<Guid>(AppError.Validation("Cannot discuss a closed proposal."));
+
+        var existingRoom = await _chatRoomRepository.GetByProposalIdForUpdateAsync(proposalId, ct);
 
         if (proposal.Status == ProposalStatus.InDiscussion)
-            return ApiResponse.Success("Discussion is already active for this proposal.");
+        {
+            if (existingRoom is null)
+                return ApiResponse.Failure<Guid>(AppError.Validation("Discussion chat room was not found."));
+
+            return ApiResponse.Success(
+                existingRoom.Id,
+                "Discussion is already active for this proposal.");
+        }
 
         var active = (await _proposalRepository.GetActiveDiscussionByProjectIdAsync(proposal.ProjectId, ct)).ToList();
         if (active.Any(p => p.Id != proposalId))
-            return ApiResponse.Failure(AppError.Validation(
+            return ApiResponse.Failure<Guid>(AppError.Validation(
                 "Another discussion is already active. Close it before starting a new one."));
 
         await _proposalRepository.UpdateStatusAsync(proposalId, ProposalStatus.InDiscussion, ct);
 
-        var existingRoom = await _chatRoomRepository.GetByProposalIdAsync(proposalId, ct);
-        List<(Guid? ClientProfileId, Guid? DeveloperProfileId, bool CanSend, string? RoleLabel)>? members = null;
-        ChatRoom? chatRoom = null;
-        if (existingRoom is null)
+        ChatRoom chatRoom;
+        List<(Guid? ClientProfileId, Guid? DeveloperProfileId, bool CanSend, string? RoleLabel)>? notifyMembers = null;
+
+        if (existingRoom is not null)
+        {
+            chatRoom = existingRoom;
+            if (chatRoom.Status == ChatRoomStatus.Archived)
+            {
+                chatRoom.Status = ChatRoomStatus.Active;
+                chatRoom.ArchivedAt = null;
+                _chatRoomRepository.Update(chatRoom);
+            }
+        }
+        else
         {
             var clientProfileId = await _userRepository.GetClientProfileIdByUserIdAsync(project.ClientId, ct);
             if (clientProfileId is null)
-                return ApiResponse.Failure(AppError.Validation("Client profile is required to start a discussion."));
+                return ApiResponse.Failure<Guid>(AppError.Validation("Client profile is required to start a discussion."));
 
-             members = new ()
+            var members = new List<(Guid? ClientProfileId, Guid? DeveloperProfileId, bool CanSend, string? RoleLabel)>
             {
                 (clientProfileId, null, true, "Client")
             };
@@ -248,7 +268,7 @@ public partial class ProposalService : IProposalService
                 var developerProfileId =
                     await _userRepository.GetDeveloperProfileIdByUserIdAsync(proposal.UserId.Value, ct);
                 if (developerProfileId is null)
-                    return ApiResponse.Failure(AppError.Validation("Applicant developer profile was not found."));
+                    return ApiResponse.Failure<Guid>(AppError.Validation("Applicant developer profile was not found."));
 
                 members.Add((null, developerProfileId, true, null));
             }
@@ -263,7 +283,7 @@ public partial class ProposalService : IProposalService
                     var developerProfileId =
                         await _userRepository.GetDeveloperProfileIdByUserIdAsync(leader.UserId, ct);
                     if (developerProfileId is null)
-                        return ApiResponse.Failure(AppError.Validation("Team leader developer profile was not found."));
+                        return ApiResponse.Failure<Guid>(AppError.Validation("Team leader developer profile was not found."));
 
                     var canSend = speakerId.HasValue && leader.UserId == speakerId.Value;
                     members.Add((null, developerProfileId, canSend, canSend ? "Team Leader" : "Team Leader (view only)"));
@@ -275,7 +295,7 @@ public partial class ProposalService : IProposalService
                     var speakerProfileId =
                         await _userRepository.GetDeveloperProfileIdByUserIdAsync(speakerId.Value, ct);
                     if (speakerProfileId is null)
-                        return ApiResponse.Failure(AppError.Validation("Speaker developer profile was not found."));
+                        return ApiResponse.Failure<Guid>(AppError.Validation("Speaker developer profile was not found."));
 
                     if (addedDeveloperProfileIds.Add(speakerProfileId.Value))
                         members.Add((null, speakerProfileId, true, "Team Leader"));
@@ -296,6 +316,7 @@ public partial class ProposalService : IProposalService
             };
 
             await _chatRoomRepository.AddWithMembersAsync(chatRoom, members, ct);
+            notifyMembers = members;
 
             await _messageRepository.AddAsync(new Message
             {
@@ -307,25 +328,32 @@ public partial class ProposalService : IProposalService
         }
 
         await _unitOfWork.SaveChangesAsync(ct);
-        foreach (var member in members)
+
+        if (notifyMembers is not null)
         {
-            if (member.DeveloperProfileId is null)
-                continue;
-            BackgroundJob.Enqueue(() => _notificationService.CreateNotification(new CreateNotificationRequest
+            foreach (var member in notifyMembers)
             {
-                DeveloperProfileId = member.DeveloperProfileId,
-                Title = "Discussion started",
-                Body = $"A discussion has started for project \"{project.Title}\".",
-                Type = NotificationType.NewChatMessage, // أو اعمل نوع جديد
-                ChatRoomId = chatRoom.Id,
-                ProjectId = project.Id,
-                ProjectProposalId = proposal.Id,
-                ActionUrl = $"api/v1/Chat/rooms/{chatRoom.Id}/messages"
-            }));
-             
+                if (member.DeveloperProfileId is null)
+                    continue;
+
+                var roomId = chatRoom.Id;
+                BackgroundJob.Enqueue(() => _notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    DeveloperProfileId = member.DeveloperProfileId,
+                    Title = "Discussion started",
+                    Body = $"The client started a discussion on your proposal for \"{project.Title}\".",
+                    Type = NotificationType.NewChatMessage,
+                    ChatRoomId = roomId,
+                    ProjectId = project.Id,
+                    ProjectProposalId = proposal.Id,
+                    ActionUrl = $"/chat?room={roomId}"
+                }));
+            }
         }
 
-        return ApiResponse.Success("Discussion started. Accepting a proposal is not a hire — agree a milestone plan next.");
+        return ApiResponse.Success(
+            chatRoom.Id,
+            "Discussion started. Accepting a proposal is not a hire — agree a milestone plan next.");
     }
 
     /// <summary>Close discussion → Viewed (not Rejected). Reject is deferred until Hire.</summary>
@@ -373,7 +401,89 @@ public partial class ProposalService : IProposalService
         await _proposalRepository.UpdateStatusAsync(proposalId, ProposalStatus.Rejected, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
+        await NotifyProposalRejectedAsync(
+            proposal,
+            project,
+            $"Your proposal for \"{project.Title}\" was declined by the client.",
+            ct);
+
         return ApiResponse.Success("Proposal rejected successfully.");
+    }
+
+    private async Task NotifyProposalRejectedAsync(
+        ProjectProposal proposal,
+        Project project,
+        string body,
+        CancellationToken ct)
+    {
+        const string title = "Proposal rejected";
+        var actionUrl = "/developer/manage-work";
+
+        if (proposal.ApplicantType == ApplicantType.User && proposal.UserId.HasValue)
+        {
+            var developerProfileId =
+                await _userRepository.GetDeveloperProfileIdByUserIdAsync(proposal.UserId.Value, ct);
+            if (developerProfileId is null)
+                return;
+
+            BackgroundJob.Enqueue(() => _notificationService.CreateNotification(new CreateNotificationRequest
+            {
+                DeveloperProfileId = developerProfileId.Value,
+                Title = title,
+                Body = body,
+                Type = NotificationType.ProposalRejected,
+                ProjectId = project.Id,
+                ProjectProposalId = proposal.Id,
+                ActionUrl = actionUrl
+            }));
+            return;
+        }
+
+        if (proposal.ApplicantType != ApplicantType.Team || !proposal.TeamId.HasValue)
+            return;
+
+        var leaders = await _teamMemberRepository.GetLeadersAsync(proposal.TeamId.Value, ct);
+        var notified = new HashSet<Guid>();
+
+        foreach (var leader in leaders)
+        {
+            var developerProfileId =
+                await _userRepository.GetDeveloperProfileIdByUserIdAsync(leader.UserId, ct);
+            if (developerProfileId is null || !notified.Add(developerProfileId.Value))
+                continue;
+
+            BackgroundJob.Enqueue(() => _notificationService.CreateNotification(new CreateNotificationRequest
+            {
+                DeveloperProfileId = developerProfileId.Value,
+                Title = title,
+                Body = body,
+                Type = NotificationType.ProposalRejected,
+                ProjectId = project.Id,
+                ProjectProposalId = proposal.Id,
+                TeamId = proposal.TeamId,
+                ActionUrl = actionUrl
+            }));
+        }
+
+        if (!proposal.UserId.HasValue)
+            return;
+
+        var speakerProfileId =
+            await _userRepository.GetDeveloperProfileIdByUserIdAsync(proposal.UserId.Value, ct);
+        if (speakerProfileId is null || !notified.Add(speakerProfileId.Value))
+            return;
+
+        BackgroundJob.Enqueue(() => _notificationService.CreateNotification(new CreateNotificationRequest
+        {
+            DeveloperProfileId = speakerProfileId.Value,
+            Title = title,
+            Body = body,
+            Type = NotificationType.ProposalRejected,
+            ProjectId = project.Id,
+            ProjectProposalId = proposal.Id,
+            TeamId = proposal.TeamId,
+            ActionUrl = actionUrl
+        }));
     }
 
     public async Task<ApiResponse> DeleteAsync(Guid id, CancellationToken ct = default)

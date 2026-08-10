@@ -18,17 +18,24 @@ namespace FreeGency.Application.Features.Teams.Commands
         private readonly IMilestonePlanVersionRepository _milestonePlanVersionRepository;
         private readonly IWalletRepository _walletRepository;
         private readonly ILedgerEntryRepository _ledgerEntryRepository;
-        public TeamService(IUnitOfWork unitOfWork, IStorageService storageService, ICurrentUserService currentUserService)
+        private readonly IContentModerationService _contentModerationService;
+        private readonly IUserRepository _userRepository;
+        public TeamService(
+            IUnitOfWork unitOfWork,
+            IStorageService storageService,
+            ICurrentUserService currentUserService,
+            IContentModerationService contentModerationService)
         {
             _unitOfWork = unitOfWork;
             _storageService = storageService;
             _currentUserService = currentUserService;
+            _contentModerationService = contentModerationService;
             _walletRepository = _unitOfWork.Repository<IWalletRepository, Wallet>();
             _teamRepository = _unitOfWork.Repository<ITeamRepository, Team>();
             _projectRepository = _unitOfWork.Repository<IProjectRepository, Project>();
             _milestonePlanVersionRepository = _unitOfWork.Repository<IMilestonePlanVersionRepository, MilestonePlanVersion>();
             _ledgerEntryRepository = _unitOfWork.Repository<ILedgerEntryRepository, LedgerEntry>();
-
+            _userRepository = _unitOfWork.Repository<IUserRepository, User>();
         }
 
         public async Task<ApiResponse<Guid>> CreateAsync(CreateTeamDto dto, CancellationToken ct = default)
@@ -629,6 +636,11 @@ namespace FreeGency.Application.Features.Teams.Commands
                 return ApiResponse.Failure<TeamReviewDto>(
                     AppError.Conflict("You already reviewed this team."));
 
+            var (isMuted, mutedUntil) = await _contentModerationService.GetMuteStatusAsync(userId, ct);
+            if (isMuted)
+                return ApiResponse.Failure<TeamReviewDto>(
+                    AppError.Forbidden($"You are temporarily restricted from posting reviews until {mutedUntil:u}."));
+
             var now = DateTime.UtcNow;
             var feedback = new TeamFeedback
             {
@@ -639,10 +651,49 @@ namespace FreeGency.Application.Features.Teams.Commands
                 Comment = comment,
                 CreatedAt = now,
                 CreatedBy = userId.ToString(),
+                ModerationStatus = ModerationStatus.Visible
             };
 
             await _teamRepository.AddFeedbackAsync(feedback, ct);
             await _unitOfWork.SaveChangesAsync(ct);
+
+            string? moderationWarning = null;
+            if (!string.IsNullOrWhiteSpace(comment))
+            {
+                var active = await _userRepository.GetActiveProfileAsync(userId, ct);
+                Guid? clientProfileId = null;
+                Guid? developerProfileId = null;
+                if (active is not null)
+                {
+                    if (active.Value.Mode == profileMode.Client) clientProfileId = active.Value.ProfileId;
+                    else developerProfileId = active.Value.ProfileId;
+                }
+
+                var moderation = await _contentModerationService.ModerateAndEnforceAsync(
+                    userId,
+                    ModerationSourceType.TeamFeedback,
+                    feedback.Id,
+                    comment,
+                    "review",
+                    clientProfileId,
+                    developerProfileId,
+                    ct);
+
+                feedback.ModerationStatus = moderation.Status;
+                feedback.ModerationNote = moderation.WarningMessage;
+                feedback.ModeratedText = moderation.Status switch
+                {
+                    ModerationStatus.Visible => null,
+                    ModerationStatus.Redacted => moderation.SafeText,
+                    _ => "Review comment removed by FreeGency for a policy violation."
+                };
+                moderationWarning = moderation.WarningMessage;
+                await _unitOfWork.SaveChangesAsync(ct);
+
+                if (moderation.Action == ModerationAction.BlockSubmit)
+                    return ApiResponse.Failure<TeamReviewDto>(
+                        AppError.Validation(moderation.WarningMessage ?? "This review violates FreeGency community guidelines."));
+            }
 
             var all = await _teamRepository.GetFeedbackAsync(teamId, 500, ct);
             var count = all.Count;
@@ -650,7 +701,9 @@ namespace FreeGency.Application.Features.Teams.Commands
             await _teamRepository.UpdateRatingAsync(teamId, Math.Round(average, 2), count, ct);
 
             var withUser = all.FirstOrDefault(x => x.Id == feedback.Id);
-            return ApiResponse.Success(MapTeamReview(withUser ?? feedback));
+            var dto = MapTeamReview(withUser ?? feedback);
+            dto.ModerationWarning = moderationWarning;
+            return ApiResponse.Success(dto);
         }
 
         private static TeamReviewDto MapTeamReview(TeamFeedback feedback)
@@ -663,16 +716,24 @@ namespace FreeGency.Application.Features.Teams.Commands
             if (string.IsNullOrWhiteSpace(name))
                 name = user?.UserName?.Trim() ?? "Community member";
 
+            var comment = feedback.ModerationStatus switch
+            {
+                ModerationStatus.Visible => feedback.Comment,
+                ModerationStatus.Redacted => feedback.ModeratedText ?? feedback.Comment,
+                _ => feedback.ModeratedText ?? "Review comment removed by FreeGency for a policy violation."
+            };
+
             return new TeamReviewDto
             {
                 Id = feedback.Id,
                 Rating = feedback.Rating,
-                Comment = feedback.Comment,
+                Comment = comment,
                 CreatedAt = feedback.CreatedAt,
                 ReviewerUserId = feedback.ReviewerUserId,
                 ReviewerName = name,
                 ReviewerAvatar = user?.DeveloperProfile?.ProfileImage
                     ?? user?.ClientProfile?.ProfileImage,
+                ModerationStatus = feedback.ModerationStatus.ToString(),
             };
         }
 

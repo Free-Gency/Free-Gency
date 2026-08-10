@@ -56,14 +56,20 @@ public sealed class ChromaVectorStore : IVectorStore
             metadatas: metadatas);
     }
 
-    public async Task<IReadOnlyList<VectorSearchResult>> SearchAsync(string collection, float[] queryVector, int topK = 10, double? minScore = null, CancellationToken ct = default)
+    public async Task<IReadOnlyList<VectorSearchResult>> SearchAsync(
+        string collection,
+        float[] queryVector,
+        int topK = 10,
+        double? minScore = null,
+        IReadOnlyDictionary<string, string>? payloadFilters = null,
+        CancellationToken ct = default)
     {
         var client = await GetCollectionClientAsync(collection);
         var queryEmbedding = new ReadOnlyMemory<float>(queryVector);
 
         var results = await client.Query(
             queryEmbedding,
-            nResults: topK,
+            nResults: Math.Max(topK * 3, topK),
             include: ChromaQueryInclude.Metadatas | ChromaQueryInclude.Distances);
 
         return results
@@ -73,8 +79,30 @@ public sealed class ChromaVectorStore : IVectorStore
                 Score = (float)(1.0 / (1.0 + r.Distance)),
                 Metadata = ToSearchMetadata(r.Metadata)
             })
+            .Where(r => MatchesFilters(r.Metadata, payloadFilters))
             .Where(r => minScore is null || r.Score >= minScore)
+            .Take(topK)
             .ToList();
+    }
+
+    private static bool MatchesFilters(IDictionary<string, string>? metadata, IReadOnlyDictionary<string, string>? filters)
+    {
+        if (filters is null || filters.Count == 0)
+            return true;
+
+        if (metadata is null)
+            return false;
+
+        foreach (var filter in filters)
+        {
+            if (!metadata.TryGetValue(filter.Key, out var value) ||
+                !string.Equals(value, filter.Value, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public async Task DeleteAsync(string collection, string id, CancellationToken ct = default)

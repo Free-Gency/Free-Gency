@@ -415,7 +415,8 @@ public sealed class TeamRepository : GenericRepository<Team>, ITeamRepository
                 .ThenInclude(u => u.ClientProfile)
             .Include(x => x.ReviewerUser!)
                 .ThenInclude(u => u.DeveloperProfile)
-            .Where(x => x.TeamId == teamId)
+            .Where(x => x.TeamId == teamId
+                        && x.ModerationStatus != FreeGency.Domain.Enums.ModerationStatus.Hidden)
             .OrderByDescending(x => x.CreatedAt)
             .Take(take)
             .ToListAsync(ct);

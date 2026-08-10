@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Features.Projects.Commands
+namespace FreeGency.Application.Features.Projects.Commands
 {
     // Commands
     public partial class ProjectService : IProjectService
@@ -186,6 +186,8 @@
 
             project.Status = ProjectStatus.Open;
             await _unitOfWork.SaveChangesAsync(ct);
+
+            BackgroundJob.Enqueue<ISuggestionService>(s => s.IndexProjectAsync(id, CancellationToken.None));
 
             return ApiResponse.Success("Project published successfully.");
         }

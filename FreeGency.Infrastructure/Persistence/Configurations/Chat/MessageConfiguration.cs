@@ -28,6 +28,12 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.Property(m => m.Text);
         builder.Property(m => m.FileUrl).HasMaxLength(500);
         builder.Property(m => m.FileName).HasMaxLength(255);
+        builder.Property(m => m.ModerationStatus)
+            .HasConversion<string>()
+            .HasMaxLength(40)
+            .HasDefaultValue(ModerationStatus.Visible);
+        builder.Property(m => m.ModerationNote).HasMaxLength(500);
+        builder.Property(m => m.ModeratedText);
 
         builder.HasIndex(m => m.SenderClientProfileId);
         builder.HasIndex(m => m.SenderDeveloperProfileId);

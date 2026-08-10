@@ -1,3 +1,4 @@
+using FreeGency.AI.Moderation;
 using FreeGency.AI.ProjectDrafting;
 using FreeGency.AI.ProposalAssistant;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +19,7 @@ public static class DependencyInjection
         
         services.AddScoped<ProjectDraftService>();
         services.AddScoped<ProposalAssistantChatService>();
+        services.AddScoped<IModerationAgent, ModerationAgent>();
 
         services.AddAIFoundation(configuration);
 

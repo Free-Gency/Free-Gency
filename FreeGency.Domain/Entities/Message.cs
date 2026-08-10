@@ -22,6 +22,10 @@ public class Message : ISoftDeletableEntity
     public string? FileUrl { get; set; }
     public string? FileName { get; set; }
     public Guid? PlanVersionId { get; set; }
+    public ModerationStatus ModerationStatus { get; set; } = ModerationStatus.Visible;
+    public string? ModerationNote { get; set; }
+    /// <summary>Public-facing text when status is Hidden/Redacted; null means use Text.</summary>
+    public string? ModeratedText { get; set; }
 
     public virtual ChatRoom ChatRoom { get; set; } = null!;
     public virtual ClientProfile? SenderClientProfile { get; set; }

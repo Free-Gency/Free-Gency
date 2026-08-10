@@ -1,4 +1,4 @@
-﻿using FreeGency.Application.Common.Hubs;
+using FreeGency.Application.Common.Hubs;
 using FreeGency.Application.Features.EmailFeature.Dtos;
 using FreeGency.Application.Features.NotificationFeature.Dtos;
 using FreeGency.Application.Features.NotificationFeature.Mapping;
@@ -56,14 +56,14 @@ namespace FreeGency.Application.Features.NotificationFeature.Commands
                     var settings = await developerNotificationSettingsRepository
                         .GetDeveloperNotification(active.Value.ProfileId);
 
-                    if (ShouldPush(settings, createNotificationRequest.Type))
+                    if (settings is null || ShouldPush(settings, createNotificationRequest.Type))
                     {
                         var connections = NotificationHub.GetConnections(active.Value.ProfileId);
                         if (connections.Count > 0)
                             await hubContext.Clients.Clients(connections).SendAsync("NotificationCreated", notification.ToDto());
                     }
 
-                    if (ShouldSendEmail(settings, createNotificationRequest.Type))
+                    if (settings is not null && ShouldSendEmail(settings, createNotificationRequest.Type))
                     {
                         var email = await developerProfileRepository
                         .GetEmail(active.Value.ProfileId);
@@ -82,13 +82,13 @@ namespace FreeGency.Application.Features.NotificationFeature.Commands
             else if (createNotificationRequest.ClientProfileId != null)
             {
                 var clientNotification = await clientNotificationSettingsRepository.GetByProfileId(createNotificationRequest.ClientProfileId.Value);
-                if (ShouldPush(clientNotification, createNotificationRequest.Type))
+                if (clientNotification is null || ShouldPush(clientNotification, createNotificationRequest.Type))
                 {
                     var connections = NotificationHub.GetConnections(createNotificationRequest.ClientProfileId.Value);
                     if (connections.Count > 0)
                         await hubContext.Clients.Clients(connections).SendAsync("NotificationCreated", notification.ToDto());
                 }
-                if (ShouldSendEmail(clientNotification, createNotificationRequest.Type))
+                if (clientNotification is not null && ShouldSendEmail(clientNotification, createNotificationRequest.Type))
                 {
                     var Email = await clientProfileRepository.GetEmail(createNotificationRequest.ClientProfileId.Value);
                     if (Email != null)
@@ -102,13 +102,13 @@ namespace FreeGency.Application.Features.NotificationFeature.Commands
             else if (createNotificationRequest.DeveloperProfileId != null)
             {
                 var developerNotification = await developerNotificationSettingsRepository.GetDeveloperNotification(createNotificationRequest.DeveloperProfileId.Value);
-                if (ShouldPush(developerNotification, createNotificationRequest.Type))
+                if (developerNotification is null || ShouldPush(developerNotification, createNotificationRequest.Type))
                 {
                     var connections = NotificationHub.GetConnections(createNotificationRequest.DeveloperProfileId.Value);
                     if(connections.Count>0)
                         await hubContext.Clients.Clients(connections).SendAsync("NotificationCreated", notification.ToDto()); 
                 }
-                if (ShouldSendEmail(developerNotification, createNotificationRequest.Type))
+                if (developerNotification is not null && ShouldSendEmail(developerNotification, createNotificationRequest.Type))
                 {
                     var email = await developerProfileRepository
                         .GetEmail(createNotificationRequest.DeveloperProfileId.Value);

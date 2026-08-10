@@ -9,6 +9,8 @@ public sealed class TeamReviewDto
     public Guid? ReviewerUserId { get; init; }
     public string ReviewerName { get; init; } = string.Empty;
     public string? ReviewerAvatar { get; init; }
+    public string? ModerationStatus { get; set; }
+    public string? ModerationWarning { get; set; }
 }
 
 public sealed class CreateTeamFeedbackRequestDto

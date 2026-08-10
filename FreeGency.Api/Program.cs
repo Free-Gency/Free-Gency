@@ -119,6 +119,11 @@ namespace FreeGency.Api
             app.UseHangfireDashboard("/jobs");
             DatabaseInitializer.InitializeAsync(app.Services).GetAwaiter().GetResult();
 
+            RecurringJob.AddOrUpdate<FreeGency.Application.Common.Interfaces.ISuggestionService>(
+                "suggestions-full-reindex",
+                service => service.ReindexAllAsync(CancellationToken.None),
+                Cron.Daily);
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {

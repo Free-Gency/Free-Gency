@@ -2,6 +2,7 @@ namespace FreeGency.AI.Core;
 
 public static class AIConstants
 {
+    /// <summary>Default for gemini-embedding-001 (recommended Matryoshka size).</summary>
     public const int DefaultEmbeddingDimension = 1536;
     public const int MaxCacheEntrySizeBytes = 1024 * 100;
     public const int DefaultCacheExpirationMinutes = 60;

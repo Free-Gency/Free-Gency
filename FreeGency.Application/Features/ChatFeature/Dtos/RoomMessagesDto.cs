@@ -15,5 +15,7 @@ namespace FreeGency.Application.Features.ChatFeature.Dtos
         public DateTime CreatedAt { get; set; }
         public bool IsMine { get; set; }
         public Guid? OtherProfileId { get; set; }
+        public string ModerationStatus { get; set; } = "Visible";
+        public string? ModerationWarning { get; set; }
     }
 }

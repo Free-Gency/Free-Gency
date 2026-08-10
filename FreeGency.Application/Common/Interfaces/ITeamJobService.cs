@@ -12,4 +12,9 @@ public interface ITeamJobService
     Task<ApiResponse> UpdateAsync(UpdateTeamJobDto dto, CancellationToken ct = default);
     Task<ApiResponse> UpdateSkillsAsync(UpdateTeamJobSkillsDto dto, CancellationToken ct = default);
     Task<ApiResponse> CloseAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Fills short/empty open-job descriptions with a clearer role pitch and reindexes them.
+    /// </summary>
+    Task<ApiResponse<int>> EnrichWeakDescriptionsAsync(CancellationToken ct = default);
 }

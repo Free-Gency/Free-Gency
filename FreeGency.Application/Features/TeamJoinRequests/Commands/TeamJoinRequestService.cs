@@ -144,7 +144,7 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
                             Title = "Join request accepted",
                             Body = $"Your request to join team \"{teamName}\" has been accepted.",
                             Type = NotificationType.JoinRequestAccepted,
-                            ActionUrl = $"/teams/{teamId}"
+                            ActionUrl = $"/developer/teams/{teamId}"
                         }));
             }
 
@@ -199,7 +199,7 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
                             Title = "Join request rejected",
                             Body = $"Your request to join team \"{teamName}\" has been rejected.",
                             Type = NotificationType.JoinRequestRejected,
-                            ActionUrl = $"/teams/{teamId}"
+                            ActionUrl = $"/developer/teams/{teamId}"
                         }));
             }
             return Result.Success();
@@ -219,7 +219,7 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands
                     Title = "New team join request",
                     Body = $"{senderName} wants to join your team.",
                     Type = NotificationType.JoinRequestReceived,
-                    ActionUrl = $"/teams/{TeamId}/join-requests"
+                    ActionUrl = $"/developer/teams/{TeamId}?tab=jobs"
                 }));
             }
         }

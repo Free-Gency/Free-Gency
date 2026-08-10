@@ -444,6 +444,83 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.ToTable("ClientProfiles", "identity");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.DeveloperFeedback", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<Guid>("DeveloperUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("ModeratedText")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ModerationNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ModerationStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasDefaultValue("Visible");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ReviewerUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewerUserId");
+
+                    b.HasIndex("DeveloperUserId", "CreatedAt");
+
+                    b.HasIndex("DeveloperUserId", "ReviewerUserId")
+                        .IsUnique();
+
+                    b.ToTable("DeveloperFeedbacks", "identity");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.DeveloperNotificationSettings", b =>
                 {
                     b.Property<Guid>("Id")
@@ -795,6 +872,20 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasDefaultValue("Text");
 
+                    b.Property<string>("ModeratedText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ModerationNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ModerationStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasDefaultValue("Visible");
+
                     b.Property<Guid?>("PlanVersionId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1071,6 +1162,95 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("MilestonePlanVersions", "marketplace");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.ModerationCase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("AdminNote")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("AdminSummary")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Categories")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<float>("Confidence")
+                        .HasColumnType("real");
+
+                    b.Property<string>("ContentSnapshot")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ResolvedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasDefaultValue("AutoResolved");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("SourceType", "SourceId");
+
+                    b.HasIndex("Status", "CreatedAt");
+
+                    b.ToTable("ModerationCases", "core");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Notification", b =>
@@ -1861,6 +2041,112 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("UploadedByUserId");
 
                     b.ToTable("ProjectFiles", "marketplace");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.ProjectInvitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ChatRoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClientUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<Guid?>("InviteeTeamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("InviteeType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("InviteeUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProposalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("RespondedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("RespondedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Pending");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatRoomId");
+
+                    b.HasIndex("ClientUserId");
+
+                    b.HasIndex("InviteeTeamId");
+
+                    b.HasIndex("InviteeUserId");
+
+                    b.HasIndex("ProposalId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("ProjectId", "InviteeTeamId")
+                        .IsUnique()
+                        .HasFilter("[InviteeType] = 'Team' AND [Status] = 'Pending' AND [IsDeleted] = 0");
+
+                    b.HasIndex("ProjectId", "InviteeUserId")
+                        .IsUnique()
+                        .HasFilter("[InviteeType] = 'User' AND [Status] = 'Pending' AND [IsDeleted] = 0");
+
+                    b.ToTable("ProjectInvitations", "marketplace", t =>
+                        {
+                            t.HasCheckConstraint("CK_ProjectInvitations_InviteeScope", "(InviteeType = 'User' AND InviteeUserId IS NOT NULL AND InviteeTeamId IS NULL) OR (InviteeType = 'Team' AND InviteeTeamId IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.ProjectMember", b =>
@@ -3183,6 +3469,21 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
+                    b.Property<string>("ModeratedText")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ModerationNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ModerationStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasDefaultValue("Visible");
+
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
@@ -3728,6 +4029,9 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<DateTime?>("ModerationMutedUntil")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -3840,6 +4144,56 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         {
                             t.HasCheckConstraint("CK_UserInterests_ProfileScope", "(ClientProfileId IS NOT NULL AND DeveloperProfileId IS NULL) OR (ClientProfileId IS NULL AND DeveloperProfileId IS NOT NULL)");
                         });
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.UserModerationStrike", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<Guid?>("ModerationCaseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PrimaryCategory")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModerationCaseId");
+
+                    b.HasIndex("UserId", "CreatedAt");
+
+                    b.ToTable("UserModerationStrikes", "core");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.UserSkill", b =>
@@ -4292,6 +4646,25 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.DeveloperFeedback", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.User", "DeveloperUser")
+                        .WithMany()
+                        .HasForeignKey("DeveloperUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.User", "ReviewerUser")
+                        .WithMany("DeveloperFeedbacks")
+                        .HasForeignKey("ReviewerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DeveloperUser");
+
+                    b.Navigation("ReviewerUser");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.DeveloperNotificationSettings", b =>
                 {
                     b.HasOne("FreeGency.Domain.Entities.DeveloperProfile", "developerProfile")
@@ -4424,6 +4797,17 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("Project");
 
                     b.Navigation("Proposal");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.ModerationCase", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.User", "User")
+                        .WithMany("ModerationCases")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Notification", b =>
@@ -4687,6 +5071,53 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("Project");
 
                     b.Navigation("UploadedByUser");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.ProjectInvitation", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.ChatRoom", "ChatRoom")
+                        .WithMany()
+                        .HasForeignKey("ChatRoomId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FreeGency.Domain.Entities.User", "ClientUser")
+                        .WithMany()
+                        .HasForeignKey("ClientUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.Team", "InviteeTeam")
+                        .WithMany()
+                        .HasForeignKey("InviteeTeamId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("FreeGency.Domain.Entities.User", "InviteeUser")
+                        .WithMany()
+                        .HasForeignKey("InviteeUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("FreeGency.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.ProjectProposal", "Proposal")
+                        .WithMany()
+                        .HasForeignKey("ProposalId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("ChatRoom");
+
+                    b.Navigation("ClientUser");
+
+                    b.Navigation("InviteeTeam");
+
+                    b.Navigation("InviteeUser");
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Proposal");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.ProjectMember", b =>
@@ -5254,6 +5685,24 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("DeveloperProfile");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.UserModerationStrike", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.ModerationCase", "ModerationCase")
+                        .WithMany()
+                        .HasForeignKey("ModerationCaseId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FreeGency.Domain.Entities.User", "User")
+                        .WithMany("ModerationStrikes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ModerationCase");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.UserSkill", b =>
                 {
                     b.HasOne("FreeGency.Domain.Entities.ClientProfile", "ClientProfile")
@@ -5596,7 +6045,13 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.Navigation("CreatedTeamJobs");
 
+                    b.Navigation("DeveloperFeedbacks");
+
                     b.Navigation("DeveloperProfile");
+
+                    b.Navigation("ModerationCases");
+
+                    b.Navigation("ModerationStrikes");
 
                     b.Navigation("OwnedTeams");
 

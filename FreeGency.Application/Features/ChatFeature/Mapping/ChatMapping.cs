@@ -129,16 +129,36 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                         : x.SenderDeveloperProfile != null
                             ? x.SenderDeveloperProfile.User.FristName + " " + x.SenderDeveloperProfile.User.LastName
                             : null,
-                    Text = x.Text,
-                    FileName = x.FileName,
-                    FileUrl = x.FileUrl,
+                    Text =
+                        x.ModerationStatus == ModerationStatus.Visible
+                            ? x.Text
+                            : ((clientProfileId != null && x.SenderClientProfileId == clientProfileId) ||
+                               (developerProfileId != null && x.SenderDeveloperProfileId == developerProfileId))
+                                ? x.Text
+                                : (x.ModeratedText ?? "Message removed by FreeGency for a policy violation."),
+                    FileName = x.ModerationStatus == ModerationStatus.Hidden
+                        && !((clientProfileId != null && x.SenderClientProfileId == clientProfileId) ||
+                             (developerProfileId != null && x.SenderDeveloperProfileId == developerProfileId))
+                            ? null
+                            : x.FileName,
+                    FileUrl = x.ModerationStatus == ModerationStatus.Hidden
+                        && !((clientProfileId != null && x.SenderClientProfileId == clientProfileId) ||
+                             (developerProfileId != null && x.SenderDeveloperProfileId == developerProfileId))
+                            ? null
+                            : x.FileUrl,
                     PlanVersionId = x.PlanVersionId,
                     CreatedAt = x.CreatedAt,
                     MessageType = x.MessageType.ToString(),
                     IsMine =
                         (clientProfileId != null && x.SenderClientProfileId == clientProfileId) ||
                         (developerProfileId != null && x.SenderDeveloperProfileId == developerProfileId),
-                    OtherProfileId = otherProfileId
+                    OtherProfileId = otherProfileId,
+                    ModerationStatus = x.ModerationStatus.ToString(),
+                    ModerationWarning =
+                        ((clientProfileId != null && x.SenderClientProfileId == clientProfileId) ||
+                         (developerProfileId != null && x.SenderDeveloperProfileId == developerProfileId))
+                            ? x.ModerationNote
+                            : null
                 });
         }
     }
