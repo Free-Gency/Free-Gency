@@ -39,7 +39,10 @@ namespace FreeGency.Application.Features.Projects.Commands
             MyProjectsRequestDto request,
             CancellationToken ct = default)
         {
-            var filteredProjects = ApplyMyProjectsRoleFilter(_projectRepo.GetProjectsQuery(), request.Role)
+            var filteredProjects = ApplyMyProjectsRoleFilter(
+                    _projectRepo.GetProjectsQuery(),
+                    request.Role,
+                    request.TeamId)
                 .ApplyFilters(request)
                 .ApplySearch(request)
                 .ApplySorting(request);
@@ -55,9 +58,10 @@ namespace FreeGency.Application.Features.Projects.Commands
 
         public async Task<ApiResponse<MyProjectsSummaryDto>> GetMyProjectsSummaryAsync(
             string role,
+            Guid? teamId = null,
             CancellationToken ct = default)
         {
-            var query = ApplyMyProjectsRoleFilter(_projectRepo.GetProjectsQuery(), role);
+            var query = ApplyMyProjectsRoleFilter(_projectRepo.GetProjectsQuery(), role, teamId);
 
             var counts = await query
                 .GroupBy(p => p.Status)
@@ -97,7 +101,10 @@ namespace FreeGency.Application.Features.Projects.Commands
                 _mapper.Map<IEnumerable<ProjectDto>>(
                     await _projectRepo.GetSavedByUserAsync(_currentUser.UserId, ct)));
 
-        private IQueryable<Project> ApplyMyProjectsRoleFilter(IQueryable<Project> query, string role)
+        private IQueryable<Project> ApplyMyProjectsRoleFilter(
+            IQueryable<Project> query,
+            string role,
+            Guid? teamId = null)
         {
             var userId = _currentUser.UserId;
             var normalized = role?.Trim().ToLowerInvariant();
@@ -105,14 +112,32 @@ namespace FreeGency.Application.Features.Projects.Commands
             return normalized switch
             {
                 "as-client" => query.Where(p => p.ClientId == userId),
-                "as-assignee" => query.Where(p =>
-                    p.AssignedUserId == userId ||
-                    (p.AssignedTeamId != null &&
-                     _teamMemberRepo.Query().Any(tm => tm.TeamId == p.AssignedTeamId && tm.UserId == userId))),
+                // Manage Work: personal/solo hire only — not team projects.
+                "as-assignee" => query.Where(p => p.AssignedUserId == userId),
+                // Team workspace: projects hired to a team the user belongs to.
+                "as-team" => ApplyAsTeamFilter(query, userId, teamId),
                 _ => throw new AppValidationException(
                     "Role",
-                    "Role must be either 'as-client' or 'as-assignee'."),
+                    "Role must be 'as-client', 'as-assignee', or 'as-team'."),
             };
+        }
+
+        private IQueryable<Project> ApplyAsTeamFilter(IQueryable<Project> query, Guid userId, Guid? teamId)
+        {
+            if (teamId.HasValue)
+            {
+                var tid = teamId.Value;
+                var isMember = _teamMemberRepo.Query()
+                    .Any(tm => tm.TeamId == tid && tm.UserId == userId);
+                if (!isMember)
+                    return query.Where(_ => false);
+
+                return query.Where(p => p.AssignedTeamId == tid);
+            }
+
+            return query.Where(p =>
+                p.AssignedTeamId != null &&
+                _teamMemberRepo.Query().Any(tm => tm.TeamId == p.AssignedTeamId && tm.UserId == userId));
         }
     }
 }

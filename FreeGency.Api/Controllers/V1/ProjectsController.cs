@@ -69,8 +69,11 @@ namespace FreeGency.Api.Controllers.V1
 
         [Authorize]
         [HttpGet("mine/summary")]
-        public async Task<IActionResult> GetMyProjectsSummary([FromQuery] string role, CancellationToken ct)
-            => HandleResult(await _projectService.GetMyProjectsSummaryAsync(role, ct));
+        public async Task<IActionResult> GetMyProjectsSummary(
+            [FromQuery] string role,
+            [FromQuery] Guid? teamId,
+            CancellationToken ct)
+            => HandleResult(await _projectService.GetMyProjectsSummaryAsync(role, teamId, ct));
 
         [Authorize]
         [HttpGet("saved")]

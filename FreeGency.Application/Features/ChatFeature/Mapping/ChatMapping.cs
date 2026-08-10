@@ -147,6 +147,7 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                             ? null
                             : x.FileUrl,
                     PlanVersionId = x.PlanVersionId,
+                    MilestoneId = x.MilestoneId,
                     CreatedAt = x.CreatedAt,
                     MessageType = x.MessageType.ToString(),
                     IsMine =

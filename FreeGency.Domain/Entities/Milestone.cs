@@ -36,4 +36,5 @@ public class Milestone : ISoftDeletableEntity
     public virtual ICollection<ProjectTask> Tasks { get; set; } = [];
 
     public virtual ICollection<MilestoneAssignment> Assignments { get; set; } = [];
+    public virtual ICollection<TeamPayoutSplit> TeamPayoutSplits { get; set; } = [];
 }

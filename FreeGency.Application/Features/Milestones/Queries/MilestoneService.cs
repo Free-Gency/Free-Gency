@@ -47,19 +47,10 @@ public partial class MilestoneService
 
         var userId = _currentUser.UserId;
 
-        var memberships = await _teamMemberRepo.GetByUserIdAsync(userId, ct);
-        var myTeamIds = memberships.Select(m => m.TeamId).ToHashSet();
-        var myLeaderTeamIds = memberships
-            .Where(m => m.TeamRole == Role.TeamLeader)
-            .Select(m => m.TeamId)
-            .ToHashSet();
-
+        // Manage Work = solo hired projects only. Team delivery lives under Teams.
         var milestones = await _milestoneRepo.Query()
             .Include(m => m.Project)
-            .Where(m => m.Project != null &&
-                        (m.Project.AssignedUserId == userId ||
-                         (m.Project.AssignedTeamId != null &&
-                          myTeamIds.Contains(m.Project.AssignedTeamId.Value))))
+            .Where(m => m.Project != null && m.Project.AssignedUserId == userId)
             .OrderBy(m => m.DueDate)
             .ToListAsync(ct);
 
@@ -67,10 +58,10 @@ public partial class MilestoneService
 
         foreach (var dto in dtos)
         {
-            var project = milestones.First(m => m.Id == dto.Id).Project!;
-            dto.CanSubmit = project.AssignedUserId == userId ||
-                            (project.AssignedTeamId != null &&
-                             myLeaderTeamIds.Contains(project.AssignedTeamId.Value));
+            var entity = milestones.First(m => m.Id == dto.Id);
+            dto.IsAssignee = true;
+            dto.CanSubmit = entity.IsFunded
+                && entity.WorkStatus is WorkStatus.InProgress or WorkStatus.ChangesRequested;
         }
 
         return ApiResponse.Success<IEnumerable<DeveloperMilestoneDto>>(dtos);

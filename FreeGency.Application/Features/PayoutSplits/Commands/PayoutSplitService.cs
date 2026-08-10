@@ -11,6 +11,8 @@ public sealed class PayoutSplitService : IPayoutSplitService
     private readonly ITeamMemberRepository _teamMemberRepo;
     private readonly ITeamPayoutSplitRepository _splitRepo;
     private readonly IProjectRepository _projectRepo;
+    private readonly IMilestoneRepository _milestoneRepo;
+    private readonly IProjectMemberRepository _projectMemberRepo;
     private readonly IUserRepository _userRepo;
 
     public PayoutSplitService(IUnitOfWork unitOfWork, ICurrentUserService currentUser)
@@ -21,6 +23,8 @@ public sealed class PayoutSplitService : IPayoutSplitService
         _teamMemberRepo = _unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
         _splitRepo = _unitOfWork.Repository<ITeamPayoutSplitRepository, TeamPayoutSplit>();
         _projectRepo = _unitOfWork.Repository<IProjectRepository, Project>();
+        _milestoneRepo = _unitOfWork.Repository<IMilestoneRepository, Milestone>();
+        _projectMemberRepo = _unitOfWork.Repository<IProjectMemberRepository, ProjectMember>();
         _userRepo = _unitOfWork.Repository<IUserRepository, User>();
     }
 
@@ -33,8 +37,8 @@ public sealed class PayoutSplitService : IPayoutSplitService
         if (!await CanManageTeamAsync(team, ct))
             return ApiResponse.Failure<PayoutSplitsDto>(AppError.Forbidden("Only the team owner or leader can view payout splits."));
 
-        var splits = (await _splitRepo.GetByTeamAndProjectAsync(teamId, null, ct)).ToList();
-        return ApiResponse.Success(ToDto(teamId, null, splits));
+        var splits = (await _splitRepo.GetByScopeAsync(teamId, null, null, ct)).ToList();
+        return ApiResponse.Success(ToDto(teamId, null, null, splits));
     }
 
     public async Task<ApiResponse<PayoutSplitsDto>> ReplaceTeamDefaultsAsync(
@@ -58,15 +62,15 @@ public sealed class PayoutSplitService : IPayoutSplitService
             return ApiResponse.Failure<PayoutSplitsDto>(
                 AppError.Validation("Team default splits must use Percent. Use project overrides for Fixed amounts."));
 
-        var buildError = await BuildSplitsAsync(teamId, null, splitType, dto.Items, totalAmount: 100m, ct);
+        var buildError = await BuildSplitsAsync(teamId, null, null, splitType, dto.Items, totalAmount: 100m, ct);
         if (buildError.Error is not null)
             return ApiResponse.Failure<PayoutSplitsDto>(buildError.Error);
 
-        await _splitRepo.ReplaceSplitsAsync(teamId, null, buildError.Splits!, ct);
+        await _splitRepo.ReplaceSplitsAsync(teamId, null, null, buildError.Splits!, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        var saved = (await _splitRepo.GetByTeamAndProjectAsync(teamId, null, ct)).ToList();
-        return ApiResponse.Success(ToDto(teamId, null, saved), "Team payout splits updated.");
+        var saved = (await _splitRepo.GetByScopeAsync(teamId, null, null, ct)).ToList();
+        return ApiResponse.Success(ToDto(teamId, null, null, saved), "Team payout splits updated.");
     }
 
     public async Task<ApiResponse<PayoutSplitsDto>> GetProjectSplitsAsync(Guid projectId, CancellationToken ct = default)
@@ -86,13 +90,13 @@ public sealed class PayoutSplitService : IPayoutSplitService
         if (!await CanManageTeamAsync(team, ct))
             return ApiResponse.Failure<PayoutSplitsDto>(AppError.Forbidden("Only the team owner or leader can view payout splits."));
 
-        var projectSplits = (await _splitRepo.GetByTeamAndProjectAsync(team.Id, projectId, ct)).ToList();
+        var projectSplits = (await _splitRepo.GetByScopeAsync(team.Id, projectId, null, ct)).ToList();
         if (projectSplits.Count > 0)
-            return ApiResponse.Success(ToDto(team.Id, projectId, projectSplits));
+            return ApiResponse.Success(ToDto(team.Id, projectId, null, projectSplits));
 
         // Fallback: team defaults
-        var defaults = (await _splitRepo.GetByTeamAndProjectAsync(team.Id, null, ct)).ToList();
-        return ApiResponse.Success(ToDto(team.Id, projectId: null, defaults));
+        var defaults = (await _splitRepo.GetByScopeAsync(team.Id, null, null, ct)).ToList();
+        return ApiResponse.Success(ToDto(team.Id, projectId: null, null, defaults));
     }
 
     public async Task<ApiResponse<PayoutSplitsDto>> ReplaceProjectSplitsAsync(
@@ -132,6 +136,7 @@ public sealed class PayoutSplitService : IPayoutSplitService
         var buildError = await BuildSplitsAsync(
             team.Id,
             projectId,
+            null,
             splitType,
             dto.Items,
             totalForValidation,
@@ -139,11 +144,90 @@ public sealed class PayoutSplitService : IPayoutSplitService
         if (buildError.Error is not null)
             return ApiResponse.Failure<PayoutSplitsDto>(buildError.Error);
 
-        await _splitRepo.ReplaceSplitsAsync(team.Id, projectId, buildError.Splits!, ct);
+        await _splitRepo.ReplaceSplitsAsync(team.Id, projectId, null, buildError.Splits!, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        var saved = (await _splitRepo.GetByTeamAndProjectAsync(team.Id, projectId, ct)).ToList();
-        return ApiResponse.Success(ToDto(team.Id, projectId, saved), "Project payout splits updated.");
+        var saved = (await _splitRepo.GetByScopeAsync(team.Id, projectId, null, ct)).ToList();
+        return ApiResponse.Success(ToDto(team.Id, projectId, null, saved), "Project payout splits updated.");
+    }
+
+    public async Task<ApiResponse<PayoutSplitsDto>> GetMilestoneSplitsAsync(
+        Guid milestoneId, CancellationToken ct = default)
+    {
+        var milestone = await _milestoneRepo.GetByIdAsync(milestoneId, ct);
+        if (milestone is null)
+            return ApiResponse.Failure<PayoutSplitsDto>(AppError.NotFound(nameof(Milestone), milestoneId));
+
+        var project = await _projectRepo.GetByIdAsync(milestone.ProjectId, ct);
+        if (project is null)
+            return ApiResponse.Failure<PayoutSplitsDto>(AppError.NotFound(nameof(Project), milestone.ProjectId));
+
+        if (project.AssignedTeamId is null)
+            return ApiResponse.Failure<PayoutSplitsDto>(
+                AppError.Validation("Payout splits apply only to team-assigned projects."));
+
+        var team = await _teamRepo.GetByIdAsync(project.AssignedTeamId.Value, ct);
+        if (team is null)
+            return ApiResponse.Failure<PayoutSplitsDto>(
+                AppError.NotFound(nameof(Team), project.AssignedTeamId.Value));
+
+        if (!await CanManageTeamAsync(team, ct))
+            return ApiResponse.Failure<PayoutSplitsDto>(
+                AppError.Forbidden("Only the team owner or leader can view payout splits."));
+
+        var splits = (await _splitRepo.GetByScopeAsync(team.Id, project.Id, milestoneId, ct)).ToList();
+        return ApiResponse.Success(ToDto(team.Id, project.Id, milestoneId, splits));
+    }
+
+    public async Task<ApiResponse<PayoutSplitsDto>> ReplaceMilestoneSplitsAsync(
+        Guid milestoneId,
+        ReplacePayoutSplitsDto dto,
+        CancellationToken ct = default)
+    {
+        var milestone = await _milestoneRepo.GetByIdAsync(milestoneId, ct);
+        if (milestone is null)
+            return ApiResponse.Failure<PayoutSplitsDto>(AppError.NotFound(nameof(Milestone), milestoneId));
+
+        var project = await _projectRepo.GetByIdAsync(milestone.ProjectId, ct);
+        if (project is null)
+            return ApiResponse.Failure<PayoutSplitsDto>(AppError.NotFound(nameof(Project), milestone.ProjectId));
+
+        if (project.AssignedTeamId is null)
+            return ApiResponse.Failure<PayoutSplitsDto>(
+                AppError.Validation("Payout splits apply only to team-assigned projects."));
+
+        var team = await _teamRepo.GetByIdAsync(project.AssignedTeamId.Value, ct);
+        if (team is null)
+            return ApiResponse.Failure<PayoutSplitsDto>(
+                AppError.NotFound(nameof(Team), project.AssignedTeamId.Value));
+
+        var authError = await EnsureLeaderDeveloperAsync(team, ct);
+        if (authError is not null)
+            return ApiResponse.Failure<PayoutSplitsDto>(authError);
+
+        if (!TryParseSplitType(dto.SplitType, out var splitType) || splitType != Domain.Enums.SplitType.Percent)
+            return ApiResponse.Failure<PayoutSplitsDto>(
+                AppError.Validation("Milestone payout splits must use Percent and sum to 100."));
+
+        var buildError = await BuildSplitsAsync(
+            team.Id,
+            project.Id,
+            milestoneId,
+            splitType,
+            dto.Items,
+            totalAmount: 100m,
+            ct,
+            preferProjectMembers: true);
+        if (buildError.Error is not null)
+            return ApiResponse.Failure<PayoutSplitsDto>(buildError.Error);
+
+        await _splitRepo.ReplaceSplitsAsync(team.Id, project.Id, milestoneId, buildError.Splits!, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        var saved = (await _splitRepo.GetByScopeAsync(team.Id, project.Id, milestoneId, ct)).ToList();
+        return ApiResponse.Success(
+            ToDto(team.Id, project.Id, milestoneId, saved),
+            "Milestone payout splits updated.");
     }
 
     private async Task<AppError?> EnsureLeaderDeveloperAsync(Team team, CancellationToken ct)
@@ -172,10 +256,12 @@ public sealed class PayoutSplitService : IPayoutSplitService
     private async Task<(AppError? Error, List<TeamPayoutSplit>? Splits)> BuildSplitsAsync(
         Guid teamId,
         Guid? projectId,
+        Guid? milestoneId,
         Domain.Enums.SplitType splitType,
         IReadOnlyList<PayoutSplitItemDto> items,
         decimal totalAmount,
-        CancellationToken ct)
+        CancellationToken ct,
+        bool preferProjectMembers = false)
     {
         if (items is null || items.Count == 0)
             return (AppError.Validation("At least one split item is required."), null);
@@ -189,6 +275,15 @@ public sealed class PayoutSplitService : IPayoutSplitService
         if (team is not null)
             memberIds.Add(team.OwnerUserId);
 
+        if (preferProjectMembers && projectId is Guid pid)
+        {
+            var staffed = (await _projectMemberRepo.GetByProjectIdAsync(pid, ct))
+                .Select(m => m.UserId)
+                .ToHashSet();
+            if (staffed.Count > 0)
+                memberIds = staffed;
+        }
+
         var entities = new List<TeamPayoutSplit>();
         foreach (var item in items)
         {
@@ -196,7 +291,7 @@ public sealed class PayoutSplitService : IPayoutSplitService
                 return (AppError.Validation("Each split item needs a userId."), null);
 
             if (!memberIds.Contains(item.UserId))
-                return (AppError.Validation($"User {item.UserId} is not a member of this team."), null);
+                return (AppError.Validation($"User {item.UserId} is not eligible for this payout split."), null);
 
             if (item.Value <= 0)
                 return (AppError.Validation("Each split value must be greater than 0."), null);
@@ -206,9 +301,12 @@ public sealed class PayoutSplitService : IPayoutSplitService
                 Id = Guid.NewGuid(),
                 TeamId = teamId,
                 ProjectId = projectId,
+                MilestoneId = milestoneId,
                 UserId = item.UserId,
                 SplitType = splitType,
-                Value = item.Value
+                Value = item.Value,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = _currentUser.UserId.ToString()
             });
         }
 
@@ -231,7 +329,11 @@ public sealed class PayoutSplitService : IPayoutSplitService
         return Enum.TryParse(raw.Trim(), ignoreCase: true, out splitType);
     }
 
-    private static PayoutSplitsDto ToDto(Guid teamId, Guid? projectId, IReadOnlyList<TeamPayoutSplit> splits)
+    private static PayoutSplitsDto ToDto(
+        Guid teamId,
+        Guid? projectId,
+        Guid? milestoneId,
+        IReadOnlyList<TeamPayoutSplit> splits)
     {
         var splitType = splits.Count > 0
             ? splits[0].SplitType.ToString()
@@ -241,6 +343,7 @@ public sealed class PayoutSplitService : IPayoutSplitService
         {
             TeamId = teamId,
             ProjectId = projectId,
+            MilestoneId = milestoneId,
             SplitType = splitType,
             Items = splits.Select(s => new PayoutSplitItemDto
             {

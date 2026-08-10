@@ -27,4 +27,15 @@ public class PayoutSplitsController(IPayoutSplitService payoutSplitService) : Ba
         [FromBody] ReplacePayoutSplitsDto dto,
         CancellationToken ct)
         => HandleResult(await payoutSplitService.ReplaceProjectSplitsAsync(projectId, dto, ct));
+
+    [HttpGet("milestones/{milestoneId:guid}/payout-splits")]
+    public async Task<IActionResult> GetMilestoneSplits([FromRoute] Guid milestoneId, CancellationToken ct)
+        => HandleResult(await payoutSplitService.GetMilestoneSplitsAsync(milestoneId, ct));
+
+    [HttpPut("milestones/{milestoneId:guid}/payout-splits")]
+    public async Task<IActionResult> ReplaceMilestoneSplits(
+        [FromRoute] Guid milestoneId,
+        [FromBody] ReplacePayoutSplitsDto dto,
+        CancellationToken ct)
+        => HandleResult(await payoutSplitService.ReplaceMilestoneSplitsAsync(milestoneId, dto, ct));
 }

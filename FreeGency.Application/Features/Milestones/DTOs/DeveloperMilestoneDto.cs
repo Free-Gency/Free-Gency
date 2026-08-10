@@ -15,6 +15,7 @@ public sealed class DeveloperMilestoneDto
     public string WorkStatus { get; init; } = default!;
     public DateTime? DueDate { get; init; }
     public bool IsFunded { get; init; }
+    public bool IsAssignee { get; set; }
     public bool CanSubmit { get; set; }
     public DateTime? SubmittedAt { get; init; }
     public DateTime CreatedAt { get; init; }

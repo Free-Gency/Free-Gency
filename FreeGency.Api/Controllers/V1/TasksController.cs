@@ -16,8 +16,8 @@ public class TasksController(ITaskService taskService) : BaseApiController
         => HandleResult(await taskService.GetByProjectAsync(projectId, ct));
 
     [HttpGet("tasks/mine")]
-    public async Task<IActionResult> GetMine(CancellationToken ct)
-        => HandleResult(await taskService.GetMyTasksAsync(ct));
+    public async Task<IActionResult> GetMine([FromQuery] Guid? teamId, CancellationToken ct)
+        => HandleResult(await taskService.GetMyTasksAsync(teamId, ct));
 
     [HttpGet("tasks/{taskId:guid}")]
     public async Task<IActionResult> GetById([FromRoute] Guid taskId, CancellationToken ct)

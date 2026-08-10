@@ -26,9 +26,17 @@ public class TeamPayoutSplitConfiguration : IEntityTypeConfiguration<TeamPayoutS
             .OnDelete(DeleteBehavior.SetNull)
             .IsRequired(false);
 
+        builder.HasOne(s => s.Milestone)
+            .WithMany(m => m.TeamPayoutSplits)
+            .HasForeignKey(s => s.MilestoneId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
+
         builder.HasOne(s => s.User)
             .WithMany(u => u.TeamPayoutSplits)
             .HasForeignKey(s => s.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(s => new { s.TeamId, s.ProjectId, s.MilestoneId, s.UserId });
     }
 }

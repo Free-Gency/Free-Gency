@@ -22,6 +22,7 @@ public class Message : ISoftDeletableEntity
     public string? FileUrl { get; set; }
     public string? FileName { get; set; }
     public Guid? PlanVersionId { get; set; }
+    public Guid? MilestoneId { get; set; }
     public ModerationStatus ModerationStatus { get; set; } = ModerationStatus.Visible;
     public string? ModerationNote { get; set; }
     /// <summary>Public-facing text when status is Hidden/Redacted; null means use Text.</summary>
@@ -31,4 +32,5 @@ public class Message : ISoftDeletableEntity
     public virtual ClientProfile? SenderClientProfile { get; set; }
     public virtual DeveloperProfile? SenderDeveloperProfile { get; set; }
     public virtual MilestonePlanVersion? PlanVersion { get; set; }
+    public virtual Milestone? Milestone { get; set; }
 }

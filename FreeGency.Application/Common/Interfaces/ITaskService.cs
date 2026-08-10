@@ -6,7 +6,7 @@ public interface ITaskService
 {
     Task<ApiResponse<IEnumerable<TaskDto>>> GetByMilestoneAsync(Guid milestoneId, CancellationToken ct = default);
     Task<ApiResponse<IEnumerable<TaskDto>>> GetByProjectAsync(Guid projectId, CancellationToken ct = default);
-    Task<ApiResponse<IEnumerable<TaskDto>>> GetMyTasksAsync(CancellationToken ct = default);
+    Task<ApiResponse<IEnumerable<TaskDto>>> GetMyTasksAsync(Guid? teamId = null, CancellationToken ct = default);
     Task<ApiResponse<TaskDto>> GetByIdAsync(Guid taskId, CancellationToken ct = default);
 
     Task<ApiResponse<TaskDto>> CreateAsync(Guid milestoneId, CreateTaskDto dto, CancellationToken ct = default);

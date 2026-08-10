@@ -7,7 +7,7 @@ namespace FreeGency.Application.Common.Interfaces
         Task<ApiResponse<ProjectDto>> GetDetailsAsync(Guid id, CancellationToken ct = default);
         Task<ApiResponse<IEnumerable<ProjectDto>>> GetSavedProjectsAsync(CancellationToken ct = default);
         Task<ApiResponse<PaginatedResult<ProjectDto>>> GetMyProjectsAsync(MyProjectsRequestDto request, CancellationToken ct = default);
-        Task<ApiResponse<MyProjectsSummaryDto>> GetMyProjectsSummaryAsync(string role, CancellationToken ct = default);
+        Task<ApiResponse<MyProjectsSummaryDto>> GetMyProjectsSummaryAsync(string role, Guid? teamId = null, CancellationToken ct = default);
 
 
         // Writes
