@@ -56,6 +56,7 @@ public static class DependencyInjection
         services.AddScoped<IMilestoneService, MilestoneService>();
         services.AddScoped<IEscrowService, EscrowService>();
         services.AddScoped<IProjectEventService, ProjectEventService>();
+        services.AddScoped<IPayoutSplitService, PayoutSplitService>();
 
         services.AddScoped<ITaskService, TaskService>();
 

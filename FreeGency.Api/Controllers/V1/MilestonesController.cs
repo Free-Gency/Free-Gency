@@ -22,6 +22,10 @@ public class MilestonesController(IMilestoneService milestoneService) : BaseApiC
     public async Task<IActionResult> GetMine(CancellationToken ct)
         => HandleResult(await milestoneService.GetMyMilestonesAsync(ct));
 
+    [HttpGet("milestones/{milestoneId:guid}")]
+    public async Task<IActionResult> GetById([FromRoute] Guid milestoneId, CancellationToken ct)
+        => HandleResult(await milestoneService.GetByIdAsync(milestoneId, ct));
+
     [HttpPost("milestone-plans")]
     public async Task<IActionResult> ProposePlan([FromBody] ProposeMilestonePlanDto dto, CancellationToken ct)
         => HandleResult(await milestoneService.ProposePlanAsync(dto, ct));

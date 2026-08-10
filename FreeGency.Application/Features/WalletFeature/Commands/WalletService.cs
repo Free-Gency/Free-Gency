@@ -76,27 +76,40 @@ namespace FreeGency.Application.Features.WalletFeature.Queries
             };
             await ledgerEntryRepository.AddAsync(ledger);
             await unitOfWork.SaveChangesAsync();
-            var profileId = await userRepository.GetProfileId(wallet.OwnerUserId!.Value);
-            var connections = NotificationHub.GetConnections( profileId);
+            var ownerUserId = wallet.OwnerUserId!.Value;
+            var active = await userRepository.GetActiveProfileAsync(ownerUserId);
+            var profileId = active?.ProfileId
+                ?? await userRepository.GetProfileId(ownerUserId);
+            var connections = NotificationHub.GetConnections(profileId);
             if (connections.Count > 0)
                 await hub.Clients.Clients(connections).SendAsync("WalletUpdated", wallet.ToDto());
+
+            Guid? clientProfileId = active?.Mode == profileMode.Client ? active.Value.ProfileId : null;
+            Guid? developerProfileId = active?.Mode == profileMode.Developer ? active.Value.ProfileId : null;
+
+            if (clientProfileId is null && developerProfileId is null)
+            {
+                clientProfileId = await userRepository.GetClientProfileIdByUserIdAsync(ownerUserId);
+                if (clientProfileId is null)
+                    developerProfileId = await userRepository.GetDeveloperProfileIdByUserIdAsync(ownerUserId);
+            }
+
             var notificationRequest = new CreateNotificationRequest
             {
                 Title = "Wallet topped up",
                 Body = $"{transaction.Amount} {transaction.Currency} has been added to your wallet successfully.",
-                UserId=wallet.OwnerUserId!.Value,
                 Type = NotificationType.Wallet,
-                ClientProfileId = null,
-                DeveloperProfileId = null,
+                ClientProfileId = clientProfileId,
+                DeveloperProfileId = developerProfileId,
                 Data = JsonSerializer.Serialize(new
                 {
                     WalletId = wallet.Id,
                     Amount = transaction.Amount,
                     Currency = transaction.Currency,
-                    
                 }),
-                ActionUrl= "/settings/payments"
+                ActionUrl = "/settings/payments"
             };
+
             BackgroundJob.Enqueue(() => notificationService.CreateNotification(notificationRequest));
             return Result.Success();
         }
