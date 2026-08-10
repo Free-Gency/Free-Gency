@@ -28,12 +28,22 @@ public partial class MilestoneService
     private ITeamMemberRepository TeamMemberRepo =>
         _unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
 
+    private ITeamPayoutSplitRepository SplitRepo =>
+        _unitOfWork.Repository<ITeamPayoutSplitRepository, TeamPayoutSplit>();
+
+    private IProjectEventRepository EventRepo =>
+        _unitOfWork.Repository<IProjectEventRepository, ProjectEvent>();
+
     public async Task<ApiResponse<IEnumerable<MilestonePlanVersionDto>>> GetPlanVersionsAsync(
         Guid projectId, CancellationToken ct = default)
     {
         var project = await _projectRepo.GetByIdAsync(projectId, ct);
         if (project is null)
             return ApiResponse.Failure<IEnumerable<MilestonePlanVersionDto>>(AppError.NotFound(nameof(Project), projectId));
+
+        if (!await CanAccessProjectMilestoneDataAsync(project, ct))
+            return ApiResponse.Failure<IEnumerable<MilestonePlanVersionDto>>(
+                AppError.Forbidden("You do not have access to this project's milestone plans."));
 
         var versions = await PlanRepo.GetByProjectIdAsync(projectId, ct);
         return ApiResponse.Success(versions.Select(MapPlanVersion));
@@ -45,6 +55,10 @@ public partial class MilestoneService
         var project = await _projectRepo.GetByIdAsync(projectId, ct);
         if (project is null)
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.NotFound(nameof(Project), projectId));
+
+        if (!await CanAccessProjectMilestoneDataAsync(project, ct))
+            return ApiResponse.Failure<MilestonePlanVersionDto>(
+                AppError.Forbidden("You do not have access to this project's milestone plans."));
 
         var latest = await PlanRepo.GetLatestByProjectIdAsync(projectId, ct);
         if (latest is null)
@@ -88,6 +102,10 @@ public partial class MilestoneService
         if (!await IsProposalNegotiationSpeakerAsync(proposal, ct))
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Forbidden(
                 "Only the team leader who submitted this proposal can propose a milestone plan."));
+
+        var profileError = await RequireActiveProfileModeAsync(profileMode.Developer, ct);
+        if (profileError is not null)
+            return ApiResponse.Failure<MilestonePlanVersionDto>(profileError);
 
         var versionCount = await PlanRepo.CountByProjectIdAsync(dto.ProjectId, ct);
         if (versionCount >= MilestonePlanConstants.MaxPlanVersions)
@@ -170,10 +188,10 @@ public partial class MilestoneService
         Message? planMessage = null;
         if (proposalRoom is not null)
         {
-            var senderProfiles = await ResolveActiveSenderProfilesAsync(ct);
+            var senderProfiles = await ResolveSenderProfilesForModeAsync(profileMode.Developer, ct);
             if (senderProfiles is null)
                 return ApiResponse.Failure<MilestonePlanVersionDto>(
-                    AppError.Validation("An active client or developer profile is required for chat."));
+                    AppError.Validation("A Developer profile is required for chat."));
 
             planMessage = new Message
             {
@@ -190,6 +208,7 @@ public partial class MilestoneService
             proposalRoom.UpdatedAt = DateTime.UtcNow;
         }
 
+        await RecordEventAsync(project.Id, null, EventType.MilestonePlanProposed, null, ct);
         await _unitOfWork.SaveChangesAsync(ct);
         var clientProfileId =
     await UserRepo.GetClientProfileIdByUserIdAsync(project.ClientId, ct);
@@ -245,6 +264,10 @@ public partial class MilestoneService
         if (project.ClientId != _currentUser.UserId)
             return ApiResponse.Failure(AppError.Forbidden("Only the client can request plan changes."));
 
+        var profileError = await RequireActiveProfileModeAsync(profileMode.Client, ct);
+        if (profileError is not null)
+            return ApiResponse.Failure(profileError);
+
         if (plan.Status != PlanVersionStatus.Proposed)
             return ApiResponse.Failure(AppError.Validation("Only a proposed plan can receive change requests."));
 
@@ -261,10 +284,10 @@ public partial class MilestoneService
         Message? changeMessage = null;
         if (proposalRoom is not null)
         {
-            var senderProfiles = await ResolveActiveSenderProfilesAsync(ct);
+            var senderProfiles = await ResolveSenderProfilesForModeAsync(profileMode.Client, ct);
             if (senderProfiles is null)
                 return ApiResponse.Failure(
-                    AppError.Validation("An active client or developer profile is required for chat."));
+                    AppError.Validation("A Client profile is required for chat."));
 
             changeMessage = new Message
             {
@@ -280,6 +303,7 @@ public partial class MilestoneService
             proposalRoom.UpdatedAt = DateTime.UtcNow;
         }
 
+        await RecordEventAsync(project.Id, null, EventType.MilestonePlanChangesRequested, null, ct);
         await _unitOfWork.SaveChangesAsync(ct);
         var proposerProfileId =
                             await UserRepo.GetDeveloperProfileIdByUserIdAsync(
@@ -334,6 +358,10 @@ public partial class MilestoneService
 
         if (project.ClientId != _currentUser.UserId)
             return ApiResponse.Failure(AppError.Forbidden("Only the client can accept a milestone plan."));
+
+        var profileError = await RequireActiveProfileModeAsync(profileMode.Client, ct);
+        if (profileError is not null)
+            return ApiResponse.Failure(profileError);
 
         if (plan.Status != PlanVersionStatus.Proposed)
             return ApiResponse.Failure(AppError.Validation("Only a proposed plan can be accepted."));
@@ -485,6 +513,8 @@ public partial class MilestoneService
             }, ct);
         }
 
+        await RecordEventAsync(project.Id, null, EventType.MilestonePlanAgreed, null, ct);
+        await RecordEventAsync(project.Id, null, EventType.ProposalAccepted, null, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
         await NotifyProposalApplicantsAsync(
@@ -521,6 +551,10 @@ public partial class MilestoneService
 
         if (project.ClientId != _currentUser.UserId)
             return ApiResponse.Failure(AppError.Forbidden("Only the client can fund milestones."));
+
+        var profileError = await RequireActiveProfileModeAsync(profileMode.Client, ct);
+        if (profileError is not null)
+            return ApiResponse.Failure(profileError);
 
         var escrow = await EscrowRepo.GetByProjectIdAsync(projectId, ct);
         if (escrow is null || escrow.planStatus != PlanStatus.PlanAgreed)
@@ -577,6 +611,7 @@ public partial class MilestoneService
             IdempotencyKey = idempotencyKey
         }, ct);
 
+        await RecordEventAsync(projectId, next.Id, EventType.EscrowLocked, null, ct);
         await _unitOfWork.SaveChangesAsync(ct);
         if (project.AssignedUserId.HasValue)
         {
@@ -655,6 +690,10 @@ public partial class MilestoneService
         if (!await IsProjectAssigneeAsync(project, ct))
             return ApiResponse.Failure(AppError.Forbidden("Only the hired assignee can submit a milestone."));
 
+        var profileError = await RequireActiveProfileModeAsync(profileMode.Developer, ct);
+        if (profileError is not null)
+            return ApiResponse.Failure(profileError);
+
         if (!milestone.IsFunded)
             return ApiResponse.Failure(AppError.Validation("Milestone must be funded before submission."));
 
@@ -667,6 +706,7 @@ public partial class MilestoneService
         milestone.AvailableAt = DateTime.UtcNow;
         _milestoneRepo.Update(milestone);
 
+        await RecordEventAsync(project.Id, milestone.Id, EventType.MilestoneSubmitted, null, ct);
         await _unitOfWork.SaveChangesAsync(ct);
         var clientProfileId =
     await UserRepo.GetClientProfileIdByUserIdAsync(
@@ -704,10 +744,16 @@ public partial class MilestoneService
         if (project.ClientId != _currentUser.UserId)
             return ApiResponse.Failure(AppError.Forbidden("Only the client can approve and release funds."));
 
+        var profileError = await RequireActiveProfileModeAsync(profileMode.Client, ct);
+        if (profileError is not null)
+            return ApiResponse.Failure(profileError);
+
         if (milestone.WorkStatus != WorkStatus.Submitted || milestone.ReleaseStatus != ReleaseStatus.Pending)
             return ApiResponse.Failure(AppError.Validation("Milestone is not awaiting approval."));
 
         await ReleaseFundsInternalAsync(project, milestone, ct);
+        await RecordEventAsync(project.Id, milestone.Id, EventType.MilestoneApproved, null, ct);
+        await RecordEventAsync(project.Id, milestone.Id, EventType.MilestoneReleased, null, ct);
         await _unitOfWork.SaveChangesAsync(ct);
         if (project.AssignedUserId.HasValue)
         {
@@ -778,6 +824,10 @@ public partial class MilestoneService
         if (project.ClientId != _currentUser.UserId)
             return ApiResponse.Failure(AppError.Forbidden("Only the client can request work changes."));
 
+        var profileError = await RequireActiveProfileModeAsync(profileMode.Client, ct);
+        if (profileError is not null)
+            return ApiResponse.Failure(profileError);
+
         if (milestone.WorkStatus != WorkStatus.Submitted)
             return ApiResponse.Failure(AppError.Validation("Only submitted milestones can receive change requests."));
 
@@ -785,6 +835,7 @@ public partial class MilestoneService
         milestone.ReleaseStatus = ReleaseStatus.Locked;
         milestone.AvailableAt = null;
         _milestoneRepo.Update(milestone);
+        await RecordEventAsync(project.Id, milestone.Id, EventType.MilestoneChangesRequested, null, ct);
         await _unitOfWork.SaveChangesAsync(ct);
         var notificationBody = string.IsNullOrWhiteSpace(comment)
     ? $"Changes were requested on milestone #{milestone.SortOrder}."
@@ -862,6 +913,14 @@ public partial class MilestoneService
             try
             {
                 await ReleaseFundsInternalAsync(project, milestone, ct);
+                var actorId = project.AssignedUserId
+                    ?? project.ClientId;
+                await RecordEventAsync(
+                    project.Id,
+                    milestone.Id,
+                    EventType.MilestoneReleased,
+                    actorId,
+                    ct);
                 count++;
                 if (project.AssignedUserId.HasValue)
                 {
@@ -872,6 +931,29 @@ public partial class MilestoneService
 
                     if (developerProfileId is not null)
                     {
+                        BackgroundJob.Enqueue(() =>
+                            _notificationService.CreateNotification(
+                                new CreateNotificationRequest
+                                {
+                                    DeveloperProfileId = developerProfileId.Value,
+                                    Title = "Milestone auto-released",
+                                    Body = $"Milestone #{milestone.SortOrder} was automatically released after the review period.",
+                                    Type = NotificationType.MilestoneReleased,
+                                    ProjectId = project.Id,
+                                    ActionUrl = $"/projects/{project.Id}?tab=milestones"
+                                }));
+                    }
+                }
+                else if (project.AssignedTeamId.HasValue)
+                {
+                    var leaders = await TeamMemberRepo.GetLeadersAsync(project.AssignedTeamId.Value, ct);
+                    foreach (var leader in leaders)
+                    {
+                        var developerProfileId =
+                            await UserRepo.GetDeveloperProfileIdByUserIdAsync(leader.UserId, ct);
+                        if (developerProfileId is null)
+                            continue;
+
                         BackgroundJob.Enqueue(() =>
                             _notificationService.CreateNotification(
                                 new CreateNotificationRequest
@@ -906,15 +988,6 @@ public partial class MilestoneService
         if (clientWallet.Reserved < milestone.Amount)
             throw new InvalidOperationException("Insufficient reserved funds.");
 
-        Wallet? payeeWallet = null;
-        if (project.AssignedUserId.HasValue)
-            payeeWallet = await WalletRepo.GetByOwnerAsync(owner.User, project.AssignedUserId.Value, ct);
-        else if (project.AssignedTeamId.HasValue)
-            payeeWallet = await WalletRepo.GetByOwnerAsync(owner.Team, project.AssignedTeamId.Value, ct);
-
-        if (payeeWallet is null)
-            throw new InvalidOperationException("Assignee wallet not found.");
-
         var releaseKey = $"escrow-release:{milestone.Id}";
         if (await LedgerRepo.ExistsByIdempotencyKeyAsync(releaseKey, ct))
             return;
@@ -922,8 +995,34 @@ public partial class MilestoneService
         clientWallet.Reserved -= milestone.Amount;
         WalletRepo.Update(clientWallet);
 
-        payeeWallet.Available += milestone.Amount;
-        WalletRepo.Update(payeeWallet);
+        if (project.AssignedUserId.HasValue)
+        {
+            var payeeWallet = await WalletRepo.GetByOwnerAsync(owner.User, project.AssignedUserId.Value, ct)
+                ?? throw new InvalidOperationException("Assignee wallet not found.");
+
+            payeeWallet.Available += milestone.Amount;
+            WalletRepo.Update(payeeWallet);
+
+            await LedgerRepo.AddAsync(new LedgerEntry
+            {
+                Id = Guid.NewGuid(),
+                WalletId = payeeWallet.Id,
+                EntryType = EntryType.EscrowRelease,
+                Amount = milestone.Amount,
+                Currency = payeeWallet.Currency,
+                ProjectId = project.Id,
+                MilestoneId = milestone.Id,
+                IdempotencyKey = releaseKey
+            }, ct);
+        }
+        else if (project.AssignedTeamId.HasValue)
+        {
+            await CreditTeamReleaseAsync(project, milestone, releaseKey, ct);
+        }
+        else
+        {
+            throw new InvalidOperationException("Project has no assignee.");
+        }
 
         milestone.WorkStatus = WorkStatus.Approved;
         milestone.ReleaseStatus = ReleaseStatus.Released;
@@ -932,17 +1031,114 @@ public partial class MilestoneService
         _milestoneRepo.Update(milestone);
 
         await EscrowRepo.RecordReleaseAsync(project.Id, milestone.Amount, ct);
+    }
+
+    /// <summary>
+    /// Team release: apply project override splits → team defaults → else 100% team wallet.
+    /// </summary>
+    private async Task CreditTeamReleaseAsync(
+        Project project,
+        Milestone milestone,
+        string releaseKey,
+        CancellationToken ct)
+    {
+        var teamId = project.AssignedTeamId!.Value;
+
+        var splits = (await SplitRepo.GetByTeamAndProjectAsync(teamId, project.Id, ct)).ToList();
+        if (splits.Count == 0)
+            splits = (await SplitRepo.GetByTeamAndProjectAsync(teamId, null, ct)).ToList();
+
+        var useSplits = splits.Count > 0 &&
+                        await SplitRepo.ValidateSplitsAsync(splits, milestone.Amount, ct);
+
+        if (!useSplits)
+        {
+            var teamWallet = await WalletRepo.GetByOwnerAsync(owner.Team, teamId, ct)
+                ?? throw new InvalidOperationException("Team wallet not found.");
+
+            teamWallet.Available += milestone.Amount;
+            WalletRepo.Update(teamWallet);
+
+            await LedgerRepo.AddAsync(new LedgerEntry
+            {
+                Id = Guid.NewGuid(),
+                WalletId = teamWallet.Id,
+                EntryType = EntryType.EscrowRelease,
+                Amount = milestone.Amount,
+                Currency = teamWallet.Currency,
+                ProjectId = project.Id,
+                MilestoneId = milestone.Id,
+                IdempotencyKey = releaseKey
+            }, ct);
+            return;
+        }
+
+        decimal allocated = 0m;
+        for (var i = 0; i < splits.Count; i++)
+        {
+            var split = splits[i];
+            decimal share;
+            if (i == splits.Count - 1)
+                share = milestone.Amount - allocated;
+            else if (split.SplitType == SplitType.Percent)
+                share = Math.Round(milestone.Amount * split.Value / 100m, 2, MidpointRounding.AwayFromZero);
+            else
+                share = split.Value;
+
+            allocated += share;
+            if (share <= 0)
+                continue;
+
+            var memberWallet = await WalletRepo.GetByOwnerAsync(owner.User, split.UserId, ct)
+                ?? throw new InvalidOperationException($"Wallet not found for team member {split.UserId}.");
+
+            memberWallet.Available += share;
+            WalletRepo.Update(memberWallet);
+
+            await LedgerRepo.AddAsync(new LedgerEntry
+            {
+                Id = Guid.NewGuid(),
+                WalletId = memberWallet.Id,
+                EntryType = EntryType.TeamSplit,
+                Amount = share,
+                Currency = memberWallet.Currency,
+                ProjectId = project.Id,
+                MilestoneId = milestone.Id,
+                IdempotencyKey = $"team-split:{milestone.Id}:{split.UserId}"
+            }, ct);
+        }
+
+        // Parent release marker for idempotency / project audit (no Available credit — members got TeamSplit).
+        var teamWalletMarker = await WalletRepo.GetByOwnerAsync(owner.Team, teamId, ct)
+            ?? throw new InvalidOperationException("Team wallet not found.");
 
         await LedgerRepo.AddAsync(new LedgerEntry
         {
             Id = Guid.NewGuid(),
-            WalletId = payeeWallet.Id,
+            WalletId = teamWalletMarker.Id,
             EntryType = EntryType.EscrowRelease,
             Amount = milestone.Amount,
-            Currency = payeeWallet.Currency,
+            Currency = teamWalletMarker.Currency,
             ProjectId = project.Id,
             MilestoneId = milestone.Id,
             IdempotencyKey = releaseKey
+        }, ct);
+    }
+
+    private async Task RecordEventAsync(
+        Guid projectId,
+        Guid? milestoneId,
+        EventType type,
+        Guid? actorUserId,
+        CancellationToken ct)
+    {
+        await EventRepo.AddAsync(new ProjectEvent
+        {
+            Id = Guid.NewGuid(),
+            ProjectId = projectId,
+            MilestoneId = milestoneId,
+            ActorUserId = actorUserId ?? _currentUser.UserId,
+            EventType = type
         }, ct);
     }
 
@@ -964,14 +1160,19 @@ public partial class MilestoneService
         string? previewText,
         CancellationToken ct)
     {
-        var active = await UserRepo.GetActiveProfileAsync(_currentUser.UserId, ct);
+        var senderId = message.SenderClientProfileId ?? message.SenderDeveloperProfileId;
+        var senderProfileType = message.SenderClientProfileId.HasValue
+            ? nameof(profileMode.Client)
+            : message.SenderDeveloperProfileId.HasValue
+                ? nameof(profileMode.Developer)
+                : null;
         var senderName = $"{_currentUser.FirstName} {_currentUser.LastName}".Trim();
         var dto = new RoomMessagesDto
         {
             Id = message.Id,
             ChatRoomId = roomId,
-            SenderId = active?.ProfileId,
-            SenderProfileType = active?.Mode.ToString(),
+            SenderId = senderId,
+            SenderProfileType = senderProfileType,
             SenderName = string.IsNullOrWhiteSpace(senderName) ? null : senderName,
             MessageType = message.MessageType.ToString(),
             Text = message.Text,
@@ -989,7 +1190,7 @@ public partial class MilestoneService
             LastMessageType = message.MessageType.ToString(),
             LastMessageAt = message.CreatedAt,
             LastMessageSender = senderName,
-            SenderId = active?.ProfileId ?? Guid.Empty
+            SenderId = senderId ?? Guid.Empty
         };
 
         var profileIds = await ChatMemberRepo.GetRoomProfileIdsAsync(roomId);
@@ -1000,16 +1201,68 @@ public partial class MilestoneService
         }
     }
 
-    private async Task<(Guid? ClientProfileId, Guid? DeveloperProfileId)?> ResolveActiveSenderProfilesAsync(
-        CancellationToken ct)
+    private async Task<AppError?> RequireActiveProfileModeAsync(profileMode required, CancellationToken ct)
     {
         var active = await UserRepo.GetActiveProfileAsync(_currentUser.UserId, ct);
         if (active is null)
-            return null;
+        {
+            return AppError.Validation(
+                "An active profile is required. Create or switch to a Client or Developer profile.");
+        }
 
-        return active.Value.Mode == profileMode.Client
-            ? (active.Value.ProfileId, null)
-            : (null, active.Value.ProfileId);
+        if (active.Value.Mode != required)
+        {
+            return AppError.Forbidden(required == profileMode.Client
+                ? "Switch to Client profile to perform this action."
+                : "Switch to Developer profile to perform this action.");
+        }
+
+        return null;
+    }
+
+    /// <summary>Stamp chat sender by action role (Client vs Developer), not by whatever mode happens to be active.</summary>
+    private async Task<(Guid? ClientProfileId, Guid? DeveloperProfileId)?> ResolveSenderProfilesForModeAsync(
+        profileMode required,
+        CancellationToken ct)
+    {
+        if (required == profileMode.Client)
+        {
+            var clientProfileId = await UserRepo.GetClientProfileIdByUserIdAsync(_currentUser.UserId, ct);
+            return clientProfileId is null ? null : (clientProfileId, null);
+        }
+
+        var developerProfileId = await UserRepo.GetDeveloperProfileIdByUserIdAsync(_currentUser.UserId, ct);
+        return developerProfileId is null ? null : (null, developerProfileId);
+    }
+
+    private async Task<bool> CanAccessProjectMilestoneDataAsync(Project project, CancellationToken ct)
+    {
+        var userId = _currentUser.UserId;
+
+        if (project.ClientId == userId)
+            return true;
+
+        if (project.AssignedUserId == userId)
+            return true;
+
+        if (project.AssignedTeamId is not null &&
+            await TeamMemberRepo.IsMemberAsync(project.AssignedTeamId.Value, userId, ct))
+            return true;
+
+        // Pre-hire negotiation: discussion participants can read plans.
+        var discussions = await ProposalRepo.GetActiveDiscussionByProjectIdAsync(project.Id, ct);
+        foreach (var proposal in discussions)
+        {
+            if (proposal.ApplicantType == ApplicantType.User && proposal.UserId == userId)
+                return true;
+
+            if (proposal.ApplicantType == ApplicantType.Team &&
+                proposal.TeamId is not null &&
+                await TeamMemberRepo.IsMemberAsync(proposal.TeamId.Value, userId, ct))
+                return true;
+        }
+
+        return false;
     }
 
     private async Task<bool> IsProposalNegotiationSpeakerAsync(ProjectProposal proposal, CancellationToken ct)

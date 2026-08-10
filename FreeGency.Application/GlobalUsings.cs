@@ -41,6 +41,7 @@ global using FreeGency.Application.Features.EmailFeature.Commands;
 global using FreeGency.Application.Features.Escrow.Commands;
 global using FreeGency.Application.Features.ExternalFeature.Commands;
 global using FreeGency.Application.Features.Milestones.Commands;
+global using FreeGency.Application.Features.PayoutSplits.Commands;
 global using FreeGency.Application.Features.Portfolio.Commands;
 global using FreeGency.Application.Features.ProjectEvents.Commands;
 global using FreeGency.Application.Features.ProjectFiles.Commands;
