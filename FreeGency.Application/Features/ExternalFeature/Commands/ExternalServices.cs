@@ -2,6 +2,7 @@
 using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Common.Mappings.AuthenticationMapping;
+using FreeGency.Application.Features.ExternalFeature.Dtos;
 using FreeGency.Domain.Entities;
 using FreeGency.Domain.Enums;
 using FreeGency.Domain.Interfaces;
@@ -170,6 +171,205 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
         private static string GenerateRefreshToken()
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        }
+        public async Task<Result<AuthResponseDto>> LoginWithLinkedInAsync(
+    LinkedInUserInfo linkedInUser,
+    string intent,
+    string mode)
+        {
+            if (string.IsNullOrWhiteSpace(linkedInUser.Email))
+                return Result.Failure<AuthResponseDto>(
+                    ExternalErrors.ExternalEmailNotFound);
+
+            var user = await userManager.FindByEmailAsync(
+                linkedInUser.Email);
+
+            if (user == null)
+            {
+                if (intent != "signup")
+                {
+                    return Result.Failure<AuthResponseDto>(
+                        ExternalErrors.ExternalAccountNotFound);
+                }
+
+                var ProfileMode =
+                    mode == "Developer"
+                        ? profileMode.Developer
+                        : profileMode.Client;
+
+                user = new User
+                {
+                    Email = linkedInUser.Email,
+                    UserName = linkedInUser.Email,
+                    EmailConfirmed = true,
+
+                    ActiveProfileMode = ProfileMode,
+
+                    HasCompletedOnboarding = false,
+
+                    FristName =
+                        !string.IsNullOrWhiteSpace(linkedInUser.GivenName)
+                            ? linkedInUser.GivenName
+                            : linkedInUser.Name?.Split(' ', 2)[0]
+                              ?? string.Empty,
+
+                    LastName =
+                        !string.IsNullOrWhiteSpace(linkedInUser.FamilyName)
+                            ? linkedInUser.FamilyName
+                            : linkedInUser.Name?.Contains(' ') == true
+                                ? linkedInUser.Name.Split(' ', 2)[1]
+                                : string.Empty,
+
+                    refreshTokens = [],
+                };
+
+                var createResult =
+                    await userManager.CreateAsync(user);
+
+                if (!createResult.Succeeded)
+                {
+                    return Result.Failure<AuthResponseDto>(
+                        ExternalErrors.ExternalLoginFailed);
+                }
+
+                // نفس Google بالضبط
+                var clientProfile = new ClientProfile
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id
+                };
+
+                var developerProfile = new DeveloperProfile
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id
+                };
+
+                var wallet = new Wallet
+                {
+                    Id = Guid.NewGuid(),
+                    OwnerUserId = user.Id,
+                    OwnerType = owner.User,
+                    Currency = "USD"
+                };
+
+                await clientProfileRepository.AddAsync(clientProfile);
+                await developerProfileRepository.AddAsync(developerProfile);
+                await walletRepository.AddAsync(wallet);
+
+                await clientNotificationSettingsRepository.AddAsync(
+                    new ClientNotificationSettings
+                    {
+                        Id = Guid.NewGuid(),
+                        ProfileId = clientProfile.Id
+                    });
+
+                await developerNotificationSettingsRepository.AddAsync(
+                    new DeveloperNotificationSettings
+                    {
+                        Id = Guid.NewGuid(),
+                        ProfileId = developerProfile.Id
+                    });
+
+                await unitOfWork.SaveChangesAsync();
+
+                // ربط LinkedIn بالـ User
+                var loginInfo = new UserLoginInfo(
+                    "LinkedIn",
+                    linkedInUser.Sub,
+                    "LinkedIn");
+
+                var loginResult =
+                    await userManager.AddLoginAsync(
+                        user,
+                        loginInfo);
+
+                if (!loginResult.Succeeded)
+                {
+                    return Result.Failure<AuthResponseDto>(
+                        ExternalErrors.ExternalLoginFailed);
+                }
+
+                await EnsureProfileForModeAsync(
+                    user.Id,
+                    ProfileMode);
+            }
+            else
+            {
+                // User موجود بالفعل
+
+                var logins =
+                    await userManager.GetLoginsAsync(user);
+
+                var linkedInLoginExists =
+                    logins.Any(x =>
+                        x.LoginProvider == "LinkedIn" &&
+                        x.ProviderKey == linkedInUser.Sub);
+
+                if (!linkedInLoginExists)
+                {
+                    var loginResult =
+                        await userManager.AddLoginAsync(
+                            user,
+                            new UserLoginInfo(
+                                "LinkedIn",
+                                linkedInUser.Sub,
+                                "LinkedIn"));
+
+                    if (!loginResult.Succeeded)
+                    {
+                        return Result.Failure<AuthResponseDto>(
+                            ExternalErrors.ExternalLoginFailed);
+                    }
+                }
+
+                if (user.ActiveProfileMode is profileMode activeMode)
+                {
+                    await EnsureProfileForModeAsync(
+                        user.Id,
+                        activeMode);
+                }
+            }
+
+            // ================================
+            // نفس Login Google بالظبط من هنا
+            // ================================
+
+            var (token, expiresIn) =
+                jwtProvider.GenerateToken(user);
+
+            var refreshToken =
+                GenerateRefreshToken();
+
+            var refreshTokenExpiration =
+                DateTime.UtcNow.AddDays(14);
+
+            user.refreshTokens ??= [];
+
+            user.refreshTokens.Add(
+                new RefreshToken
+                {
+                    Token = refreshToken,
+                    ExpiresOn = refreshTokenExpiration,
+                });
+
+            var updateResult =
+                await userManager.UpdateAsync(user);
+
+            if (!updateResult.Succeeded)
+            {
+                return Result.Failure<AuthResponseDto>(
+                    ExternalErrors.ExternalLoginFailed);
+            }
+
+            var authResponse =
+                user.ToDto(
+                    token,
+                    expiresIn,
+                    refreshToken,
+                    refreshTokenExpiration);
+
+            return Result.Success(authResponse);
         }
     }
 }
