@@ -1,4 +1,6 @@
 using FreeGency.AI;
+using FreeGency.Api.Extensions;
+using FreeGency.Api.OpenApi;
 using FreeGency.Application;
 using FreeGency.Application.Common.Helpers;
 using FreeGency.Application.Common.Hubs;
@@ -7,7 +9,6 @@ using FreeGency.Infrastructure;
 using FreeGency.Infrastructure.Persistence.Context;
 using FreeGency.Infrastructure.Persistence.Seeding;
 using Hangfire;
-using FreeGency.Api.OpenApi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -31,7 +32,12 @@ namespace FreeGency.Api
             builder.Services.AddIdentity<User, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+            builder.Services.AddDistributedMemoryCache();
+
+            builder.Services.AddSession();
             builder.Services.Configure<StripeSetting>(builder.Configuration.GetSection("StripeSetting"));
+            builder.Services.Configure<LinkedInOptions>(
+    builder.Configuration.GetSection("LinkedIn"));
             #region
             var JwtSettings = builder.Configuration.GetSection(JwtOptions.NameSection).Get<JwtOptions>();
             builder.Host.UseSerilog((context, configration) =>
@@ -144,6 +150,7 @@ namespace FreeGency.Api
             }
             app.UseSerilogRequestLogging();
             app.UseCors("Frontend");
+            app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
