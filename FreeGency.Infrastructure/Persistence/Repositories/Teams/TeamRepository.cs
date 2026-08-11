@@ -306,6 +306,8 @@ public sealed class TeamRepository : GenericRepository<Team>, ITeamRepository
             .Include(t => t.TeamMembers).ThenInclude(tm => tm.User).ThenInclude(u => u.DeveloperProfile)
             .Include(t => t.TeamMembers).ThenInclude(tm => tm.User).ThenInclude(u => u.ClientProfile)
             .Include(t => t.SocialLinks)
+            .Include(t => t.AssignedProjects)
+            .Include(t => t.PortfolioProjects)
             .FirstOrDefaultAsync(t => t.Id == id, ct);
     }
 

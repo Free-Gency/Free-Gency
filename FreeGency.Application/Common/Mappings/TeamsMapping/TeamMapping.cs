@@ -24,8 +24,7 @@ public static class TeamMapping
             MembersCount = membersCount,
             MyRole = ResolveMyRole(team, currentUserId),
             MemberAvatars = BuildMemberAvatars(team),
-            ProjectsCount = (team.PortfolioProjects?.Count ?? 0)
-                + (team.AssignedProjects?.Count(p => p.Status == ProjectStatus.Completed) ?? 0),
+            ProjectsCount = team.AssignedProjects?.Count ?? 0,
             Categories = team.TeamCategories?.Select(tc => new TeamCategoryDto
             {
                 CategoryId = tc.CategoryId,

@@ -207,17 +207,30 @@ public sealed class PayoutSplitService : IPayoutSplitService
 
         if (!TryParseSplitType(dto.SplitType, out var splitType) || splitType != Domain.Enums.SplitType.Percent)
             return ApiResponse.Failure<PayoutSplitsDto>(
-                AppError.Validation("Milestone payout splits must use Percent and sum to 100."));
+                AppError.Validation("Milestone payout splits must use Percent."));
+
+        var positiveItems = (dto.Items ?? []).Where(i => i.Value > 0).ToList();
+
+        // Empty / all-zero = clear milestone splits → full amount stays on team wallet at release.
+        if (positiveItems.Count == 0)
+        {
+            await _splitRepo.ReplaceSplitsAsync(team.Id, project.Id, milestoneId, [], ct);
+            await _unitOfWork.SaveChangesAsync(ct);
+            return ApiResponse.Success(
+                ToDto(team.Id, project.Id, milestoneId, []),
+                "Milestone payout splits cleared. Release will credit the team wallet.");
+        }
 
         var buildError = await BuildSplitsAsync(
             team.Id,
             project.Id,
             milestoneId,
             splitType,
-            dto.Items,
+            positiveItems,
             totalAmount: 100m,
             ct,
-            preferProjectMembers: true);
+            preferProjectMembers: true,
+            allowPartialPercent: true);
         if (buildError.Error is not null)
             return ApiResponse.Failure<PayoutSplitsDto>(buildError.Error);
 
@@ -261,7 +274,8 @@ public sealed class PayoutSplitService : IPayoutSplitService
         IReadOnlyList<PayoutSplitItemDto> items,
         decimal totalAmount,
         CancellationToken ct,
-        bool preferProjectMembers = false)
+        bool preferProjectMembers = false,
+        bool allowPartialPercent = false)
     {
         if (items is null || items.Count == 0)
             return (AppError.Validation("At least one split item is required."), null);
@@ -310,10 +324,12 @@ public sealed class PayoutSplitService : IPayoutSplitService
             });
         }
 
-        if (!await _splitRepo.ValidateSplitsAsync(entities, totalAmount, ct))
+        if (!await _splitRepo.ValidateSplitsAsync(entities, totalAmount, allowPartialPercent, ct))
         {
             return (AppError.Validation(splitType == Domain.Enums.SplitType.Percent
-                ? "Percent splits must sum to 100."
+                ? (allowPartialPercent
+                    ? "Percent splits must be greater than 0 and cannot exceed 100. The remainder stays on the team wallet."
+                    : "Percent splits must sum to 100.")
                 : $"Fixed splits must sum to {totalAmount:0.##}."), null);
         }
 

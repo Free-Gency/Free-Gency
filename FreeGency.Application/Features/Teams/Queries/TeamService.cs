@@ -193,22 +193,60 @@ public partial class TeamService
         var projectIds = visible.Select(p => p.Id).ToList();
         var milestones = await _milestoneRepository.Query()
             .Where(m => projectIds.Contains(m.ProjectId))
+            .OrderBy(m => m.SortOrder)
             .ToListAsync(ct);
 
-        var counts = milestones
+        var milestonesByProject = milestones
             .GroupBy(m => m.ProjectId)
-            .ToDictionary(g => g.Key,
-                g => (Total: g.Count(), Done: g.Count(m => m.WorkStatus == WorkStatus.Approved)));
+            .ToDictionary(g => g.Key, g => g.ToList());
 
         var myProjectIds = (await _projectMemberRepository.GetByUserIdAsync(userId, ct))
             .Select(pm => pm.ProjectId)
             .ToHashSet();
 
+        var membersByProject = new Dictionary<Guid, List<TeamProjectMemberAvatarDto>>();
+        foreach (var pid in projectIds)
+        {
+            var rows = await _projectMemberRepository.GetMembersWithUsersAsync(pid, ct);
+            membersByProject[pid] = rows
+                .Select(m => new TeamProjectMemberAvatarDto
+                {
+                    UserId = m.UserId,
+                    Name = FullName(m.User),
+                    ImageUrl = m.User?.DeveloperProfile?.ProfileImage
+                })
+                .ToList();
+        }
+
+        var currentMilestoneIds = milestonesByProject.Values
+            .Select(list => list.FirstOrDefault(m => m.WorkStatus != WorkStatus.Approved) ?? list.LastOrDefault())
+            .Where(m => m is not null)
+            .Select(m => m!.Id)
+            .Distinct()
+            .ToList();
+
+        var tasksByMilestone = new Dictionary<Guid, (int Done, int Total)>();
+        foreach (var mid in currentMilestoneIds)
+        {
+            var tasks = await _taskRepository.GetByMilestoneIdAsync(mid, ct);
+            tasksByMilestone[mid] = (
+                Done: tasks.Count(t => t.Status == Domain.Enums.TaskStatus.Done),
+                Total: tasks.Count);
+        }
+
         var dtos = visible
             .Select(p =>
             {
-                var (total, done) = counts.GetValueOrDefault(p.Id);
+                var list = milestonesByProject.GetValueOrDefault(p.Id) ?? [];
+                var total = list.Count;
+                var done = list.Count(m => m.WorkStatus == WorkStatus.Approved);
                 var percent = total > 0 ? (int)Math.Round(done * 100.0 / total) : 0;
+                var current = list.FirstOrDefault(m => m.WorkStatus != WorkStatus.Approved) ?? list.LastOrDefault();
+                var taskStats = current is not null && tasksByMilestone.TryGetValue(current.Id, out var ts)
+                    ? ts
+                    : (Done: 0, Total: 0);
+                var members = membersByProject.GetValueOrDefault(p.Id) ?? [];
+
                 return new TeamProjectCardDto
                 {
                     Id = p.Id,
@@ -219,11 +257,21 @@ public partial class TeamService
                     BudgetMax = p.BudgetMax,
                     Currency = p.Currency,
                     Deadline = p.Deadline,
-                    CategoryName = p.Category?.Name,
+                    CategoryName = string.IsNullOrWhiteSpace(p.Category?.NameEn)
+                        ? p.Category?.Name
+                        : p.Category.NameEn,
                     TotalMilestones = total,
                     CompletedMilestones = done,
                     ProgressPercent = percent,
-                    IsCurrentUserMember = p.AssignedUserId == userId || myProjectIds.Contains(p.Id)
+                    IsCurrentUserMember = p.AssignedUserId == userId || myProjectIds.Contains(p.Id),
+                    CurrentMilestoneTitle = current?.Title,
+                    CurrentMilestoneAmount = current?.Amount,
+                    CurrentMilestoneWorkStatus = current?.WorkStatus.ToString(),
+                    CurrentMilestoneDue = current?.AvailableAt ?? p.Deadline,
+                    CurrentMilestoneTasksDone = taskStats.Done,
+                    CurrentMilestoneTasksTotal = taskStats.Total,
+                    Members = members.Take(4).ToList(),
+                    MembersTotal = members.Count
                 };
             })
             .OrderByDescending(d => d.Deadline ?? DateTime.MaxValue)

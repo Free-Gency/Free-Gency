@@ -17,6 +17,24 @@ public sealed class TeamProjectCardDto
     public int CompletedMilestones { get; init; }
     public int ProgressPercent { get; init; }
     public bool IsCurrentUserMember { get; init; }
+
+    public string? CurrentMilestoneTitle { get; init; }
+    public decimal? CurrentMilestoneAmount { get; init; }
+    public string? CurrentMilestoneWorkStatus { get; init; }
+    public DateTime? CurrentMilestoneDue { get; init; }
+    public int CurrentMilestoneTasksDone { get; init; }
+    public int CurrentMilestoneTasksTotal { get; init; }
+
+    public IReadOnlyList<TeamProjectMemberAvatarDto> Members { get; init; } = [];
+    public int MembersTotal { get; init; }
+}
+
+
+public sealed class TeamProjectMemberAvatarDto
+{
+    public Guid UserId { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public string? ImageUrl { get; init; }
 }
 
 

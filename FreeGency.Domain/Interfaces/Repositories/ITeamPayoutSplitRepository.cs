@@ -20,21 +20,30 @@ public interface ITeamPayoutSplitRepository : IGenericRepository<TeamPayoutSplit
         Guid projectId,
         CancellationToken ct = default);
 
-    Task ReplaceSplitsAsync(
-        Guid teamId,
-        Guid? projectId,
-        Guid? milestoneId,
-        IEnumerable<TeamPayoutSplit> splits,
-        CancellationToken ct = default);
+        Task ReplaceSplitsAsync(
+            Guid teamId,
+            Guid? projectId,
+            Guid? milestoneId,
+            IEnumerable<TeamPayoutSplit> splits,
+            CancellationToken ct = default);
 
-    Task<bool> ValidateSplitsAsync(
-        IEnumerable<TeamPayoutSplit> splits,
-        decimal totalAmount,
-        CancellationToken ct = default);
+        Task<bool> ValidateSplitsAsync(
+            IEnumerable<TeamPayoutSplit> splits,
+            decimal totalAmount,
+            CancellationToken ct = default);
 
-    [Obsolete("Use GetByScopeAsync with milestoneId: null")]
-    Task<IEnumerable<TeamPayoutSplit>> GetByTeamAndProjectAsync(
-        Guid teamId,
-        Guid? projectId,
-        CancellationToken ct = default);
+        /// <param name="allowPartialPercent">
+        /// When true, percent splits may sum to any value in (0, 100]; remainder goes to the team wallet on release.
+        /// </param>
+        Task<bool> ValidateSplitsAsync(
+            IEnumerable<TeamPayoutSplit> splits,
+            decimal totalAmount,
+            bool allowPartialPercent,
+            CancellationToken ct = default);
+
+        [Obsolete("Use GetByScopeAsync with milestoneId: null")]
+        Task<IEnumerable<TeamPayoutSplit>> GetByTeamAndProjectAsync(
+            Guid teamId,
+            Guid? projectId,
+            CancellationToken ct = default);
 }

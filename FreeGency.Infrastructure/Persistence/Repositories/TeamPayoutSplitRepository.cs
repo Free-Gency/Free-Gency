@@ -81,6 +81,13 @@ public class TeamPayoutSplitRepository : GenericRepository<TeamPayoutSplit>, ITe
         IEnumerable<TeamPayoutSplit> splits,
         decimal totalAmount,
         CancellationToken ct = default)
+        => ValidateSplitsAsync(splits, totalAmount, allowPartialPercent: false, ct);
+
+    public Task<bool> ValidateSplitsAsync(
+        IEnumerable<TeamPayoutSplit> splits,
+        decimal totalAmount,
+        bool allowPartialPercent,
+        CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(splits);
 
@@ -93,7 +100,14 @@ public class TeamPayoutSplitRepository : GenericRepository<TeamPayoutSplit>, ITe
             return Task.FromResult(false);
 
         if (splitType == SplitType.Percent)
-            return Task.FromResult(list.Sum(x => x.Value) == 100m);
+        {
+            var sum = list.Sum(x => x.Value);
+            // Percent may be partial: remainder stays on the team wallet at release.
+            // allowPartialPercent=false still requires an exact 100 for legacy team/project defaults.
+            if (allowPartialPercent)
+                return Task.FromResult(sum > 0 && sum <= 100m);
+            return Task.FromResult(sum == 100m);
+        }
 
         if (totalAmount <= 0)
             return Task.FromResult(false);

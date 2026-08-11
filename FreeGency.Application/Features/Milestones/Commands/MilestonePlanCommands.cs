@@ -1128,7 +1128,7 @@ public partial class MilestoneService
             splits = (await SplitRepo.GetByScopeAsync(teamId, null, null, ct)).ToList();
 
         var useSplits = splits.Count > 0 &&
-                        await SplitRepo.ValidateSplitsAsync(splits, milestone.Amount, ct);
+                        await SplitRepo.ValidateSplitsAsync(splits, milestone.Amount, allowPartialPercent: true, ct);
 
         if (!useSplits)
         {
@@ -1153,20 +1153,16 @@ public partial class MilestoneService
         }
 
         decimal allocated = 0m;
-        for (var i = 0; i < splits.Count; i++)
+        foreach (var split in splits)
         {
-            var split = splits[i];
-            decimal share;
-            if (i == splits.Count - 1)
-                share = milestone.Amount - allocated;
-            else if (split.SplitType == SplitType.Percent)
-                share = Math.Round(milestone.Amount * split.Value / 100m, 2, MidpointRounding.AwayFromZero);
-            else
-                share = split.Value;
+            decimal share = split.SplitType == SplitType.Percent
+                ? Math.Round(milestone.Amount * split.Value / 100m, 2, MidpointRounding.AwayFromZero)
+                : split.Value;
 
-            allocated += share;
             if (share <= 0)
                 continue;
+
+            allocated += share;
 
             var memberWallet = await WalletRepo.GetByOwnerAsync(owner.User, split.UserId, ct)
                 ?? throw new InvalidOperationException($"Wallet not found for team member {split.UserId}.");
@@ -1187,10 +1183,30 @@ public partial class MilestoneService
             }, ct);
         }
 
-        // Parent release marker for idempotency / project audit (no Available credit — members got TeamSplit).
+        var remainder = milestone.Amount - allocated;
         var teamWalletMarker = await WalletRepo.GetByOwnerAsync(owner.Team, teamId, ct)
             ?? throw new InvalidOperationException("Team wallet not found.");
 
+        // Unallocated percent (or rounding leftover) stays on the team wallet.
+        if (remainder > 0)
+        {
+            teamWalletMarker.Available += remainder;
+            WalletRepo.Update(teamWalletMarker);
+
+            await LedgerRepo.AddAsync(new LedgerEntry
+            {
+                Id = Guid.NewGuid(),
+                WalletId = teamWalletMarker.Id,
+                EntryType = EntryType.TeamSplit,
+                Amount = remainder,
+                Currency = teamWalletMarker.Currency,
+                ProjectId = project.Id,
+                MilestoneId = milestone.Id,
+                IdempotencyKey = $"team-split-remainder:{milestone.Id}"
+            }, ct);
+        }
+
+        // Parent release marker for idempotency / project audit.
         await LedgerRepo.AddAsync(new LedgerEntry
         {
             Id = Guid.NewGuid(),

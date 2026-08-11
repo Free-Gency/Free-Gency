@@ -19,6 +19,7 @@ public partial class TeamService : ITeamService
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IMilestoneAssignmentRepository _milestoneAssignmentRepository;
     private readonly ITeamPayoutSplitRepository _payoutSplitRepository;
+    private readonly ITaskRepository _taskRepository;
 
     public TeamService(IUnitOfWork unitOfWork, IStorageService storageService,
         ICurrentUserService currentUserService, IContentModerationService contentModerationService)
@@ -39,6 +40,7 @@ public partial class TeamService : ITeamService
         _projectMemberRepository = _unitOfWork.Repository<IProjectMemberRepository, ProjectMember>();
         _milestoneAssignmentRepository = _unitOfWork.Repository<IMilestoneAssignmentRepository, MilestoneAssignment>();
         _payoutSplitRepository = _unitOfWork.Repository<ITeamPayoutSplitRepository, TeamPayoutSplit>();
+        _taskRepository = _unitOfWork.Repository<ITaskRepository, ProjectTask>();
     }
 
     public async Task<ApiResponse<Guid>> CreateAsync(CreateTeamDto dto, CancellationToken ct = default)

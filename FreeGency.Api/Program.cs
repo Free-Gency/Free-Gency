@@ -93,6 +93,11 @@ namespace FreeGency.Api
                 options.AddSchemaTransformer<XmlCommentsOpenApiTransformer>();
             });
             builder.Services.AddSignalR();
+            builder.Services.Configure<HostOptions>(options =>
+            {
+                // Don't tear down the whole API if a background worker faults during shutdown/restart.
+                options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+            });
             builder.Services.AddHostedService<FreeGency.Api.BackgroundJobs.MilestoneAutoReleaseWorker>();
             builder.Services.AddCors(options =>
             {
