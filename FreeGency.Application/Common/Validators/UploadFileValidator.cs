@@ -54,7 +54,7 @@ public static class UploadFileValidator
     private static string GetMessage(UploadFileKind kind) => kind switch
     {
         UploadFileKind.Image => "Only JPG, JPEG, PNG, and WEBP files are allowed.",
-        UploadFileKind.Document => "Only PDF, DOC, DOCX, XLS, XLSX, PPT, and PPTX files are allowed.",
-        _ => "Unsupported file type."
+        UploadFileKind.Document => "Only PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, CSV, and TXT files are allowed.",
+        _ => "Unsupported file type. Allowed: images (JPG, PNG, WEBP) and documents (PDF, Office, CSV, TXT).",
     };
 }

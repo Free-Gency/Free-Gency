@@ -4,50 +4,50 @@ namespace FreeGency.Application.Features.Portfolio.DTOs
 {
     public sealed class CreatePortfolioProjectRequestDto
     {
-        public string Title { get; init; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
 
-        public string Description { get; init; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
 
-        public owner OwnerType { get; init; }
+        public owner OwnerType { get; set; }
 
-        public Guid? OwnerTeamId { get; init; }
+        public Guid? OwnerTeamId { get; set; }
 
-        public decimal? Budget { get; init; }
+        public decimal? Budget { get; set; }
 
-        public string? ProjectUrl { get; init; }
+        public string? ProjectUrl { get; set; }
 
-        public string? PrototypeUrl { get; init; }
+        public string? PrototypeUrl { get; set; }
 
-        public DateTime? CompletionDate { get; init; }
+        public DateTime? CompletionDate { get; set; }
 
-        public Guid? CategoryId { get; init; }
+        public Guid? CategoryId { get; set; }
 
-        public Visibility Visibility { get; init; } = Visibility.Public;
+        public Visibility Visibility { get; set; } = Visibility.Public;
 
-        public string? Challenge { get; init; }
+        public string? Challenge { get; set; }
 
-        public string? Solution { get; init; }
+        public string? Solution { get; set; }
 
-        public string? DurationLabel { get; init; }
+        public string? DurationLabel { get; set; }
 
-        public string? Industry { get; init; }
+        public string? Industry { get; set; }
 
-        public string? TeamLeads { get; init; }
+        public string? TeamLeads { get; set; }
 
-        public string? TestimonialQuote { get; init; }
+        public string? TestimonialQuote { get; set; }
 
-        public string? TestimonialAuthorName { get; init; }
+        public string? TestimonialAuthorName { get; set; }
 
-        public string? TestimonialAuthorTitle { get; init; }
+        public string? TestimonialAuthorTitle { get; set; }
 
-        public string? TestimonialAuthorAvatarUrl { get; init; }
+        public string? TestimonialAuthorAvatarUrl { get; set; }
 
-        public IEnumerable<Guid> SkillIds { get; init; } = [];
+        public List<Guid> SkillIds { get; set; } = [];
 
-        public List<PortfolioRoadmapStepDto> RoadmapSteps { get; init; } = [];
+        public List<PortfolioRoadmapStepDto> RoadmapSteps { get; set; } = [];
 
-        public List<PortfolioMetricDto> Metrics { get; init; } = [];
+        public List<PortfolioMetricDto> Metrics { get; set; } = [];
 
-        public IEnumerable<IFormFile>? Images { get; init; }
+        public List<IFormFile>? Images { get; set; }
     }
 }

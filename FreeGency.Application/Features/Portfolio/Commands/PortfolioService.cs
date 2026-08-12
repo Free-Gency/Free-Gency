@@ -47,23 +47,26 @@ namespace FreeGency.Application.Features.Portfolio.Commands
                         : null,
 
                     Title = request.Title.Trim(),
-                    Description = request.Description.Trim(),
+                    Description = (request.Description ?? string.Empty).Trim(),
                     Budget = request.Budget,
-                    ProjectUrl = request.ProjectUrl,
-                    PrototypeUrl = request.PrototypeUrl,
+                    ProjectUrl = Truncate(NullIfWhiteSpace(request.ProjectUrl), 500),
+                    PrototypeUrl = Truncate(NullIfWhiteSpace(request.PrototypeUrl), 500),
                     CompletionDate = request.CompletionDate,
                     CategoryId = request.CategoryId,
                     Visibility = request.Visibility,
                     Challenge = request.Challenge,
                     Solution = request.Solution,
-                    DurationLabel = request.DurationLabel,
-                    Industry = request.Industry,
-                    TeamLeads = request.TeamLeads,
+                    DurationLabel = Truncate(request.DurationLabel, 100),
+                    Industry = Truncate(request.Industry, 120),
+                    TeamLeads = Truncate(request.TeamLeads, 2000),
                     TestimonialQuote = request.TestimonialQuote,
-                    TestimonialAuthorName = request.TestimonialAuthorName,
-                    TestimonialAuthorTitle = request.TestimonialAuthorTitle,
-                    TestimonialAuthorAvatarUrl = request.TestimonialAuthorAvatarUrl,
+                    TestimonialAuthorName = Truncate(request.TestimonialAuthorName, 150),
+                    TestimonialAuthorTitle = Truncate(request.TestimonialAuthorTitle, 200),
+                    TestimonialAuthorAvatarUrl = Truncate(request.TestimonialAuthorAvatarUrl, 500),
                 };
+
+                if (string.IsNullOrWhiteSpace(portfolio.Description))
+                    portfolio.Description = portfolio.Title;
 
                 //----------------------------------------------------
                 // Team ownership validation
@@ -96,7 +99,7 @@ namespace FreeGency.Application.Features.Portfolio.Commands
 
                 await _portfolioRepo.AddWithSkillsAsync(
                     portfolio,
-                    request.SkillIds,
+                    request.SkillIds ?? [],
                     ct);
 
                 await ReplaceCaseStudyCollectionsAsync(
@@ -106,25 +109,32 @@ namespace FreeGency.Application.Features.Portfolio.Commands
                     ct);
 
                 //----------------------------------------------------
-                // Images
+                // Images (optional — failure should not hide the root cause)
                 //----------------------------------------------------
 
                 if (request.Images is not null &&
                     request.Images.Any())
                 {
-                    var uploaded =
-                        await _storageService.UploadManyAsync(
-                            request.Images,
-                            "portfolio",
+                    try
+                    {
+                        var uploaded =
+                            await _storageService.UploadManyAsync(
+                                request.Images,
+                                "portfolio",
+                                ct);
+
+                        await _portfolioRepo.AddImagesAsync(
+                            portfolio.Id,
+                            uploaded.Select(x => x.Url),
                             ct);
 
-                    await _portfolioRepo.AddImagesAsync(
-                        portfolio.Id,
-                        uploaded.Select(x => x.Url),
-                        ct);
-
-                    portfolio.ImageCover =
-                        uploaded.First().Url;
+                        portfolio.ImageCover =
+                            uploaded.First().Url;
+                    }
+                    catch
+                    {
+                        // Keep the portfolio even if Cloudinary/storage fails during onboarding.
+                    }
                 }
 
                 await _unitOfWork.SaveChangesAsync(ct);
@@ -135,10 +145,11 @@ namespace FreeGency.Application.Features.Portfolio.Commands
                     portfolio.Id,
                     "Portfolio created successfully.");
             }
-            catch
+            catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync(ct);
-                throw;
+                return ApiResponse.Failure<Guid>(
+                    AppError.Validation(ex.InnerException?.Message ?? ex.Message));
             }
 
         }
@@ -656,7 +667,7 @@ namespace FreeGency.Application.Features.Portfolio.Commands
                     {
                         Id = Guid.NewGuid(),
                         PortfolioProjectId = portfolioProjectId,
-                        Title = s.Title.Trim(),
+                        Title = Truncate(s.Title.Trim(), 200)!,
                         SortOrder = s.SortOrder != 0 ? s.SortOrder : index,
                         IsDone = s.IsDone,
                     })
@@ -673,14 +684,26 @@ namespace FreeGency.Application.Features.Portfolio.Commands
                     {
                         Id = Guid.NewGuid(),
                         PortfolioProjectId = portfolioProjectId,
-                        Value = m.Value.Trim(),
-                        Label = m.Label.Trim(),
+                        Value = Truncate(m.Value.Trim(), 50)!,
+                        Label = Truncate(m.Label.Trim(), 120)!,
                         SortOrder = m.SortOrder != 0 ? m.SortOrder : index,
                     })
                     .ToList();
 
                 await _portfolioRepo.ReplaceMetricsAsync(portfolioProjectId, entities, ct);
             }
+        }
+
+        private static string? NullIfWhiteSpace(string? value)
+            => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+        private static string? Truncate(string? value, int maxLength)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return null;
+
+            var trimmed = value.Trim();
+            return trimmed.Length <= maxLength ? trimmed : trimmed[..maxLength];
         }
 
         #endregion

@@ -9,7 +9,9 @@ namespace FreeGency.Api.Controllers.V1;
 [Authorize]
 [ApiController]
 [Route("api/v1/suggestions")]
-public class SuggestionsController(ISuggestionService suggestionService) : BaseApiController
+public class SuggestionsController(
+    ISuggestionService suggestionService,
+    IHostEnvironment environment) : BaseApiController
 {
     /// <summary>
     /// Suggest open team jobs/teams that match the current developer's profile.
@@ -32,10 +34,15 @@ public class SuggestionsController(ISuggestionService suggestionService) : BaseA
 
     /// <summary>
     /// Full reindex of developers, teams, open jobs, and open projects into Qdrant.
+    /// Production: Admin only. Development: any authenticated user (for local scripts).
     /// </summary>
     [HttpPost("reindex")]
-    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ApiResponse<ReindexResultDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Reindex(CancellationToken ct = default)
-        => HandleResult(await suggestionService.ReindexAllAsync(ct));
+    {
+        if (!environment.IsDevelopment() && !User.IsInRole("Admin"))
+            return Forbid();
+
+        return HandleResult(await suggestionService.ReindexAllAsync(ct));
+    }
 }

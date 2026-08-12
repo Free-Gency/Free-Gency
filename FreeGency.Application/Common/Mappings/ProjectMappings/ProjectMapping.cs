@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Common.Mappings.ProjectMappings
+namespace FreeGency.Application.Common.Mappings.ProjectMappings
 {
     public class ProjectMapping : Profile
     {
@@ -13,6 +13,8 @@
                 .ForMember(dist => dist.Specialties, opt => opt.MapFrom(src => src.ProjectSpecialties.Select(s => s.Specialty.NameEn)))
                 .ForMember(dist => dist.Skills, opt => opt.MapFrom(src => src.ProjectSkills.Select(ps => ps.Skill.Name)))
                 .ForMember(dist => dist.ProposalCount, opt => opt.MapFrom(src => src.ProjectProposals.Count()))
+                .ForMember(dist => dist.HasActiveDiscussion, opt => opt.MapFrom(src =>
+                    src.ProjectProposals.Any(p => p.Status == ProposalStatus.InDiscussion)))
                 .ForMember(dist => dist.ClientId, opt => opt.MapFrom(src => src.ClientId))
                 .ForMember(dist => dist.ClientRating, opt => opt.MapFrom(src => src.Client.ClientProfile != null ? src.Client.ClientProfile.AverageRating : 0m))
                 .ForMember(dist => dist.SkillIds, opt => opt.MapFrom(src => src.ProjectSkills.Select(ps => ps.SkillId.ToString())));

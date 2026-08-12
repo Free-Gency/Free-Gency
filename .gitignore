@@ -1,4 +1,4 @@
-bin/
+﻿bin/
 obj/
 
 .vs/
@@ -6,3 +6,6 @@ obj/
 artifacts/
 
 appsettings.Development.json
+
+# Local-only helper scripts (credentials / machine-specific)
+scripts/local/

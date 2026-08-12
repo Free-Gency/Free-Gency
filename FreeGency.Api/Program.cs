@@ -2,8 +2,10 @@ using FreeGency.AI;
 using FreeGency.Api.Extensions;
 using FreeGency.Api.OpenApi;
 using FreeGency.Application;
+using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Common.Helpers;
 using FreeGency.Application.Common.Hubs;
+using FreeGency.Application.Common.Results;
 using FreeGency.Domain.Entities;
 using FreeGency.Infrastructure;
 using FreeGency.Infrastructure.Persistence.Context;
@@ -12,6 +14,7 @@ using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -90,7 +93,36 @@ namespace FreeGency.Api
             #endregion
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.InvalidModelStateResponseFactory = context =>
+                    {
+                        var messages = context.ModelState
+                            .Where(kvp => kvp.Value is { Errors.Count: > 0 })
+                            .SelectMany(kvp => kvp.Value!.Errors.Select(err =>
+                            {
+                                var detail = !string.IsNullOrWhiteSpace(err.ErrorMessage)
+                                    ? err.ErrorMessage
+                                    : err.Exception?.Message ?? "Invalid value.";
+                                return string.IsNullOrWhiteSpace(kvp.Key)
+                                    ? detail
+                                    : $"{kvp.Key}: {detail}";
+                            }))
+                            .Where(m => !string.IsNullOrWhiteSpace(m))
+                            .Distinct()
+                            .ToList();
+
+                        if (messages.Count == 0)
+                        {
+                            messages.Add(
+                                "Request binding failed for one or more form fields (check dates, numbers, skills, roadmap, or images).");
+                        }
+
+                        return new BadRequestObjectResult(
+                            ApiResponse.Failure(AppError.Validation(string.Join(" | ", messages))));
+                    };
+                });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddSingleton<XmlCommentsOpenApiTransformer>();
             builder.Services.AddOpenApi(options =>

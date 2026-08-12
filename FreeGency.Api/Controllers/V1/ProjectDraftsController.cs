@@ -25,7 +25,21 @@ public class ProjectDraftsController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.UserInput))
             return BadRequest("userInput is required.");
 
-        var draft = await _draftService.GenerateDraftAsync(request.UserInput);
-        return Ok(draft);
+        try
+        {
+            var draft = await _draftService.GenerateDraftAsync(request.UserInput);
+            return Ok(draft);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return StatusCode(StatusCodes.Status502BadGateway, new { message = ex.Message });
+        }
+        catch (HttpRequestException ex)
+        {
+            return StatusCode(StatusCodes.Status502BadGateway, new
+            {
+                message = "Could not reach the ITI AI gateway. " + ex.Message
+            });
+        }
     }
 }

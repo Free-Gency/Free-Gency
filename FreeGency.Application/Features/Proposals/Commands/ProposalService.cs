@@ -232,11 +232,7 @@ public partial class ProposalService : IProposalService
                 "Discussion is already active for this proposal.");
         }
 
-        var active = (await _proposalRepository.GetActiveDiscussionByProjectIdAsync(proposal.ProjectId, ct)).ToList();
-        if (active.Any(p => p.Id != proposalId))
-            return ApiResponse.Failure<Guid>(AppError.Validation(
-                "Another discussion is already active. Close it before starting a new one."));
-
+        // Multiple concurrent discussions are allowed (e.g. pending invites + another applicant).
         await _proposalRepository.UpdateStatusAsync(proposalId, ProposalStatus.InDiscussion, ct);
 
         ChatRoom chatRoom;

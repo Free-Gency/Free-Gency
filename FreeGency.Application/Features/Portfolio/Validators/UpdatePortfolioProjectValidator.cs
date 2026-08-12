@@ -16,14 +16,6 @@ namespace FreeGency.Application.Features.Portfolio.Validators
                 .GreaterThanOrEqualTo(0)
                 .When(x => x.Budget.HasValue);
 
-            RuleFor(x => x.ProjectUrl)
-                .Must(x => Uri.TryCreate(x, UriKind.Absolute, out _))
-                .When(x => !string.IsNullOrWhiteSpace(x.ProjectUrl));
-
-            RuleFor(x => x.PrototypeUrl)
-                .Must(x => Uri.TryCreate(x, UriKind.Absolute, out _))
-                .When(x => !string.IsNullOrWhiteSpace(x.PrototypeUrl));
-
             RuleFor(x => x.Challenge).MaximumLength(8000);
             RuleFor(x => x.Solution).MaximumLength(8000);
             RuleFor(x => x.DurationLabel).MaximumLength(100);

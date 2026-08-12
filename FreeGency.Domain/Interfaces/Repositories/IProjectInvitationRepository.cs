@@ -28,4 +28,8 @@ public interface IProjectInvitationRepository : IGenericRepository<ProjectInvita
         Guid teamId,
         ProjectInvitationStatus? status,
         CancellationToken ct = default);
+
+    Task<IReadOnlyList<ProjectInvitation>> GetPendingByProjectIdAsync(
+        Guid projectId,
+        CancellationToken ct = default);
 }

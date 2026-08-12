@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Application.Features.Projects.DTOs
+namespace FreeGency.Application.Features.Projects.DTOs
 {
     public sealed class ProjectDto
     {
@@ -47,5 +47,8 @@
         public IEnumerable<string> SkillIds { get; init; } = [];
 
         public int ProposalCount { get; init; }
+
+        /// <summary>True when at least one proposal is InDiscussion on this project.</summary>
+        public bool HasActiveDiscussion { get; init; }
     }
 }

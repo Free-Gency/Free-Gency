@@ -421,6 +421,34 @@ public partial class MilestoneService
                 ProposalStatus.Rejected,
                 MilestonePlanConstants.HiredAnotherCandidateReason,
                 ct);
+
+            var otherRoom = await ChatRoomRepo.GetByProposalIdForUpdateAsync(other.Id, ct);
+            if (otherRoom is not null && otherRoom.Status == ChatRoomStatus.Active)
+            {
+                await MessageRepo.AddAsync(new Message
+                {
+                    Id = Guid.NewGuid(),
+                    ChatRoomId = otherRoom.Id,
+                    MessageType = MessageType.System,
+                    Text = "Discussion closed — another candidate was hired."
+                }, ct);
+                otherRoom.Status = ChatRoomStatus.Archived;
+                otherRoom.ArchivedAt = DateTime.UtcNow;
+                ChatRoomRepo.Update(otherRoom);
+            }
+        }
+
+        // Pending invites are no longer relevant after hire.
+        var invitationRepo = _unitOfWork.Repository<IProjectInvitationRepository, ProjectInvitation>();
+        var pendingInvites = await invitationRepo.GetPendingByProjectIdAsync(plan.ProjectId, ct);
+        foreach (var invite in pendingInvites)
+        {
+            invite.Status = ProjectInvitationStatus.Cancelled;
+            invite.RespondedAt = DateTime.UtcNow;
+            invite.RespondedByUserId = _currentUser.UserId;
+            invite.UpdatedAt = DateTime.UtcNow;
+            invite.UpdatedBy = _currentUser.UserId.ToString();
+            invitationRepo.Update(invite);
         }
 
         var proposalRoom = await ChatRoomRepo.GetByProposalIdForUpdateAsync(proposal.Id, ct);

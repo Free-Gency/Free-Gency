@@ -53,6 +53,13 @@ public class ProjectInvitationService : IProjectInvitationService
             return ApiResponse.Failure<ProjectInvitationDto>(
                 AppError.Validation("Project is not open for invitations."));
 
+        var activeDiscussions =
+            (await _proposalRepository.GetActiveDiscussionByProjectIdAsync(dto.ProjectId, ct)).ToList();
+        if (activeDiscussions.Count > 0)
+            return ApiResponse.Failure<ProjectInvitationDto>(
+                AppError.Validation(
+                    "This project already has an active discussion. Close it before sending invitations."));
+
         if (dto.InviteeType == ApplicantType.User)
         {
             if (dto.InviteeUserId is null || dto.InviteeUserId == Guid.Empty)
@@ -199,34 +206,53 @@ public class ProjectInvitationService : IProjectInvitationService
             ? invitation.InviteeTeamId!.Value
             : invitation.InviteeUserId!.Value;
 
-        if (await _proposalRepository.HasPendingOrActiveAsync(invitation.ProjectId, applicantType, applicantId, ct))
-            return ApiResponse.Failure<Guid>(
-                AppError.Validation("There is already an active proposal for this project."));
+        // Reuse an existing proposal/discussion for the same invitee when possible.
+        var existingForInvitee = await FindOpenProposalForApplicantAsync(
+            invitation.ProjectId, applicantType, applicantId, ct);
 
-        var active = (await _proposalRepository.GetActiveDiscussionByProjectIdAsync(invitation.ProjectId, ct)).ToList();
-        if (active.Count > 0)
-            return ApiResponse.Failure<Guid>(
-                AppError.Validation("Another discussion is already active on this project. Close it before accepting."));
-
-        var proposal = new ProjectProposal
+        if (existingForInvitee is not null && existingForInvitee.Status == ProposalStatus.InDiscussion)
         {
-            Id = Guid.NewGuid(),
-            ProjectId = invitation.ProjectId,
-            ApplicantType = applicantType,
-            TeamId = applicantType == ApplicantType.Team ? invitation.InviteeTeamId : null,
-            UserId = _currentUser.UserId,
-            CoverLetter = invitation.Message,
-            Approach = "Accepted project invitation — ready to discuss scope and milestones.",
-            ProposedTimeline = null,
-            SimilarLinksUrl = null,
-            ProposedBudget = project.BudgetMin > 0 ? project.BudgetMin : 1m,
-            Status = ProposalStatus.InDiscussion,
-            AppliedAt = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow,
-            CreatedBy = _currentUser.UserId.ToString()
-        };
+            var existingRoom = await _chatRoomRepository.GetByProposalIdAsync(existingForInvitee.Id, ct);
+            if (existingRoom is null)
+                return ApiResponse.Failure<Guid>(
+                    AppError.Validation("Discussion chat room was not found for the existing proposal."));
 
-        await _proposalRepository.AddAsync(proposal, ct);
+            await MarkInvitationAcceptedAsync(invitation, existingForInvitee.Id, existingRoom.Id, ct);
+            await NotifyInviteAcceptedAsync(invitation, project, existingRoom.Id, ct);
+            return ApiResponse.Success(existingRoom.Id, "Invitation accepted. Discussion already open.");
+        }
+
+        // Allow a second concurrent discussion (e.g. client invited A, then opened discussion with B).
+        ProjectProposal proposal;
+        if (existingForInvitee is not null)
+        {
+            proposal = existingForInvitee;
+            await _proposalRepository.UpdateStatusAsync(proposal.Id, ProposalStatus.InDiscussion, ct);
+            proposal = await _proposalRepository.GetByIdAsync(proposal.Id, ct)
+                       ?? proposal;
+        }
+        else
+        {
+            proposal = new ProjectProposal
+            {
+                Id = Guid.NewGuid(),
+                ProjectId = invitation.ProjectId,
+                ApplicantType = applicantType,
+                TeamId = applicantType == ApplicantType.Team ? invitation.InviteeTeamId : null,
+                UserId = _currentUser.UserId,
+                CoverLetter = invitation.Message,
+                Approach = "Accepted project invitation — ready to discuss scope and milestones.",
+                ProposedTimeline = null,
+                SimilarLinksUrl = null,
+                ProposedBudget = project.BudgetMin > 0 ? project.BudgetMin : 1m,
+                Status = ProposalStatus.InDiscussion,
+                AppliedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = _currentUser.UserId.ToString()
+            };
+
+            await _proposalRepository.AddAsync(proposal, ct);
+        }
 
         var clientProfileId = await _userRepository.GetClientProfileIdByUserIdAsync(project.ClientId, ct);
         if (clientProfileId is null)
@@ -271,42 +297,80 @@ public class ProjectInvitationService : IProjectInvitationService
                     AppError.Validation("Team leader developer profile was not found."));
         }
 
-        var chatRoom = new ChatRoom
+        var chatRoom = await _chatRoomRepository.GetByProposalIdForUpdateAsync(proposal.Id, ct);
+        if (chatRoom is null)
         {
-            Id = Guid.NewGuid(),
-            RoomType = RoomType.Proposal,
-            Status = ChatRoomStatus.Active,
-            ProposalId = proposal.Id,
-            TeamId = proposal.TeamId,
-            ProjectId = null,
-            Title = project.Title,
-            CreatedByUserId = project.ClientId,
-            CreatedAt = DateTime.UtcNow
-        };
+            chatRoom = new ChatRoom
+            {
+                Id = Guid.NewGuid(),
+                RoomType = RoomType.Proposal,
+                Status = ChatRoomStatus.Active,
+                ProposalId = proposal.Id,
+                TeamId = proposal.TeamId,
+                ProjectId = null,
+                Title = project.Title,
+                CreatedByUserId = project.ClientId,
+                CreatedAt = DateTime.UtcNow
+            };
 
-        await _chatRoomRepository.AddWithMembersAsync(chatRoom, members, ct);
-        await _messageRepository.AddAsync(new Message
+            await _chatRoomRepository.AddWithMembersAsync(chatRoom, members, ct);
+            await _messageRepository.AddAsync(new Message
+            {
+                Id = Guid.NewGuid(),
+                ChatRoomId = chatRoom.Id,
+                MessageType = MessageType.System,
+                Text = "Invitation accepted. Discussion started — negotiate the Milestone Plan next."
+            }, ct);
+        }
+        else if (chatRoom.Status == ChatRoomStatus.Archived)
         {
-            Id = Guid.NewGuid(),
-            ChatRoomId = chatRoom.Id,
-            MessageType = MessageType.System,
-            Text = "Invitation accepted. Discussion started — negotiate the Milestone Plan next."
-        }, ct);
+            chatRoom.Status = ChatRoomStatus.Active;
+            chatRoom.ArchivedAt = null;
+            _chatRoomRepository.Update(chatRoom);
+            await _messageRepository.AddAsync(new Message
+            {
+                Id = Guid.NewGuid(),
+                ChatRoomId = chatRoom.Id,
+                MessageType = MessageType.System,
+                Text = "Invitation accepted. Discussion reopened."
+            }, ct);
+        }
 
-        invitation.Status = ProjectInvitationStatus.Accepted;
-        invitation.RespondedAt = DateTime.UtcNow;
-        invitation.RespondedByUserId = _currentUser.UserId;
-        invitation.ProposalId = proposal.Id;
-        invitation.ChatRoomId = chatRoom.Id;
-        invitation.UpdatedAt = DateTime.UtcNow;
-        invitation.UpdatedBy = _currentUser.UserId.ToString();
-        _invitationRepository.Update(invitation);
-
-        await _unitOfWork.SaveChangesAsync(ct);
-
+        await MarkInvitationAcceptedAsync(invitation, proposal.Id, chatRoom.Id, ct);
         await NotifyInviteAcceptedAsync(invitation, project, chatRoom.Id, ct);
 
         return ApiResponse.Success(chatRoom.Id, "Invitation accepted. Discussion opened.");
+    }
+
+    private async Task<ProjectProposal?> FindOpenProposalForApplicantAsync(
+        Guid projectId,
+        ApplicantType applicantType,
+        Guid applicantId,
+        CancellationToken ct)
+    {
+        var open = await _proposalRepository.GetByProjectIdAsync(projectId, status: null, ct);
+        return open.FirstOrDefault(p =>
+            p.Status is ProposalStatus.Pending or ProposalStatus.Viewed or ProposalStatus.InDiscussion
+            && (applicantType == ApplicantType.Team
+                ? p.TeamId == applicantId
+                : p.UserId == applicantId && p.ApplicantType == ApplicantType.User));
+    }
+
+    private async Task MarkInvitationAcceptedAsync(
+        ProjectInvitation invitation,
+        Guid proposalId,
+        Guid chatRoomId,
+        CancellationToken ct)
+    {
+        invitation.Status = ProjectInvitationStatus.Accepted;
+        invitation.RespondedAt = DateTime.UtcNow;
+        invitation.RespondedByUserId = _currentUser.UserId;
+        invitation.ProposalId = proposalId;
+        invitation.ChatRoomId = chatRoomId;
+        invitation.UpdatedAt = DateTime.UtcNow;
+        invitation.UpdatedBy = _currentUser.UserId.ToString();
+        _invitationRepository.Update(invitation);
+        await _unitOfWork.SaveChangesAsync(ct);
     }
 
     public async Task<ApiResponse> RejectAsync(Guid invitationId, CancellationToken ct = default)

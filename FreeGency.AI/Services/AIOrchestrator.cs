@@ -183,7 +183,7 @@ public sealed class AIOrchestrator : IAIOrchestrator
                 ReturnedCount = finalProposals.Count,
                 ProcessingTime = sw.Elapsed,
                 UsedAiEmbeddings = projectEmbedding.Length > 0,
-                ModelUsed = "meta.llama4-scout-17b-instruct-v1:0",
+                ModelUsed = "google.gemma-3-27b-it",
                 Warnings = warnings.Count > 0 ? warnings : null
             }
         };

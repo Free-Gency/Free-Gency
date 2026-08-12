@@ -186,7 +186,7 @@ public sealed class ProposalRankingService : IProposalRankingService
                 ReturnedCount = ranked.Count,
                 ProcessingTime = elapsed,
                 UsedAiEmbeddings = false,
-                ModelUsed = "meta.llama4-scout-17b-instruct-v1:0"
+                ModelUsed = "google.gemma-3-27b-it"
             }
         };
     }

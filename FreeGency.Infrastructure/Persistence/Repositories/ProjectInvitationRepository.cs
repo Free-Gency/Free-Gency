@@ -97,4 +97,14 @@ public class ProjectInvitationRepository
 
         return await query.OrderByDescending(i => i.CreatedAt).ToListAsync(ct);
     }
+
+    public async Task<IReadOnlyList<ProjectInvitation>> GetPendingByProjectIdAsync(
+        Guid projectId,
+        CancellationToken ct = default)
+    {
+        return await _dbSet
+            .Where(i => i.ProjectId == projectId && i.Status == ProjectInvitationStatus.Pending)
+            .OrderByDescending(i => i.CreatedAt)
+            .ToListAsync(ct);
+    }
 }
