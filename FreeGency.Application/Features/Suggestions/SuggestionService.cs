@@ -262,8 +262,7 @@ public sealed class SuggestionService : ISuggestionService
         var sw = Stopwatch.StartNew();
         _logger.LogInformation("Starting full suggestions reindex.");
 
-        await _indexing.ResetCollectionsAsync(ct);
-
+        // Build documents first — never wipe Qdrant until embeddings are ready.
         var developerDocs = new List<BuiltSuggestionDocument>();
         var developers = await _developers.Query()
             .AsNoTracking()
@@ -323,10 +322,8 @@ public sealed class SuggestionService : ISuggestionService
         foreach (var project in openProjects)
             projectDocs.Add(_documentBuilder.BuildProject(MapProject(project)));
 
-        await _indexing.UpsertBatchAsync(developerDocs, ct);
-        await _indexing.UpsertBatchAsync(teamDocs, ct);
-        await _indexing.UpsertBatchAsync(jobDocs, ct);
-        await _indexing.UpsertBatchAsync(projectDocs, ct);
+        var allDocs = developerDocs.Concat(teamDocs).Concat(jobDocs).Concat(projectDocs);
+        await _indexing.RebuildCollectionsAsync(allDocs, ct);
 
         sw.Stop();
         _logger.LogInformation(
