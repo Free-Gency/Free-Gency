@@ -22,5 +22,11 @@ namespace FreeGency.Api.Controllers.V1
             var result = await notificationService.GetNotificationUnreadCount();
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
+        [HttpPost("{notificationId}/seen")]
+        public async Task<IActionResult> MaskAsSeen([FromRoute] Guid notificationId)
+        {
+            var result = await notificationService.MarkAsSeen(notificationId);
+            return result.IsSuccess ? Ok() : result.ToProblem();
+        }
     }
 }

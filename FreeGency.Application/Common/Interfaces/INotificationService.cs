@@ -10,5 +10,6 @@ namespace FreeGency.Application.Common.Interfaces
         Task<Result<UnreadNotificationCountDto>> GetNotificationUnreadCount();
         Task CreateNotification(CreateNotificationRequest createNotificationRequest);
         Task<Result<PaginatedResult<NotificationDto>>> GetNotificationAsync(NotificationFilter filter);
+        Task<Result> MarkAsSeen(Guid NotificationId);
     }
 }

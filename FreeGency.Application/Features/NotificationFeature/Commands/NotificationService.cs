@@ -289,6 +289,21 @@ namespace FreeGency.Application.Features.NotificationFeature.Commands
             };
         }
 
-      
+        public async Task<Result> MarkAsSeen(Guid NotificationId)
+        {
+            var notification = await notificationRepository.GetByIdAsync(NotificationId);
+            if (notification == null) return Result.Failure(NotificationErrors.NotificationNotFound);
+            notification.IsRead = true;
+            notification.ReadAt = DateTime.UtcNow;
+            await unitOfWork.SaveChangesAsync();
+            var active = await userRepository.GetActiveProfileAsync(currentUserService.UserId);
+            var connection = NotificationHub.GetConnections(active!.Value.ProfileId);
+            await hubContext.Clients.Clients(connection).SendAsync("MarkAsSeenNotification", new
+            {
+                NotificationId = NotificationId,
+                WasUnread = true
+            });
+            return Result.Success();
+        }
     }
 }
