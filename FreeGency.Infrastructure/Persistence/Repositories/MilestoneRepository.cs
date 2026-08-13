@@ -11,6 +11,17 @@ public class MilestoneRepository:GenericRepository<Milestone>,IMilestoneReposito
     public MilestoneRepository(ApplicationDbContext context):base(context)
     {
     }
+    public async Task<bool> AreAllOtherMilestonesApprovedAsync(
+     Guid projectId,
+     Guid currentMilestoneId,
+     CancellationToken ct = default)
+    {
+        return !await _dbSet.AnyAsync(
+            m => m.ProjectId == projectId &&
+                 m.Id != currentMilestoneId &&
+                 m.WorkStatus != WorkStatus.Approved,
+            ct);
+    }
     public async Task<IEnumerable<Milestone>> GetByProjectIdAsync(Guid projectId,CancellationToken ct = default)
     {
         return await _dbSet.AsNoTracking()

@@ -9,7 +9,7 @@ public class WalletRepository : GenericRepository<Wallet>, IWalletRepository
     public async Task<Wallet?> GetByOwnerAsync(owner ownerType, Guid ownerId, CancellationToken cancellationToken = default)
     {
         return await _dbSet
-            .AsNoTracking()
+           
             .FirstOrDefaultAsync(MatchesOwner(ownerType, ownerId), cancellationToken);
     }
 

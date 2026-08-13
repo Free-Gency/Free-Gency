@@ -818,11 +818,22 @@ public partial class MilestoneService
         try
         {
             await ReleaseFundsInternalAsync(project, milestone, ct);
+            var allOtherMilestonesApproved =
+       await _milestoneRepo.AreAllOtherMilestonesApprovedAsync(
+           project.Id,
+           milestone.Id,
+           ct);
+
+            if (allOtherMilestonesApproved)
+            {
+                project.Status = ProjectStatus.Completed;
+            }
         }
         catch (InvalidOperationException ex)
         {
             return ApiResponse.Failure(AppError.Validation(ex.Message));
         }
+       
 
         await RecordEventAsync(project.Id, milestone.Id, EventType.MilestoneApproved, null, ct);
         await RecordEventAsync(project.Id, milestone.Id, EventType.MilestoneReleased, null, ct);

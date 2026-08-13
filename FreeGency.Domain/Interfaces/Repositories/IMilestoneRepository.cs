@@ -8,6 +8,10 @@ namespace FreeGency.Domain.Interfaces.Repositories
 {
     public interface IMilestoneRepository : IGenericRepository<Milestone>
     {
+        Task<bool> AreAllOtherMilestonesApprovedAsync(
+      Guid projectId,
+      Guid currentMilestoneId,
+      CancellationToken ct = default);
         Task<IEnumerable<Milestone>> GetByProjectIdAsync(Guid projectId,CancellationToken ct = default);
     Task<Milestone?> GetNextUnfundedAsync(Guid projectId, CancellationToken ct = default);
     Task<IEnumerable<Milestone>> GetDueForAutoReleaseAsync(DateTime cutoffUtc, CancellationToken ct = default);
