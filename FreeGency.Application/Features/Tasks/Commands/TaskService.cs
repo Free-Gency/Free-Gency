@@ -95,6 +95,10 @@ public partial class TaskService : ITaskService
         => task.AssigneeUserId == UserId;
 
 
+    private async Task<bool> CanAssigneeModifyAsync(ProjectTask task, CancellationToken ct)
+        => await IsAssigneeAsync(task, ct) && task.Status == Domain.Enums.TaskStatus.InProgress;
+
+
     private async Task<Project?> LoadProjectForMilestoneAsync(Guid milestoneId, CancellationToken ct)
     {
         var milestone = await MilestoneRepo.GetByIdAsync(milestoneId, ct);
@@ -515,8 +519,8 @@ public partial class TaskService : ITaskService
         if (project is null || task is null)
             return ApiResponse.Failure<TaskChecklistItemDto>(AppError.NotFound(nameof(ProjectTask), taskId));
 
-        if (!await IsTaskManagerAsync(project, ct) && !await IsAssigneeAsync(task, ct))
-            return ApiResponse.Failure<TaskChecklistItemDto>(AppError.Forbidden("Only the assignee or team leader can add checklist items."));
+        if (!await IsTaskManagerAsync(project, ct) && !await CanAssigneeModifyAsync(task, ct))
+            return ApiResponse.Failure<TaskChecklistItemDto>(AppError.Forbidden("Checklist items can only be added while the task is in progress."));
 
         var item = new TaskChecklistItem
         {
@@ -541,8 +545,8 @@ public partial class TaskService : ITaskService
         if (project is null || task is null)
             return ApiResponse.Failure<TaskChecklistItemDto>(AppError.NotFound(nameof(ProjectTask), item.TaskId));
 
-        if (!await IsTaskManagerAsync(project, ct) && !await IsAssigneeAsync(task, ct))
-            return ApiResponse.Failure<TaskChecklistItemDto>(AppError.Forbidden("Only the assignee or team leader can update checklist items."));
+        if (!await IsTaskManagerAsync(project, ct) && !await CanAssigneeModifyAsync(task, ct))
+            return ApiResponse.Failure<TaskChecklistItemDto>(AppError.Forbidden("Checklist items can only be updated while the task is in progress."));
 
         item.IsCompleted = isCompleted;
         item.CompletedAt = isCompleted ? DateTime.UtcNow : null;
@@ -621,10 +625,11 @@ public partial class TaskService : ITaskService
             return ApiResponse.Failure<TaskSubtaskDto>(AppError.NotFound(nameof(ProjectTask), subtask.TaskId));
 
         var isManager = await IsTaskManagerAsync(project, ct);
-        var isAssignee = await IsAssigneeAsync(task, ct) || subtask.AssigneeUserId == UserId;
+        var isAssignee = (await IsAssigneeAsync(task, ct) || subtask.AssigneeUserId == UserId)
+                         && task.Status == Domain.Enums.TaskStatus.InProgress;
 
         if (!isManager && !isAssignee)
-            return ApiResponse.Failure<TaskSubtaskDto>(AppError.Forbidden("You cannot update this subtask."));
+            return ApiResponse.Failure<TaskSubtaskDto>(AppError.Forbidden("Subtask status can only be updated while the task is in progress."));
 
         if (!CanSubtaskTransit(subtask.Status, dto.Status, isManager))
             return ApiResponse.Failure<TaskSubtaskDto>(AppError.Validation("Invalid subtask status transition."));
@@ -673,8 +678,8 @@ public partial class TaskService : ITaskService
         if (project is null || task is null)
             return ApiResponse.Failure<TaskTimeLogDto>(AppError.NotFound(nameof(ProjectTask), taskId));
 
-        if (!await IsTaskManagerAsync(project, ct) && !await IsAssigneeAsync(task, ct))
-            return ApiResponse.Failure<TaskTimeLogDto>(AppError.Forbidden("Only the assignee or team leader can log time."));
+        if (!await IsTaskManagerAsync(project, ct) && !await CanAssigneeModifyAsync(task, ct))
+            return ApiResponse.Failure<TaskTimeLogDto>(AppError.Forbidden("Time can only be logged while the task is in progress."));
 
         var log = new TaskTimeLog
         {
@@ -723,8 +728,8 @@ public partial class TaskService : ITaskService
         if (project is null || task is null)
             return ApiResponse.Failure<IEnumerable<TaskAttachmentDto>>(AppError.NotFound(nameof(ProjectTask), taskId));
 
-        if (!await IsTaskManagerAsync(project, ct) && !await IsAssigneeAsync(task, ct))
-            return ApiResponse.Failure<IEnumerable<TaskAttachmentDto>>(AppError.Forbidden("Only the assignee or team leader can attach files."));
+        if (!await IsTaskManagerAsync(project, ct) && !await CanAssigneeModifyAsync(task, ct))
+            return ApiResponse.Failure<IEnumerable<TaskAttachmentDto>>(AppError.Forbidden("Files can only be attached while the task is in progress."));
 
         if (dto.Files is null || dto.Files.Count == 0)
             return ApiResponse.Failure<IEnumerable<TaskAttachmentDto>>(AppError.Validation("Please select at least one file."));
