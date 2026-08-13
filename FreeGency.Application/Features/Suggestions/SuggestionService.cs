@@ -402,7 +402,9 @@ public sealed class SuggestionService : ISuggestionService
             projectDocs.Add(_documentBuilder.BuildProject(MapProject(project)));
 
         var allDocs = developerDocs.Concat(teamDocs).Concat(jobDocs).Concat(projectDocs);
-        await _indexing.RebuildCollectionsAsync(allDocs, ct);
+        // Upsert only — never wipe Qdrant. Stale closed jobs / non-open projects are deleted by id.
+        await _indexing.UpsertBatchAsync(allDocs, ct);
+        await PruneStaleSuggestionVectorsAsync(ct);
 
         sw.Stop();
         _logger.LogInformation(
@@ -417,6 +419,27 @@ public sealed class SuggestionService : ISuggestionService
             ProjectsIndexed = projectDocs.Count,
             ElapsedMs = sw.ElapsedMilliseconds
         });
+    }
+
+    private async Task PruneStaleSuggestionVectorsAsync(CancellationToken ct)
+    {
+        var staleJobIds = await _teamJobs.Query()
+            .AsNoTracking()
+            .Where(j => j.Status != TeamJobStatus.open)
+            .Select(j => j.Id)
+            .ToListAsync(ct);
+
+        foreach (var id in staleJobIds)
+            await _indexing.DeleteAsync(SuggestionCollections.TeamJobs, id.ToString(), ct);
+
+        var staleProjectIds = await _projects.Query()
+            .AsNoTracking()
+            .Where(p => p.Status != ProjectStatus.Open)
+            .Select(p => p.Id)
+            .ToListAsync(ct);
+
+        foreach (var id in staleProjectIds)
+            await _indexing.DeleteAsync(SuggestionCollections.Projects, id.ToString(), ct);
     }
 
     public async Task IndexDeveloperAsync(Guid userId, CancellationToken ct = default)

@@ -31,8 +31,8 @@ public class SuggestionsController(ISuggestionService suggestionService) : BaseA
         => HandleResult(await suggestionService.SuggestCandidatesForProjectAsync(projectId, topK, ct));
 
     /// <summary>
-    /// Full reindex of developers, teams, open jobs, and open projects into Qdrant.
-    /// Available to any authenticated user.
+    /// Incremental reindex: upsert developers, teams, open jobs, and open projects into Qdrant.
+    /// Does not wipe existing vectors. Available to any authenticated user.
     /// </summary>
     [HttpPost("reindex")]
     [ProducesResponseType(typeof(ApiResponse<ReindexResultDto>), StatusCodes.Status200OK)]

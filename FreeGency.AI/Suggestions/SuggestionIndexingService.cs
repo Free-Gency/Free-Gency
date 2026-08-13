@@ -12,8 +12,7 @@ public interface ISuggestionIndexingService
     Task ResetCollectionsAsync(CancellationToken ct = default);
 
     /// <summary>
-    /// Embeds all documents first, then wipes collections and upserts.
-    /// Avoids leaving Qdrant empty if Gemini/DB work fails before vectors are ready.
+    /// Incremental reindex: embed then upsert. Never wipes collections.
     /// </summary>
     Task RebuildCollectionsAsync(IEnumerable<BuiltSuggestionDocument> documents, CancellationToken ct = default);
 }
@@ -82,47 +81,8 @@ public sealed class SuggestionIndexingService : ISuggestionIndexingService
         }
     }
 
-    public async Task RebuildCollectionsAsync(IEnumerable<BuiltSuggestionDocument> documents, CancellationToken ct = default)
-    {
-        var prepared = new List<(string Collection, List<VectorStoreEntry> Entries)>();
-
-        foreach (var group in documents.GroupBy(d => d.Collection, StringComparer.OrdinalIgnoreCase))
-        {
-            var docs = group.ToList();
-            if (docs.Count == 0)
-                continue;
-
-            var texts = docs
-                .Select(d => EmbeddingContentTypes.GetPrefix(d.ContentType) + d.Text)
-                .ToList();
-
-            var vectors = await _embeddings.EmbedBatchAsync(texts, ct);
-            var entries = new List<VectorStoreEntry>(docs.Count);
-            for (var i = 0; i < docs.Count; i++)
-            {
-                entries.Add(new VectorStoreEntry
-                {
-                    Id = docs[i].Id,
-                    Vector = vectors[i],
-                    Metadata = docs[i].Payload
-                });
-            }
-
-            prepared.Add((group.Key, entries));
-        }
-
-        // Wipe only after embeddings succeeded — otherwise For you stays populated.
-        await ResetCollectionsAsync(ct);
-
-        foreach (var (collection, entries) in prepared)
-        {
-            await _vectorStore.UpsertBatchAsync(collection, entries, ct);
-            _logger.LogInformation(
-                "Rebuilt {Count} suggestion vectors into {Collection}.",
-                entries.Count,
-                collection);
-        }
-    }
+    public Task RebuildCollectionsAsync(IEnumerable<BuiltSuggestionDocument> documents, CancellationToken ct = default)
+        => UpsertBatchAsync(documents, ct);
 
     private async Task<float[]> EmbedDocumentAsync(BuiltSuggestionDocument document, CancellationToken ct)
     {
