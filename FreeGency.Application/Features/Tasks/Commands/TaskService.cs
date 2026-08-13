@@ -142,6 +142,23 @@ public partial class TaskService : ITaskService
         };
     }
 
+    private static bool CanSubtaskTransit(Domain.Enums.TaskStatus from, Domain.Enums.TaskStatus to, bool isManager)
+    {
+        if (from == to)
+            return true;
+        if (isManager)
+            return true;
+
+        return (from, to) switch
+        {
+            (Domain.Enums.TaskStatus.Todo, Domain.Enums.TaskStatus.InProgress) => true,
+            (Domain.Enums.TaskStatus.InProgress, Domain.Enums.TaskStatus.InReview) => true,
+            (Domain.Enums.TaskStatus.Todo, Domain.Enums.TaskStatus.Done) => true,
+            (Domain.Enums.TaskStatus.Done, Domain.Enums.TaskStatus.Todo) => true,
+            _ => false
+        };
+    }
+
     private static string FullName(User? user)
         => user is null ? string.Empty : $"{user.FristName} {user.LastName}".Trim();
 
@@ -609,7 +626,7 @@ public partial class TaskService : ITaskService
         if (!isManager && !isAssignee)
             return ApiResponse.Failure<TaskSubtaskDto>(AppError.Forbidden("You cannot update this subtask."));
 
-        if (!CanTransit(subtask.Status, dto.Status, isManager))
+        if (!CanSubtaskTransit(subtask.Status, dto.Status, isManager))
             return ApiResponse.Failure<TaskSubtaskDto>(AppError.Validation("Invalid subtask status transition."));
 
         subtask.Status = dto.Status;
