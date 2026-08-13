@@ -63,8 +63,11 @@ public sealed class SuggestionSearchService : ISuggestionSearchService
         CancellationToken ct = default)
     {
         topK = NormalizeTopK(topK);
-        var built = _builder.BuildDeveloper(developer);
-        var queryVector = await EmbedBuiltAsync(built, ct);
+        var queryVector = await ResolveQueryVectorAsync(
+            SuggestionCollections.Developers,
+            developer.UserId.ToString(),
+            () => _builder.BuildDeveloper(developer),
+            ct);
 
         // Only open jobs are indexed in team_jobs (closed jobs are deleted),
         // so avoid a Qdrant payload filter — Cloud often rejects keyword filters
@@ -130,8 +133,11 @@ public sealed class SuggestionSearchService : ISuggestionSearchService
         CancellationToken ct = default)
     {
         topK = NormalizeTopK(topK);
-        var built = _builder.BuildProject(project);
-        var queryVector = await EmbedBuiltAsync(built, ct);
+        var queryVector = await ResolveQueryVectorAsync(
+            SuggestionCollections.Projects,
+            project.ProjectId.ToString(),
+            () => _builder.BuildProject(project),
+            ct);
         var recallK = Math.Max(topK * 3, topK);
 
         var teamTask = _vectorStore.SearchAsync(
@@ -166,6 +172,19 @@ public sealed class SuggestionSearchService : ISuggestionSearchService
             .OrderByDescending(s => s.FinalScore)
             .Take(topK)
             .ToList();
+    }
+
+    private async Task<float[]> ResolveQueryVectorAsync(
+        string collection,
+        string id,
+        Func<BuiltSuggestionDocument> buildFallback,
+        CancellationToken ct)
+    {
+        var stored = await _vectorStore.GetVectorAsync(collection, id, ct);
+        if (stored is { Length: > 0 })
+            return stored;
+
+        return await EmbedBuiltAsync(buildFallback(), ct);
     }
 
     private ScoredSuggestion ScoreCandidate(

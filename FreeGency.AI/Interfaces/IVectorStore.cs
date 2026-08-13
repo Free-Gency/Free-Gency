@@ -14,6 +14,12 @@ public interface IVectorStore
     Task DeleteAsync(string collection, string id, CancellationToken ct = default);
     Task DeleteCollectionAsync(string collection, CancellationToken ct = default);
     Task<bool> CollectionExistsAsync(string collection, CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns the stored embedding for an indexed point, or null if missing.
+    /// Used to avoid re-calling Gemini on every For you request.
+    /// </summary>
+    Task<float[]?> GetVectorAsync(string collection, string id, CancellationToken ct = default);
 }
 
 public sealed class VectorStoreEntry

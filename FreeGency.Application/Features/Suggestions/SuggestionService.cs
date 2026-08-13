@@ -61,14 +61,28 @@ public sealed class SuggestionService : ISuggestionService
             var doc = await MapDeveloperAsync(profile, ct);
             var scored = await _search.SearchTeamJobsForDeveloperAsync(doc, topK, ct);
 
+            var jobIds = scored
+                .Select(s => Guid.TryParse(s.Id, out var id) ? id : Guid.Empty)
+                .Where(id => id != Guid.Empty)
+                .Distinct()
+                .ToList();
+
+            var jobs = jobIds.Count == 0
+                ? []
+                : await _teamJobs.Query()
+                    .AsNoTracking()
+                    .AsSplitQuery()
+                    .Where(j => jobIds.Contains(j.Id) && j.Status == TeamJobStatus.open)
+                    .Include(j => j.Team)
+                    .Include(j => j.TeamJobSkills).ThenInclude(s => s.Skill)
+                    .ToListAsync(ct);
+
+            var jobsById = jobs.ToDictionary(j => j.Id);
+
             var suggestions = new List<SuggestedTeamJobDto>();
             foreach (var item in scored)
             {
-                if (!Guid.TryParse(item.Id, out var jobId))
-                    continue;
-
-                var job = await _teamJobs.GetByIdWithDetailsAsync(jobId, ct);
-                if (job is null || job.Status != TeamJobStatus.open)
+                if (!Guid.TryParse(item.Id, out var jobId) || !jobsById.TryGetValue(jobId, out var job))
                     continue;
 
                 suggestions.Add(new SuggestedTeamJobDto
@@ -131,6 +145,90 @@ public sealed class SuggestionService : ISuggestionService
         var projectDoc = MapProject(project);
         var scored = await _search.SearchCandidatesForProjectAsync(projectDoc, topK, ct);
 
+        var teamIds = scored
+            .Where(s => string.Equals(s.CandidateType, "Team", StringComparison.OrdinalIgnoreCase))
+            .Select(s => Guid.TryParse(s.Id, out var id) ? id : Guid.Empty)
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        var developerIds = scored
+            .Where(s => !string.Equals(s.CandidateType, "Team", StringComparison.OrdinalIgnoreCase))
+            .Select(s => Guid.TryParse(s.Id, out var id) ? id : Guid.Empty)
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        var teamsTask = teamIds.Count == 0
+            ? Task.FromResult(new List<Team>())
+            : _teams.Query()
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Where(t => teamIds.Contains(t.Id))
+                .Include(t => t.TeamSkills).ThenInclude(s => s.Skill)
+                .Include(t => t.TeamSpecialties).ThenInclude(s => s.Specialty)
+                .Include(t => t.TeamCategories).ThenInclude(c => c.Category)
+                .ToListAsync(ct);
+
+        var developersTask = developerIds.Count == 0
+            ? Task.FromResult(new List<DeveloperProfile>())
+            : _developers.Query()
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Where(d => developerIds.Contains(d.UserId))
+                .Include(d => d.User)
+                .Include(d => d.UserSkills).ThenInclude(s => s.Skill)
+                .Include(d => d.UserSpecialties).ThenInclude(s => s.Specialty)
+                .ToListAsync(ct);
+
+        var portfoliosTask = (teamIds.Count == 0 && developerIds.Count == 0)
+            ? Task.FromResult(new List<PortfolioProject>())
+            : _portfolios.Query()
+                .AsNoTracking()
+                .Where(p =>
+                    (p.OwnerTeamId.HasValue && teamIds.Contains(p.OwnerTeamId.Value)) ||
+                    (p.OwnerUserId.HasValue && developerIds.Contains(p.OwnerUserId.Value)))
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync(ct);
+
+        var memberCountsTask = teamIds.Count == 0
+            ? Task.FromResult(new Dictionary<Guid, int>())
+            : _teamMembers.Query()
+                .AsNoTracking()
+                .Where(m => teamIds.Contains(m.TeamId))
+                .GroupBy(m => m.TeamId)
+                .Select(g => new { TeamId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.TeamId, x => x.Count, ct);
+
+        var completedCountsTask = teamIds.Count == 0
+            ? Task.FromResult(new Dictionary<Guid, int>())
+            : _projects.GetProjectsQuery()
+                .AsNoTracking()
+                .Where(p => p.AssignedTeamId.HasValue
+                            && teamIds.Contains(p.AssignedTeamId.Value)
+                            && p.Status == ProjectStatus.Completed)
+                .GroupBy(p => p.AssignedTeamId!.Value)
+                .Select(g => new { TeamId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.TeamId, x => x.Count, ct);
+
+        await Task.WhenAll(teamsTask, developersTask, portfoliosTask, memberCountsTask, completedCountsTask);
+
+        var teamsById = teamsTask.Result.ToDictionary(t => t.Id);
+        var developersById = developersTask.Result.ToDictionary(d => d.UserId);
+        var portfolios = portfoliosTask.Result;
+        var memberCounts = memberCountsTask.Result;
+        var completedCounts = completedCountsTask.Result;
+
+        var teamPortfolios = portfolios
+            .Where(p => p.OwnerTeamId.HasValue)
+            .GroupBy(p => p.OwnerTeamId!.Value)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var developerPortfolios = portfolios
+            .Where(p => p.OwnerUserId.HasValue)
+            .GroupBy(p => p.OwnerUserId!.Value)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
         var candidates = new List<SuggestedCandidateDto>();
         foreach (var item in scored)
         {
@@ -139,21 +237,14 @@ public sealed class SuggestionService : ISuggestionService
 
             if (string.Equals(item.CandidateType, "Team", StringComparison.OrdinalIgnoreCase))
             {
-                var team = await _teams.GetByIdWithDetailsAsync(id, ct);
-                if (team is null)
+                if (!teamsById.TryGetValue(id, out var team))
                     continue;
 
-                var teamPortfolio = await _portfolios.Query()
-                    .AsNoTracking()
-                    .Where(p => p.OwnerTeamId == team.Id)
-                    .OrderByDescending(p => p.CreatedAt)
-                    .ToListAsync(ct);
+                var teamPortfolio = teamPortfolios.TryGetValue(team.Id, out var list) ? list : [];
                 var featured = teamPortfolio.FirstOrDefault(p => p.Visibility == Visibility.Public)
                     ?? teamPortfolio.FirstOrDefault();
-                var completedCount = await _projects.GetProjectsQuery()
-                    .AsNoTracking()
-                    .CountAsync(p => p.AssignedTeamId == team.Id && p.Status == ProjectStatus.Completed, ct);
-                var memberCount = await _teamMembers.GetMemberCountAsync(team.Id, ct);
+                completedCounts.TryGetValue(team.Id, out var completedCount);
+                memberCounts.TryGetValue(team.Id, out var memberCount);
 
                 candidates.Add(new SuggestedCandidateDto
                 {
@@ -186,22 +277,10 @@ public sealed class SuggestionService : ISuggestionService
             }
             else
             {
-                var developer = await _developers.Query()
-                    .AsNoTracking()
-                    .AsSplitQuery()
-                    .Include(d => d.User)
-                    .Include(d => d.UserSkills).ThenInclude(s => s.Skill)
-                    .Include(d => d.UserSpecialties).ThenInclude(s => s.Specialty)
-                    .FirstOrDefaultAsync(d => d.UserId == id, ct);
-
-                if (developer is null)
+                if (!developersById.TryGetValue(id, out var developer))
                     continue;
 
-                var developerPortfolio = await _portfolios.Query()
-                    .AsNoTracking()
-                    .Where(p => p.OwnerUserId == developer.UserId)
-                    .OrderByDescending(p => p.CreatedAt)
-                    .ToListAsync(ct);
+                var developerPortfolio = developerPortfolios.TryGetValue(developer.UserId, out var list) ? list : [];
                 var featured = developerPortfolio.FirstOrDefault(p => p.Visibility == Visibility.Public)
                     ?? developerPortfolio.FirstOrDefault();
                 var displayName = $"{developer.User?.FristName} {developer.User?.LastName}".Trim();

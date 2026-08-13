@@ -835,10 +835,16 @@ public partial class MilestoneService
             profileMode.Client,
             ct);
 
+        var completionChat = await TryCompleteProjectIfAllMilestonesReleasedAsync(project, milestone, ct);
+
         await _unitOfWork.SaveChangesAsync(ct);
         await TryBroadcastQueuedChatAsync(
             chatQueued,
             $"Milestone #{milestone.SortOrder} approved & released",
+            ct);
+        await TryBroadcastQueuedChatAsync(
+            completionChat,
+            "Project completed · chat archived",
             ct);
 
         if (project.AssignedUserId.HasValue)
@@ -893,7 +899,9 @@ public partial class MilestoneService
                         }));
             }
         }
-        return ApiResponse.Success("Funds released from escrow to the assignee.");
+        return ApiResponse.Success(project.Status == ProjectStatus.Completed
+            ? "Funds released. Project completed and chat archived."
+            : "Funds released from escrow to the assignee.");
     }
 
     public async Task<ApiResponse> RequestMilestoneWorkChangesAsync(
@@ -1026,6 +1034,7 @@ public partial class MilestoneService
                     EventType.MilestoneReleased,
                     actorId,
                     ct);
+                await TryCompleteProjectIfAllMilestonesReleasedAsync(project, milestone, ct);
                 count++;
                 if (project.AssignedUserId.HasValue)
                 {
@@ -1082,6 +1091,7 @@ public partial class MilestoneService
         if (count > 0)
             await _unitOfWork.SaveChangesAsync(ct);
 
+        count += await CompleteStuckReleasedProjectsAsync(ct);
         return count;
     }
 
@@ -1248,6 +1258,98 @@ public partial class MilestoneService
         }, ct);
     }
 
+    private async Task<int> CompleteStuckReleasedProjectsAsync(CancellationToken ct)
+    {
+        var ids = await _projectRepo.GetInProgressIdsReadyToCompleteAsync(ct);
+        if (ids.Count == 0)
+            return 0;
+
+        var completed = 0;
+        foreach (var projectId in ids)
+        {
+            var project = await _projectRepo.GetByIdAsync(projectId, ct);
+            if (project is null || project.Status == ProjectStatus.Completed)
+                continue;
+
+            try
+            {
+                await TryCompleteProjectIfAllMilestonesReleasedAsync(project, justReleased: null, ct);
+                if (project.Status == ProjectStatus.Completed)
+                    completed++;
+            }
+            catch
+            {
+                // continue other projects
+            }
+        }
+
+        if (completed > 0)
+            await _unitOfWork.SaveChangesAsync(ct);
+
+        return completed;
+    }
+
+    /// <summary>
+    /// Last released milestone: mark project Completed and archive the project chat.
+    /// </summary>
+    private async Task<(ChatRoom Room, Message Message)?> TryCompleteProjectIfAllMilestonesReleasedAsync(
+        Project project,
+        Milestone? justReleased,
+        CancellationToken ct)
+    {
+        if (project.Status == ProjectStatus.Completed)
+            return null;
+
+        if (justReleased is not null)
+        {
+            var milestones = (await _milestoneRepo.GetByProjectIdAsync(project.Id, ct)).ToList();
+            if (milestones.Count == 0)
+                return null;
+
+            var allReleased = milestones.All(m =>
+                m.Id == justReleased.Id || m.ReleaseStatus == ReleaseStatus.Released);
+            if (!allReleased)
+                return null;
+        }
+        else if (!await _milestoneRepo.AllReleasedAsync(project.Id, ct))
+        {
+            return null;
+        }
+
+        project.Status = ProjectStatus.Completed;
+        project.CompletedAt = DateTime.UtcNow;
+        _projectRepo.Update(project);
+
+        await RecordEventAsync(
+            project.Id,
+            justReleased?.Id,
+            EventType.ProjectCompleted,
+            project.ClientId,
+            ct);
+
+        var room = await ChatRoomRepo.GetByProjectIdForUpdateAsync(project.Id, ct);
+        if (room is null || room.Status == ChatRoomStatus.Archived)
+            return null;
+
+        var message = new Message
+        {
+            Id = Guid.NewGuid(),
+            ChatRoomId = room.Id,
+            MessageType = MessageType.System,
+            Text = "Project completed. This conversation is now archived.",
+            MilestoneId = justReleased?.Id,
+            CreatedAt = DateTime.UtcNow
+        };
+        await MessageRepo.AddAsync(message, ct);
+
+        room.Status = ChatRoomStatus.Archived;
+        room.ArchivedAt = DateTime.UtcNow;
+        room.UpdatedAt = DateTime.UtcNow;
+        ChatRoomRepo.Update(room);
+
+        return (room, message);
+    }
+
     private async Task RecordEventAsync(
         Guid projectId,
         Guid? milestoneId,
@@ -1318,7 +1420,13 @@ public partial class MilestoneService
             return;
         try
         {
-            await BroadcastChatMessageAsync(queued.Value.Room.Id, queued.Value.Message, preview, ct);
+            await BroadcastChatMessageAsync(
+                queued.Value.Room.Id,
+                queued.Value.Message,
+                preview,
+                ct,
+                queued.Value.Room.Status,
+                queued.Value.Room.ArchivedAt);
         }
         catch
         {
@@ -1330,7 +1438,9 @@ public partial class MilestoneService
         Guid roomId,
         Message message,
         string? previewText,
-        CancellationToken ct)
+        CancellationToken ct,
+        ChatRoomStatus? roomStatus = null,
+        DateTime? archivedAt = null)
     {
         var senderId = message.SenderClientProfileId ?? message.SenderDeveloperProfileId;
         var senderProfileType = message.SenderClientProfileId.HasValue
@@ -1363,7 +1473,9 @@ public partial class MilestoneService
             LastMessageType = message.MessageType.ToString(),
             LastMessageAt = message.CreatedAt,
             LastMessageSender = senderName,
-            SenderId = senderId ?? Guid.Empty
+            SenderId = senderId ?? Guid.Empty,
+            Status = roomStatus?.ToString(),
+            ArchivedAt = archivedAt
         };
 
         var profileIds = await ChatMemberRepo.GetRoomProfileIdsAsync(roomId);

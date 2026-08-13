@@ -77,6 +77,16 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
 
         await _context.Set<ProjectSkill>().AddRangeAsync(projectSkills, ct);
     }
+    public async Task<IReadOnlyList<Guid>> GetInProgressIdsReadyToCompleteAsync(CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Where(p => p.Status == ProjectStatus.InProgress)
+            .Where(p => p.Milestones.Any() && p.Milestones.All(m => m.ReleaseStatus == ReleaseStatus.Released))
+            .Select(p => p.Id)
+            .ToListAsync(ct);
+    }
+
     public async Task UpdateStatusAsync(Guid id, ProjectStatus status, CancellationToken ct = default)
     {
         var project = await _dbSet.FirstOrDefaultAsync(p => p.Id == id, ct);

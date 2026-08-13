@@ -33,13 +33,19 @@ public sealed class ModerationAgent : IModerationAgent
         2) PII / contact bypass: phone numbers, emails, messaging-app handles, or asking someone to
            continue privately off FreeGency. Redact or hide.
         3) Off-platform work/pay: any attempt to move the job, payment, or working relationship
-           outside FreeGency. This harms the marketplace — hide.
-        4) Spam / scam / unrelated solicitation — hide.
-        5) ALLOW normal on-platform work talk: milestones, deliverables, scheduling through FreeGency,
-           polite disagreement, constructive review criticism.
+           outside FreeGency (WhatsApp/Telegram/email pay, hire outside the app). Hide it.
+        4) Spam / scam / unrelated solicitation — hide. Gibberish keyboard mashing sent as spam → hide.
+        5) ALLOW normal on-platform work talk and normal conversation:
+           - greetings and short hellos (hi, hello, اهلا، مرحبا، سلام) even if brief or imperfect English
+           - asking for / sending the Milestone Plan, plan, deliverables, timeline, budget, files via FreeGency
+           - "PLAN" in this product means the FreeGency Milestone Plan — NEVER treat it as off-platform
+           - polite disagreement, scheduling, constructive review criticism
 
-        Bias: if intent is ambiguous but leans toward abuse, harassment, or leaving the platform → hide.
-        Only allow when the content is clearly clean coordination or a fair review.
+        Bias rules:
+        - Prefer ALLOW for short greetings and normal project coordination.
+        - Prefer hide only when intent clearly is abuse, harassment, spam/scam, contact sharing,
+          or leaving FreeGency for work/payment.
+        - Do NOT hide ambiguous short messages that have no harmful intent.
 
         Return ONLY one JSON object (no markdown, no extra text):
         {
@@ -52,9 +58,9 @@ public sealed class ModerationAgent : IModerationAgent
         }
 
         Action guide:
-        - allow: clean / normal coordination
+        - allow: clean / normal coordination / greetings
         - redact: contact details present; rest of text can stay
-        - hide: abuse, off-platform, harassment, spam
+        - hide: clear abuse, clear off-platform, harassment, spam
         - block_submit: severe threats, explicit sexual harassment, or clear off-platform payment solicitation
         """;
 
@@ -96,7 +102,8 @@ public sealed class ModerationAgent : IModerationAgent
                 {content[..Math.Min(content.Length, 2500)]}
                 >>>
 
-                Decide now. Prefer hide over allow when the user is harassing someone or trying to leave FreeGency.
+                Decide now. Prefer allow for greetings and on-platform work talk (including Milestone Plan).
+                Prefer hide only for clear harassment, spam/scam, contact sharing, or leaving FreeGency.
                 """);
 
             var response = await _chat.GetChatMessageContentsAsync(history, cancellationToken: timeout.Token);

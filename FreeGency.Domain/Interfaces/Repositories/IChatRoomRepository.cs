@@ -12,6 +12,9 @@ public interface IChatRoomRepository : IGenericRepository<ChatRoom>
 
     Task<ChatRoom?> GetByProjectIdAsync(Guid projectId, CancellationToken ct = default);
 
+    /// <summary>Tracked project room for status updates (archive on completion, etc.).</summary>
+    Task<ChatRoom?> GetByProjectIdForUpdateAsync(Guid projectId, CancellationToken ct = default);
+
     Task<ChatRoom?> GetByProposalIdAsync(Guid proposalId, CancellationToken ct = default);
 
     /// <summary>Tracked entity for status updates (archive, etc.).</summary>

@@ -15,6 +15,9 @@ namespace FreeGency.Domain.Interfaces.Repositories
 
         Task UpdateStatusAsync(Guid id, ProjectStatus status, CancellationToken ct = default);
 
+        /// <summary>In-progress projects whose milestones are all released (stuck completion).</summary>
+        Task<IReadOnlyList<Guid>> GetInProgressIdsReadyToCompleteAsync(CancellationToken ct = default);
+
         Task SetAssigneeAsync(Guid id, Guid? userId, Guid? teamId, CancellationToken ct = default);
 
         Task ReplaceSkillsAsync(Guid projectId, IEnumerable<Guid> skillIds, CancellationToken ct = default);

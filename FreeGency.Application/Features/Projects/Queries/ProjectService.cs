@@ -99,7 +99,8 @@ namespace FreeGency.Application.Features.Projects.Commands
         public async Task<ApiResponse<IEnumerable<ProjectDto>>> GetSavedProjectsAsync(CancellationToken ct = default)
             => ApiResponse.Success(
                 _mapper.Map<IEnumerable<ProjectDto>>(
-                    await _projectRepo.GetSavedByUserAsync(_currentUser.UserId, ct)));
+                    (await _projectRepo.GetSavedByUserAsync(_currentUser.UserId, ct))
+                        .Where(p => p.Status == ProjectStatus.Open)));
 
         private IQueryable<Project> ApplyMyProjectsRoleFilter(
             IQueryable<Project> query,

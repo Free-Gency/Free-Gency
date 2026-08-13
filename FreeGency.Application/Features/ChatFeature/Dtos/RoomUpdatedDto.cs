@@ -12,5 +12,7 @@ namespace FreeGency.Application.Features.ChatFeature.Dtos
         public DateTime LastMessageAt { get; set; }
         public string LastMessageSender { get; set; } = string.Empty;
         public Guid SenderId { get; set; }
+        public string? Status { get; set; }
+        public DateTime? ArchivedAt { get; set; }
     }
 }

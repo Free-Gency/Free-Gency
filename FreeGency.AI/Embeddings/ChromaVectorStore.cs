@@ -139,6 +139,13 @@ public sealed class ChromaVectorStore : IVectorStore
         }
     }
 
+    public Task<float[]?> GetVectorAsync(string collection, string id, CancellationToken ct = default)
+    {
+        // Chroma client used here doesn't expose a reliable get-embeddings API for our version.
+        // Production For you uses Qdrant; fall back to live embedding when needed.
+        return Task.FromResult<float[]?>(null);
+    }
+
     private async Task<ChromaCollectionClient> GetCollectionClientAsync(string collection)
     {
         lock (_lock)

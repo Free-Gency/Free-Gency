@@ -186,6 +186,37 @@ public sealed class QdrantVectorStore : IVectorStore, IDisposable
         }
     }
 
+    public async Task<float[]?> GetVectorAsync(string collection, string id, CancellationToken ct = default)
+    {
+        if (!await CollectionExistsAsync(collection, ct))
+            return null;
+
+        try
+        {
+            var points = await _client.RetrieveAsync(
+                collectionName: collection,
+                ids: [ToPointId(id)],
+                withVectors: true,
+                withPayload: false,
+                cancellationToken: ct);
+
+            var point = points.FirstOrDefault();
+            if (point?.Vectors is null)
+                return null;
+
+            // Dense vector (single unnamed vector) is the common FreeGency layout.
+            if (point.Vectors.Vector?.Data is { Count: > 0 } data)
+                return data.ToArray();
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "GetVector failed for {Collection}/{Id}.", collection, id);
+            return null;
+        }
+    }
+
     public void Dispose()
     {
         _client.Dispose();

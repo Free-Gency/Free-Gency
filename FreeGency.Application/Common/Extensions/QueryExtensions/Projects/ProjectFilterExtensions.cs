@@ -4,8 +4,10 @@ namespace FreeGency.Application.Common.Extensions.QueryExtensions.Projects
     {
         public static IQueryable<Project> ApplyFilters(this IQueryable<Project> query, FilterProjectsRequestDto request)
         {
-            if (request.Status.HasValue)
-                query = query.Where(i => i.Status == request.Status);
+            // Marketplace / developer home: only Open projects unless a status is requested.
+            query = request.Status.HasValue
+                ? query.Where(i => i.Status == request.Status)
+                : query.Where(i => i.Status == ProjectStatus.Open);
 
             if (request.CategoryId.HasValue)
                 query = query.Where(i => i.CategoryId == request.CategoryId);

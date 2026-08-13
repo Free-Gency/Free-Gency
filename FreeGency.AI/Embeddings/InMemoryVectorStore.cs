@@ -72,6 +72,17 @@ public sealed class InMemoryVectorStore : IVectorStore
         return Task.FromResult(_collections.ContainsKey(collection));
     }
 
+    public Task<float[]?> GetVectorAsync(string collection, string id, CancellationToken ct = default)
+    {
+        if (_collections.TryGetValue(collection, out var items) &&
+            items.TryGetValue(id, out var entry))
+        {
+            return Task.FromResult<float[]?>(entry.Vector);
+        }
+
+        return Task.FromResult<float[]?>(null);
+    }
+
     private static bool MatchesFilters(IDictionary<string, string>? metadata, IReadOnlyDictionary<string, string>? filters)
     {
         if (filters is null || filters.Count == 0)

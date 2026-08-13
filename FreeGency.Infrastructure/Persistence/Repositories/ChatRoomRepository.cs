@@ -44,6 +44,12 @@ public class ChatRoomRepository : GenericRepository<ChatRoom>, IChatRoomReposito
             .FirstOrDefaultAsync(r => r.ProjectId == projectId && r.RoomType == RoomType.Project, ct);
     }
 
+    public async Task<ChatRoom?> GetByProjectIdForUpdateAsync(Guid projectId, CancellationToken ct = default)
+    {
+        return await _dbSet.FirstOrDefaultAsync(
+            r => r.ProjectId == projectId && r.RoomType == RoomType.Project, ct);
+    }
+
     public async Task<ChatRoom?> GetByProposalIdAsync(Guid proposalId, CancellationToken ct = default)
     {
         return await _dbSet.AsNoTracking()
