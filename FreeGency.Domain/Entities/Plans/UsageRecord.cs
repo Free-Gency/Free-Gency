@@ -1,24 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
+﻿
+namespace FreeGency.Domain.Entities.Plans;
 
-namespace FreeGency.Domain.Entities.Plans
+public class UsageRecord: ISoftDeletableEntity
 {
-    public class UsageRecord
-    {
-        public Guid Id { get; set; }
+    public Guid Id { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
+    public DateTime? UpdatedAt { get; set; }
+    public string? UpdatedBy { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public string? DeletedBy { get; set; }
 
-        public Guid SubscriptionId { get; set; }
-        [ForeignKey(nameof(SubscriptionId))]
-        public Subscription subscription { get; set; } = null!;
+    public Guid SubscriptionId { get; set; }
+    [ForeignKey(nameof(SubscriptionId))]
+    public Subscription subscription { get; set; } = null!;
 
-        public FeatureType Feature { get; set; }
+    public FeatureType Feature { get; set; }
 
-        public int Used { get; set; }
+    public int Used { get; set; }
 
-        public DateTime PeriodStart { get; set; }
+    public DateTime PeriodStart { get; set; }
 
-        public DateTime PeriodEnd { get; set; }
-    }
+    public DateTime PeriodEnd { get; set; }
 }
