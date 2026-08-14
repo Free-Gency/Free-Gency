@@ -76,6 +76,10 @@ public partial class MilestoneService
         if (dto.Milestones.Any(m => string.IsNullOrWhiteSpace(m.Title) || m.Amount <= 0))
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Validation("Each milestone needs a title and amount > 0."));
 
+        var dueDateError = ValidateMilestoneDueDates(dto.Milestones.Select(m => m.DueDate));
+        if (dueDateError is not null)
+            return ApiResponse.Failure<MilestonePlanVersionDto>(dueDateError);
+
         var proposal = await ProposalRepo.GetByIdAsync(dto.ProposalId, ct);
         if (proposal is null)
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.NotFound(nameof(ProjectProposal), dto.ProposalId));
@@ -1692,8 +1696,29 @@ public partial class MilestoneService
         }
     }
 
+    private static AppError? ValidateMilestoneDueDates(IEnumerable<DateTime?> dueDates)
+    {
+        var today = DateTime.UtcNow.Date;
+        var max = today.AddYears(10);
+
+        foreach (var dueDate in dueDates)
+        {
+            if (dueDate is null)
+                continue;
+
+            var due = dueDate.Value.Date;
+            if (due < today)
+                return AppError.Validation("Milestone due dates cannot be earlier than today.");
+
+            if (due > max)
+                return AppError.Validation("Milestone due dates cannot be more than 10 years from today.");
+        }
+
+        return null;
+    }
+
     /// <summary>
-    /// Fixed price: plan total must equal the project budget.
+    /// Fixed price: plan total must be greater than zero and must not exceed the project budget.
     /// Range: plan total must stay within BudgetMin..BudgetMax.
     /// </summary>
     private static AppError? ValidatePlanTotalAgainstProjectBudget(Project project, decimal planTotal)
@@ -1704,10 +1729,16 @@ public partial class MilestoneService
             if (fixedBudget <= 0)
                 return AppError.Validation("Project fixed budget is not configured.");
 
-            if (planTotal != fixedBudget)
+            if (planTotal <= 0)
             {
                 return AppError.Validation(
-                    $"For a fixed-price project, milestone total must equal the project budget ({fixedBudget:0.##}). Current total: {planTotal:0.##}.");
+                    "For a fixed-price project, milestone total must be greater than zero.");
+            }
+
+            if (planTotal > fixedBudget)
+            {
+                return AppError.Validation(
+                    $"For a fixed-price project, milestone total must be {fixedBudget:0.##} or less. Current total: {planTotal:0.##}.");
             }
 
             return null;
