@@ -818,11 +818,22 @@ public partial class MilestoneService
         try
         {
             await ReleaseFundsInternalAsync(project, milestone, ct);
+            var allOtherMilestonesApproved =
+       await _milestoneRepo.AreAllOtherMilestonesApprovedAsync(
+           project.Id,
+           milestone.Id,
+           ct);
+
+            if (allOtherMilestonesApproved)
+            {
+                project.Status = ProjectStatus.Completed;
+            }
         }
         catch (InvalidOperationException ex)
         {
             return ApiResponse.Failure(AppError.Validation(ex.Message));
         }
+       
 
         await RecordEventAsync(project.Id, milestone.Id, EventType.MilestoneApproved, null, ct);
         await RecordEventAsync(project.Id, milestone.Id, EventType.MilestoneReleased, null, ct);
@@ -1095,28 +1106,38 @@ public partial class MilestoneService
         return count;
     }
 
-    private async Task ReleaseFundsInternalAsync(Project project, Milestone milestone, CancellationToken ct)
+    private async Task ReleaseFundsInternalAsync(
+     Project project,
+     Milestone milestone,
+     CancellationToken ct)
     {
-        var clientWallet = await WalletRepo.GetByOwnerAsync(owner.User, project.ClientId, ct)
+        var clientWallet =
+            await WalletRepo.GetByOwnerAsync(
+                owner.User,
+                project.ClientId,
+                ct)
             ?? throw new InvalidOperationException("Client wallet not found.");
 
         if (clientWallet.Reserved < milestone.Amount)
             throw new InvalidOperationException("Insufficient reserved funds.");
 
         var releaseKey = $"escrow-release:{milestone.Id}";
+
         if (await LedgerRepo.ExistsByIdempotencyKeyAsync(releaseKey, ct))
             return;
 
         clientWallet.Reserved -= milestone.Amount;
-        WalletRepo.Update(clientWallet);
 
         if (project.AssignedUserId.HasValue)
         {
-            var payeeWallet = await WalletRepo.GetByOwnerAsync(owner.User, project.AssignedUserId.Value, ct)
+            var payeeWallet =
+                await WalletRepo.GetByOwnerAsync(
+                    owner.User,
+                    project.AssignedUserId.Value,
+                    ct)
                 ?? throw new InvalidOperationException("Assignee wallet not found.");
 
             payeeWallet.Available += milestone.Amount;
-            WalletRepo.Update(payeeWallet);
 
             await LedgerRepo.AddAsync(new LedgerEntry
             {
@@ -1132,7 +1153,11 @@ public partial class MilestoneService
         }
         else if (project.AssignedTeamId.HasValue)
         {
-            await CreditTeamReleaseAsync(project, milestone, releaseKey, ct);
+            await CreditTeamReleaseAsync(
+                project,
+                milestone,
+                releaseKey,
+                ct);
         }
         else
         {
@@ -1143,9 +1168,11 @@ public partial class MilestoneService
         milestone.ReleaseStatus = ReleaseStatus.Released;
         milestone.ReleasedAmount = milestone.Amount;
         milestone.ReleasedAt = DateTime.UtcNow;
-        _milestoneRepo.Update(milestone);
 
-        await EscrowRepo.RecordReleaseAsync(project.Id, milestone.Amount, ct);
+        await EscrowRepo.RecordReleaseAsync(
+            project.Id,
+            milestone.Amount,
+            ct);
     }
 
     /// <summary>
