@@ -56,12 +56,19 @@ public static class DependencyInjection
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<ILedgerEntryRepository, LedgerEntryRepository>();
 
+        // Task repositories
         services.AddScoped<ITaskRepository, TaskRepository>();
         services.AddScoped<ITaskCommentRepository, TaskCommentRepository>();
         services.AddScoped<ITaskChecklistItemRepository, TaskChecklistItemRepository>();
         services.AddScoped<ITaskAttachmentRepository, TaskAttachmentRepository>();
         services.AddScoped<ITaskTimeLogRepository, TaskTimeLogRepository>();
         services.AddScoped<ITaskSubtaskRepository, TaskSubtaskRepository>();
+
+        // Plan repositories
+        services.AddScoped<IPlanRepository, PlanRepository>();
+        services.AddScoped<IPlanFeatureRepository, PlanFeatureRepository>();
+        services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+        services.AddScoped<IUsageRecordRepository, UsageRecordRepository>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
