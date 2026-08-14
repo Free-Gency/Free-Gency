@@ -376,7 +376,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProfileId")
                         .IsUnique();
 
-                    b.ToTable("clientNotificationSettings");
+                    b.ToTable("clientNotificationSettings", (string)null);
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.ClientProfile", b =>
@@ -596,7 +596,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProfileId")
                         .IsUnique();
 
-                    b.ToTable("developerNotificationSettings");
+                    b.ToTable("developerNotificationSettings", (string)null);
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.DeveloperProfile", b =>
@@ -1512,7 +1512,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("WalletId");
 
-                    b.ToTable("paymentTransactions");
+                    b.ToTable("paymentTransactions", (string)null);
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioFeedback", b =>
