@@ -86,8 +86,45 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             member.LastReadAt = DateTime.UtcNow;
             await unitOfWork.SaveChangesAsync();
 
+            var senderName = $"{currentUserService.FirstName} {currentUserService.LastName}";
+            var dto = await BroadcastChatMessageAsync(
+                message,
+                active.Value.ProfileId,
+                active.Value.Mode.ToString(),
+                senderName,
+                moderationWarning: null,
+                notifyOffline: string.IsNullOrWhiteSpace(message.Text));
+
+            if (!string.IsNullOrWhiteSpace(message.Text))
+            {
+                BackgroundJob.Enqueue<IChatService>(s => s.ApplyChatModerationAsync(
+                    message.Id,
+                    currentUserService.UserId,
+                    clientProfileId,
+                    developerProfileId,
+                    active.Value.ProfileId,
+                    active.Value.Mode.ToString(),
+                    senderName));
+            }
+
+            return Result.Success(dto);
+        }
+
+        public async Task ApplyChatModerationAsync(
+            Guid messageId,
+            Guid userId,
+            Guid? clientProfileId,
+            Guid? developerProfileId,
+            Guid senderProfileId,
+            string senderProfileType,
+            string senderName)
+        {
+            var message = await _messageRepository.GetByIdAsync(messageId);
+            if (message is null || string.IsNullOrWhiteSpace(message.Text))
+                return;
+
             var moderation = await contentModerationService.ModerateAndEnforceAsync(
-                currentUserService.UserId,
+                userId,
                 ModerationSourceType.ChatMessage,
                 message.Id,
                 message.Text,
@@ -106,20 +143,46 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             _messageRepository.Update(message);
             await unitOfWork.SaveChangesAsync();
 
-            if (moderation.IsMuted && moderation.Action == ModerationAction.BlockSubmit)
+            var changed = message.ModerationStatus != ModerationStatus.Visible
+                          || !string.IsNullOrWhiteSpace(moderation.WarningMessage);
+
+            if (changed)
             {
-                return Result.Failure<RoomMessagesDto>(ChatErrors.TemporarilyRestricted(
-                    moderation.WarningMessage ?? "You are temporarily restricted from sending messages."));
+                await BroadcastChatMessageAsync(
+                    message,
+                    senderProfileId,
+                    senderProfileType,
+                    senderName,
+                    moderation.WarningMessage,
+                    notifyOffline: false);
+                return;
             }
 
-            var roomMembers = await _chatRoomMemberRepository.GetRoomProfileIdsAsync(ChatRoomId);
+            await BroadcastChatMessageAsync(
+                message,
+                senderProfileId,
+                senderProfileType,
+                senderName,
+                moderationWarning: null,
+                notifyOffline: true);
+        }
+
+        private async Task<RoomMessagesDto> BroadcastChatMessageAsync(
+            Message message,
+            Guid senderProfileId,
+            string senderProfileType,
+            string senderName,
+            string? moderationWarning,
+            bool notifyOffline)
+        {
+            var roomMembers = await _chatRoomMemberRepository.GetRoomProfileIdsAsync(message.ChatRoomId);
             var dto = new RoomMessagesDto
             {
                 Id = message.Id,
-                ChatRoomId = ChatRoomId,
-                SenderId = active.Value.ProfileId,
-                SenderProfileType = active.Value.Mode.ToString(),
-                SenderName = $"{currentUserService.FirstName} {currentUserService.LastName}",
+                ChatRoomId = message.ChatRoomId,
+                SenderId = senderProfileId,
+                SenderProfileType = senderProfileType,
+                SenderName = senderName,
                 MessageType = message.MessageType.ToString(),
                 Text = message.Text,
                 FileName = message.FileName,
@@ -127,7 +190,7 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 CreatedAt = message.CreatedAt,
                 IsMine = true,
                 ModerationStatus = message.ModerationStatus.ToString(),
-                ModerationWarning = moderation.WarningMessage
+                ModerationWarning = moderationWarning
             };
 
             var publicText = message.ModerationStatus == ModerationStatus.Visible
@@ -136,10 +199,10 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             var recipientDto = new RoomMessagesDto
             {
                 Id = message.Id,
-                ChatRoomId = ChatRoomId,
-                SenderId = active.Value.ProfileId,
-                SenderProfileType = active.Value.Mode.ToString(),
-                SenderName = $"{currentUserService.FirstName} {currentUserService.LastName}",
+                ChatRoomId = message.ChatRoomId,
+                SenderId = senderProfileId,
+                SenderProfileType = senderProfileType,
+                SenderName = senderName,
                 MessageType = message.MessageType.ToString(),
                 Text = publicText,
                 FileName = message.ModerationStatus == ModerationStatus.Hidden ? null : message.FileName,
@@ -155,18 +218,18 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
 
             var roomUpdated = new RoomUpdatedDto
             {
-                RoomId = ChatRoomId,
+                RoomId = message.ChatRoomId,
                 LastMessage = lastPreview,
                 LastMessageType = message.MessageType.ToString(),
                 LastMessageAt = message.CreatedAt,
-                LastMessageSender = $"{currentUserService.FirstName} {currentUserService.LastName}",
-                SenderId = active.Value.ProfileId
+                LastMessageSender = senderName,
+                SenderId = senderProfileId
             };
 
             foreach (var memberRoom in roomMembers)
             {
                 var profileId = memberRoom.ClientProfileId ?? memberRoom.DeveloperProfileId!.Value;
-                var payload = profileId == active.Value.ProfileId ? dto : recipientDto;
+                var payload = profileId == senderProfileId ? dto : recipientDto;
 
                 await hub.Clients
                     .Group($"profile-{profileId}")
@@ -174,22 +237,21 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 await hub.Clients
                    .Group($"profile-{profileId}")
                    .SendAsync("RoomUpdated", roomUpdated);
-                if (profileId == active.Value.ProfileId)
+                if (profileId == senderProfileId)
                     continue;
-                // Don't push inbox notifications for hidden policy removals.
+                if (!notifyOffline)
+                    continue;
                 if (message.ModerationStatus == ModerationStatus.Hidden)
                     continue;
-                if (ChatHub.IsUserInRoom(ChatRoomId, profileId))
+                if (ChatHub.IsUserInRoom(message.ChatRoomId, profileId))
                     continue;
                 var notification =
                                 await notificationRepository.GetUnreadChatNotificationAsync(
-                                    ChatRoomId,
+                                    message.ChatRoomId,
                                     memberRoom.ClientProfileId,
                                     memberRoom.DeveloperProfileId);
                 if (notification == null)
                 {
-                    var senderName = $"{currentUserService.FirstName} {currentUserService.LastName}";
-
                     var body = $"{senderName}: {lastPreview ?? "Sent an attachment"}";
                     BackgroundJob.Enqueue(() => notificationService.CreateNotification(new CreateNotificationRequest
                   {
@@ -199,16 +261,16 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                       ClientProfileId = memberRoom.ClientProfileId,
                       DeveloperProfileId = memberRoom.DeveloperProfileId,
 
-                      ChatRoomId = ChatRoomId,
+                      ChatRoomId = message.ChatRoomId,
                       MessageId = message.Id,
-                      ActionUrl = $"/chat?room={ChatRoomId}"
+                      ActionUrl = $"/chat?room={message.ChatRoomId}"
                   }));
                 }
                 else
                 {
                     notification.Title = "New message";
                     notification.Body =
-                        $"{currentUserService.FirstName} {currentUserService.LastName}: " +
+                        $"{senderName}: " +
                         (lastPreview ?? "Sent an attachment");
 
                     notification.MessageId = message.Id;
@@ -217,7 +279,7 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 }
             }
 
-            return Result.Success(dto);
+            return dto;
         }
 
         public async Task<Result<Guid>> StartDiscussionAsync(StartDiscussionRequestDto dto)
