@@ -412,10 +412,22 @@ namespace FreeGency.Application.Features.Portfolio.Commands
                 request.Metrics,
                 ct);
 
-            await _unitOfWork.SaveChangesAsync(ct);
-
             if (request.Images?.Any() == true)
-                await UploadTeamImagesAsync(teamId, project.Id, request.Images, ct);
+            {
+                var uploaded = await _storageService.UploadManyAsync(
+                    request.Images,
+                    $"portfolio/team/{teamId}",
+                    ct);
+
+                await _portfolioRepo.AddImagesAsync(
+                    project.Id,
+                    uploaded.Select(x => x.Url),
+                    ct);
+
+                project.ImageCover = uploaded.First().Url;
+            }
+
+            await _unitOfWork.SaveChangesAsync(ct);
 
             return ApiResponse.Success(project.Id, "Portfolio has been created successfully.");
         }
@@ -520,8 +532,7 @@ namespace FreeGency.Application.Features.Portfolio.Commands
             if (!await CanManageTeamAsync(teamId, ct))
                 return ApiResponse.Failure(AppError.Unauthorized());
 
-            var portfolio = await _portfolioRepo
-                .GetDetailsAsync(portfolioProjectId, ct);
+            var portfolio = await _portfolioRepo.GetByIdAsync(portfolioProjectId, ct);
 
             if (portfolio is null)
                 return ApiResponse.Failure(AppError.NotFound(nameof(PortfolioProject), portfolioProjectId));
@@ -540,10 +551,7 @@ namespace FreeGency.Application.Features.Portfolio.Commands
                 ct);
 
             if (string.IsNullOrWhiteSpace(portfolio.ImageCover))
-            {
                 portfolio.ImageCover = uploaded.First().Url;
-                _portfolioRepo.Update(portfolio);
-            }
 
             await _unitOfWork.SaveChangesAsync(ct);
 
