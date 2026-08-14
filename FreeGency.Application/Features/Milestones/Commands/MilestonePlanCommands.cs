@@ -1497,6 +1497,23 @@ public partial class MilestoneService
             IsMine = true
         };
 
+        var recipientDto = new RoomMessagesDto
+        {
+            Id = dto.Id,
+            ChatRoomId = dto.ChatRoomId,
+            SenderId = dto.SenderId,
+            SenderProfileType = dto.SenderProfileType,
+            SenderName = dto.SenderName,
+            MessageType = dto.MessageType,
+            Text = dto.Text,
+            FileName = dto.FileName,
+            FileUrl = dto.FileUrl,
+            PlanVersionId = dto.PlanVersionId,
+            MilestoneId = dto.MilestoneId,
+            CreatedAt = dto.CreatedAt,
+            IsMine = false
+        };
+
         var roomUpdated = new RoomUpdatedDto
         {
             RoomId = roomId,
@@ -1509,10 +1526,18 @@ public partial class MilestoneService
             ArchivedAt = archivedAt
         };
 
-        var profileIds = await ChatMemberRepo.GetRoomProfileIdsAsync(roomId);
-        foreach (var profileId in profileIds)
+        await _hub.Clients.Group($"room-{roomId}").SendAsync("ReceiveMessage", recipientDto, ct);
+        await _hub.Clients.Group($"room-{roomId}").SendAsync("RoomUpdated", roomUpdated, ct);
+
+        var members = await ChatMemberRepo.GetRoomProfileIdsAsync(roomId);
+        foreach (var member in members)
         {
-            await _hub.Clients.Group($"profile-{profileId}").SendAsync("ReceiveMessage", dto, ct);
+            var profileId = member.ClientProfileId ?? member.DeveloperProfileId;
+            if (profileId is null)
+                continue;
+
+            var payload = profileId == senderId ? dto : recipientDto;
+            await _hub.Clients.Group($"profile-{profileId}").SendAsync("ReceiveMessage", payload, ct);
             await _hub.Clients.Group($"profile-{profileId}").SendAsync("RoomUpdated", roomUpdated, ct);
         }
     }
