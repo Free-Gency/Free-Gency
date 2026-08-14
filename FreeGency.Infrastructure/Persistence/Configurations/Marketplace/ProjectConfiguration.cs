@@ -1,8 +1,4 @@
-using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
-using FreeGency.Infrastructure.Persistence.Schemas;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
 
 namespace FreeGency.Infrastructure.Persistence.Configurations.Marketplace;
 
