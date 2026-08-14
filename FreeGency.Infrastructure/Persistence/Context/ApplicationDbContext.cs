@@ -1,4 +1,6 @@
 
+using FreeGency.Domain.Entities.Plans;
+
 namespace FreeGency.Infrastructure.Persistence.Context;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IEncryptionProvider encryptionProvider)
@@ -84,6 +86,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     // Moderation
     public DbSet<ModerationCase> ModerationCases => Set<ModerationCase>();
     public DbSet<UserModerationStrike> UserModerationStrikes => Set<UserModerationStrike>();
+    //plans
+    public DbSet<Plan> plans => Set<Plan>();
+    public DbSet<PlanFeature> planFeatures => Set<PlanFeature>();
+    public DbSet<Subscription> subscriptions => Set<Subscription>();
+    public DbSet<UsageRecord> usageRecords => Set<UsageRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
