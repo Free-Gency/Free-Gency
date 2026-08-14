@@ -21,6 +21,12 @@ namespace FreeGency.Application.Common.Errors
         public static AppError Validation(string message, IDictionary<string, string[]>? errors = null) =>
             new("Validation.Failed", message, StatusCodes.Status400BadRequest, errors);
 
+        public static AppError InsufficientWalletBalance(decimal needed, decimal available) =>
+            new(
+                "Wallet.InsufficientBalance",
+                $"Insufficient wallet balance to fund this milestone. Needed ${needed:0.##}, available ${available:0.##}.",
+                StatusCodes.Status400BadRequest);
+
         public static AppError Conflict(string message) =>
             new("Conflict", message, StatusCodes.Status409Conflict);
 

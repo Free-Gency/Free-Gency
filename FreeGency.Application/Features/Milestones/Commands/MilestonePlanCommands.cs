@@ -607,7 +607,7 @@ public partial class MilestoneService
             return ApiResponse.Failure(AppError.Validation("Client wallet not found."));
 
         if (clientWallet.Available < next.Amount)
-            return ApiResponse.Failure(AppError.Validation("Insufficient wallet balance to fund this milestone."));
+            return ApiResponse.Failure(AppError.InsufficientWalletBalance(next.Amount, clientWallet.Available));
 
         var idempotencyKey = $"escrow-lock:{next.Id}";
         if (await LedgerRepo.ExistsByIdempotencyKeyAsync(idempotencyKey, ct))
