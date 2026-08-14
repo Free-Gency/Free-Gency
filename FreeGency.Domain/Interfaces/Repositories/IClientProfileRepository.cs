@@ -1,6 +1,4 @@
-﻿using FreeGency.Domain.Entities;
-
-namespace FreeGency.Domain.Interfaces.Repositories;
+﻿namespace FreeGency.Domain.Interfaces.Repositories;
 
 public interface IClientProfileRepository : IGenericRepository<ClientProfile>
 {
@@ -13,4 +11,7 @@ public interface IClientProfileRepository : IGenericRepository<ClientProfile>
     Task AddSpecialtiesAsync(Guid userId, IEnumerable<Guid> specialtyIds, CancellationToken ct = default);
     Task ReplaceSpecialtiesAsync(Guid userId, IEnumerable<Guid> specialtyIds, CancellationToken ct = default);
     Task ReplaceSkillsAsync(Guid userId, IEnumerable<Guid> skillIds, CancellationToken ct = default);
+
+    Task<ClientProfile?> GetByUserIdWithSkillsAndInterestsAsync(Guid userId, CancellationToken ct = default);
+
 }
