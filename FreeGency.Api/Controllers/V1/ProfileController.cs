@@ -1,14 +1,14 @@
 using FreeGency.Api.Extensions;
-using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Features.Account.Dtos;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace FreeGency.Api.Controllers.V1;
 
 [Authorize]
 [Route("api/v1/profiles")]
-public class ProfileController(IAccountService accountService) : BaseApiController
+public class ProfileController(
+    IAccountService accountService,
+    IUserProfile _userProfileService,
+    ITeamService _teamService) : BaseApiController
 {
     [HttpPost("ChangePassword")]
     public async Task<IActionResult> ChangePassword(ChangePasswordRequestDto dto)
@@ -177,4 +177,18 @@ public class ProfileController(IAccountService accountService) : BaseApiControll
     [HttpPut("developer/me/skills")]
     public async Task<IActionResult> ReplaceDeveloperSkills([FromBody] ProfileSkillsDto dto, CancellationToken ct)
         => HandleResult(await accountService.ReplaceDeveloperSkillsAsync(dto, ct));
+
+
+
+
+
+    [HttpGet("client/{id:guid}")]
+    public async Task<IActionResult> GetClientProfile([FromRoute] Guid id, CancellationToken ct)
+            => HandleResult(await _userProfileService.GetClientProfileAsync(id, ct));
+
+
+    [HttpGet("team/{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+            => HandleResult(await _teamService.GetByIdAsync(id, ct));
+
 }
