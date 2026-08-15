@@ -12,6 +12,7 @@ public class PlanFeatureRepository : GenericRepository<PlanFeature>, IPlanFeatur
     CancellationToken ct = default)
     {
         return await _dbSet
+            .AsNoTracking()
             .Where(x => x.PlanId == planId && x.IsEnabled)
             .ToListAsync(ct);
     }
