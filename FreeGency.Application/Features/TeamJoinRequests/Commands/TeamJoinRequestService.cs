@@ -155,7 +155,7 @@ public partial class TeamJoinRequestService(IUnitOfWork unitOfWork,ICurrentUserS
         return Result.Success();
 
     }
-    public async Task<Result> RejectJoinRequestAsync(Guid requestId)
+    public async Task<Result> RejectJoinRequestAsync(Guid requestId, CancellationToken ct = default)
     {
         var request = await _teamJoinRequestRepository.GetEntityWithSpec(
             new TeamJoinRequestSpecification(requestId));
@@ -208,7 +208,7 @@ public partial class TeamJoinRequestService(IUnitOfWork unitOfWork,ICurrentUserS
         }
         return Result.Success();
     }
-    private async Task NotifyTeamLeadersAsync(Guid TeamId)
+    private async Task NotifyTeamLeadersAsync(Guid TeamId, CancellationToken ct = default)
     {
         var TeamLeadersProfileIds = await _teamMemberRepository.GetLeaderDeveloperProfileIdsAsync(TeamId);
         var senderName =
