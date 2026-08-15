@@ -1,5 +1,4 @@
 ﻿
-using FreeGency.Domain.Entities;
 
 namespace FreeGency.Domain.Interfaces.Repositories.Teams;
 

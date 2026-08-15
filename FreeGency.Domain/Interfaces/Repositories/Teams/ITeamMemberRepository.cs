@@ -1,7 +1,4 @@
 
-using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
-
 namespace FreeGency.Domain.Interfaces.Repositories.Teams;
 
 public interface ITeamMemberRepository : IGenericRepository<TeamMember>
@@ -31,6 +28,9 @@ public interface ITeamMemberRepository : IGenericRepository<TeamMember>
     Task RemoveAsync(Guid teamId, Guid userId, CancellationToken ct = default);
 
     Task RemoveByTeamIdAsync(Guid teamId, CancellationToken ct = default);
+
+    Task<int> CountByUserIdAsync(Guid userId, CancellationToken ct = default);
+
 }
 
 
