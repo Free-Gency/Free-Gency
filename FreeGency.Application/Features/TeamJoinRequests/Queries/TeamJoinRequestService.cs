@@ -7,14 +7,14 @@ namespace FreeGency.Application.Features.TeamJoinRequests.Commands;
 
 public partial class TeamJoinRequestService
 {
-    public async Task<Result<PaginatedResult<TeamJoinRequestResponseDto>>> GetJoinRequestAsync(TeamJoinRequestSpecificationParam param)
+    public async Task<Result<PaginatedResult<TeamJoinRequestResponseDto>>> GetJoinRequestAsync(TeamJoinRequestSpecificationParam param, CancellationToken ct = default)
     {
         var userId = currentUserService.UserId;
-        var team = await _teamRepository.GetByIdAsync(param.TeamId);
+        var team = await _teamRepository.GetByIdAsync(param.TeamId, ct);
         if (team is null)
             return Result.Failure<PaginatedResult<TeamJoinRequestResponseDto>>(TeamErrors.TeamNotFound);
 
-        var isLeader = await _teamMemberRepository.IsLeaderAsync(param.TeamId, userId)
+        var isLeader = await _teamMemberRepository.IsLeaderAsync(param.TeamId, userId, ct)
             || team.OwnerUserId == userId;
         if (!isLeader)
             return Result.Failure<PaginatedResult<TeamJoinRequestResponseDto>>(TeamErrors.UnauthorizedLeader);
@@ -35,7 +35,7 @@ public partial class TeamJoinRequestService
 
         return Result.Success(paginatedResult);
     }
-    public async Task<Result<PaginatedResult<UserRequestJoinResponseDto>>> GetUserJoinRequestsAsync(UserJoinRequestSpecificationParam param)
+    public async Task<Result<PaginatedResult<UserRequestJoinResponseDto>>> GetUserJoinRequestsAsync(UserJoinRequestSpecificationParam param, CancellationToken ct = default)
     {
         var userId = currentUserService.UserId;
 
