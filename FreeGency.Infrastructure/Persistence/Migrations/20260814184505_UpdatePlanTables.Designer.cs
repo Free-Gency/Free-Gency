@@ -4,6 +4,7 @@ using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FreeGency.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260814184505_UpdatePlanTables")]
+    partial class UpdatePlanTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -376,7 +379,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProfileId")
                         .IsUnique();
 
-                    b.ToTable("clientNotificationSettings", (string)null);
+                    b.ToTable("clientNotificationSettings");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.ClientProfile", b =>
@@ -596,7 +599,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProfileId")
                         .IsUnique();
 
-                    b.ToTable("developerNotificationSettings", (string)null);
+                    b.ToTable("developerNotificationSettings");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.DeveloperProfile", b =>
@@ -1512,7 +1515,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("WalletId");
 
-                    b.ToTable("paymentTransactions", (string)null);
+                    b.ToTable("paymentTransactions");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Plans.Plan", b =>
