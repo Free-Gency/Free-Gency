@@ -4,6 +4,7 @@ using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FreeGency.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260815004255_FixUsageRecordRelationship")]
+    partial class FixUsageRecordRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -376,7 +379,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProfileId")
                         .IsUnique();
 
-                    b.ToTable("clientNotificationSettings", (string)null);
+                    b.ToTable("clientNotificationSettings");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.ClientProfile", b =>
@@ -596,7 +599,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProfileId")
                         .IsUnique();
 
-                    b.ToTable("developerNotificationSettings", (string)null);
+                    b.ToTable("developerNotificationSettings");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.DeveloperProfile", b =>
@@ -1512,7 +1515,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("WalletId");
 
-                    b.ToTable("paymentTransactions", (string)null);
+                    b.ToTable("paymentTransactions");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Plans.Plan", b =>
@@ -1576,7 +1579,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("plans", (string)null);
+                    b.ToTable("plans");
 
                     b.HasData(
                         new
@@ -1671,7 +1674,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("PlanId", "Feature")
                         .IsUnique();
 
-                    b.ToTable("planFeatures", (string)null);
+                    b.ToTable("planFeatures");
 
                     b.HasData(
                         new
@@ -2060,7 +2063,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("subscriptions", (string)null);
+                    b.ToTable("subscriptions");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.Plans.UsageRecord", b =>
@@ -2122,7 +2125,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.HasIndex("SubscriptionId", "Feature")
                         .IsUnique();
 
-                    b.ToTable("usageRecords", (string)null);
+                    b.ToTable("usageRecords");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.PortfolioFeedback", b =>

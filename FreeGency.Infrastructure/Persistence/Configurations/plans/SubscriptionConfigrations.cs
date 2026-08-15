@@ -5,6 +5,7 @@ public class SubscriptionConfigrations : IEntityTypeConfiguration<Subscription>
 {
     public void Configure(EntityTypeBuilder<Subscription> builder)
     {
+
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Status)
@@ -18,7 +19,7 @@ public class SubscriptionConfigrations : IEntityTypeConfiguration<Subscription>
 
         // User 1 : 1 Subscription
         builder.HasOne(x => x.User)
-            .WithOne(x => x.Subscriptions)
+            .WithOne(x => x.Subscription)
             .HasForeignKey<Subscription>(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 

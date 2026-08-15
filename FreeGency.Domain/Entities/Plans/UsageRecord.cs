@@ -13,8 +13,7 @@ public class UsageRecord: ISoftDeletableEntity
     public string? DeletedBy { get; set; }
 
     public Guid SubscriptionId { get; set; }
-    [ForeignKey(nameof(SubscriptionId))]
-    public Subscription subscription { get; set; } = null!;
+    public virtual Subscription subscription { get; set; } = null!;
 
     public FeatureType Feature { get; set; }
 

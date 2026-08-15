@@ -36,6 +36,5 @@ global using FreeGency.Infrastructure.Persistence.Repositories.Tasks;
 
 global using FreeGency.Infrastructure.Persistence.Extensions;
 
-global using FreeGency.Domain.Interfaces.Repositories.Plan;
+global using FreeGency.Domain.Interfaces.Repositories.Plans;
 global using FreeGency.Domain.Entities.Plans;
-global using FreeGency.Infrastructure.Persistence.Repositories.Plan;

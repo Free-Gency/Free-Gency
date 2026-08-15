@@ -7,28 +7,18 @@ public class UsageRecordConfigrations : IEntityTypeConfiguration<UsageRecord>
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Feature)
-            .IsRequired();
-
         builder.Property(x => x.Used)
-            .IsRequired()
             .HasDefaultValue(0);
-
-        builder.Property(x => x.PeriodStart)
-            .IsRequired();
-
-        builder.Property(x => x.PeriodEnd)
-            .IsRequired();
 
         builder.HasIndex(x => new
         {
             x.SubscriptionId,
             x.Feature
         })
-        .IsUnique();    
+        .IsUnique();
 
         builder.HasOne(x => x.subscription)
-            .WithMany()
+            .WithMany(x => x.UsageRecords)
             .HasForeignKey(x => x.SubscriptionId)
             .OnDelete(DeleteBehavior.Cascade);
     }

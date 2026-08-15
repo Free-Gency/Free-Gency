@@ -5,7 +5,11 @@ using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Common.Mappings.AuthenticationMapping;
 using FreeGency.Application.Common.Models;
 using FreeGency.Application.Features.Authentication.Dtos;
+using FreeGency.Domain.Entities.Plans;
+using FreeGency.Domain.Interfaces.Repositories.Plans;
 using FreeGency.Infrastructure.Persistence.Repositories;
+using FreeGency.Infrastructure.Persistence.Repositories.Plans;
+using FreeGency.Infrastructure.Persistence.Seeding;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Cryptography;
@@ -21,6 +25,9 @@ namespace FreeGency.Application.Features.Authentication
         private readonly IWalletRepository walletRepository = unitOfWork.Repository<IWalletRepository, Wallet>();
         private readonly IClientNotificationSettingsRepository clientNotificationSettingsRepository = unitOfWork.Repository<IClientNotificationSettingsRepository, ClientNotificationSettings>();
         private readonly IDeveloperNotificationSettingsRepository developerNotificationSettingsRepository = unitOfWork.Repository<IDeveloperNotificationSettingsRepository, DeveloperNotificationSettings>();
+        private readonly IPlanFeatureRepository planFeatureRepository = unitOfWork.Repository<IPlanFeatureRepository, PlanFeature>();
+        private readonly ISubscriptionRepository subscriptionRepository = unitOfWork.Repository<ISubscriptionRepository, Subscription>();
+        private readonly IUsageRecordRepository usageRecordRepository = unitOfWork.Repository<IUsageRecordRepository, UsageRecord>();
         public async Task<Result> RegisterAsync(RegisterRequestDto dto)
         {
             var emailIsExist = await userManager.Users.AnyAsync(x => x.Email == dto.Email);
@@ -49,7 +56,6 @@ namespace FreeGency.Application.Features.Authentication
                 await repo.AddAsync(clientProfile);
                 var clientNotfication = new ClientNotificationSettings { Id=Guid.NewGuid(),ProfileId = clientProfile.Id };
                 await clientNotificationSettingsRepository.AddAsync(clientNotfication);
-                await unitOfWork.SaveChangesAsync();
             }
             else
             {
@@ -63,7 +69,6 @@ namespace FreeGency.Application.Features.Authentication
                 var developerNotification = new DeveloperNotificationSettings { Id = Guid.NewGuid(), ProfileId = developerProfile.Id };
                 await repo.AddAsync(developerProfile);
                 await developerNotificationSettingsRepository.AddAsync(developerNotification);
-                await unitOfWork.SaveChangesAsync();
             }
 
             // Confirmation email must not fail/hang the registration response —
@@ -85,7 +90,38 @@ namespace FreeGency.Application.Features.Authentication
             {
                 // Swallow — account is created; user can resend confirmation later.
             }
+            var features = await planFeatureRepository
+                                                        .GetByPlanIdAsync(PlanSeeds.FreePlanId);
+            var now = DateTime.UtcNow;
+            var subscription = new Subscription
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                PlanId = PlanSeeds.FreePlanId,
 
+                Status = SubscriptionStatus.Active,
+
+                StartedAt = now,
+                ExpiresAt = now.AddMonths(1),
+
+                AutoRenew = true
+            };
+            await subscriptionRepository.AddAsync(subscription);
+
+            var usageRecords = features
+                                        .Where(x => x.IsEnabled)
+                                        .Select(x => new UsageRecord
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            SubscriptionId = subscription.Id,
+                                            Feature = x.Feature,
+                                            Used = 0,
+                                            PeriodStart = now,
+                                            PeriodEnd = subscription.ExpiresAt!.Value
+                                        })
+                                        .ToList();
+            await usageRecordRepository.AddRangeAsync(usageRecords);
+            await unitOfWork.SaveChangesAsync();
             return Result.Success();
         }
 

@@ -13,12 +13,10 @@ public class Subscription : ISoftDeletableEntity
     public string? DeletedBy { get; set; }
 
     public Guid UserId { get; set; }
-    [ForeignKey(nameof(UserId))]
-    public User User { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
 
     public Guid PlanId { get; set; }
-    [ForeignKey(nameof(PlanId))]
-    public Plan Plan { get; set; } = null!;
+    public virtual Plan Plan { get; set; } = null!;
 
     public SubscriptionStatus Status { get; set; }
 
@@ -27,6 +25,8 @@ public class Subscription : ISoftDeletableEntity
     public DateTime? ExpiresAt { get; set; }
 
     public bool AutoRenew { get; set; }
+    public virtual ICollection<UsageRecord> UsageRecords { get; set; }
+       = [];
 }
 public enum SubscriptionStatus
 {
