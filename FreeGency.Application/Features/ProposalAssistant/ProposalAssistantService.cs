@@ -1,11 +1,7 @@
 using System.Text;
 using FreeGency.AI.ProposalAssistant;
 using FreeGency.Application.Features.ProposalAssistant.Dtos;
-using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
-using FreeGency.Domain.Interfaces.Repositories;
-using FreeGency.Infrastructure.Interfaces;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace FreeGency.Application.Features.ProposalAssistant;
 
@@ -17,15 +13,18 @@ public sealed class ProposalAssistantService : IProposalAssistantService
 
     private readonly IProjectRepository _projectRepository;
     private readonly IProjectProposalRepository _proposalRepository;
+    private readonly IEntitlementService _entitlementService;
 
     public ProposalAssistantService(
         IUnitOfWork unitOfWork,
         ProposalAssistantChatService chat,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IEntitlementService entitlementService)
     {
         _unitOfWork = unitOfWork;
         _chat = chat;
         _currentUser = currentUser;
+        _entitlementService = entitlementService;
         _projectRepository = _unitOfWork.Repository<IProjectRepository, Project>();
         _proposalRepository = _unitOfWork.Repository<IProjectProposalRepository, ProjectProposal>();
     }
@@ -50,6 +49,13 @@ public sealed class ProposalAssistantService : IProposalAssistantService
 
         if (project.ClientId != _currentUser.UserId)
             return ApiResponse.Failure<ProposalAssistantResponseDto>(AppError.Forbidden());
+            
+
+        // Check if the user has enough quota to use the AI chat feature
+        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.AIChat, ct);
+        if (!quota.IsAllowed)
+            return ApiResponse.Failure<ProposalAssistantResponseDto>(quota.ToAppError());
+        
 
         var proposals = await _proposalRepository.Query()
             .Where(p => p.ProjectId == projectId && p.Status != ProposalStatus.Withdrawn)
@@ -79,6 +85,9 @@ public sealed class ProposalAssistantService : IProposalAssistantService
                 request.FocusedApplicantName,
                 history,
                 ct);
+
+            // Consume one unit of the AI chat feature for the current user
+            await _entitlementService.ConsumeAsync(_currentUser.UserId, FeatureType.AIChat, ct);
 
             return ApiResponse.Success(MapResponse(ai, proposals));
         }

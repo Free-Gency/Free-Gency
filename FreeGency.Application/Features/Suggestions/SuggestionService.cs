@@ -1,11 +1,4 @@
-using System.Diagnostics;
-using FreeGency.AI.Suggestions;
-using FreeGency.Application.Common.Errors;
-using FreeGency.Application.Common.Results;
-using FreeGency.Application.Features.Suggestions.DTOs;
-using FreeGency.Domain.Enums;
-using FreeGency.Domain.Interfaces.Repositories.Teams;
-using Microsoft.EntityFrameworkCore;
+
 using Microsoft.Extensions.Logging;
 
 namespace FreeGency.Application.Features.Suggestions;
@@ -25,6 +18,7 @@ public sealed class SuggestionService : ISuggestionService
     private readonly ITeamJobRepository _teamJobs;
     private readonly IProjectRepository _projects;
     private readonly IPortfolioRepository _portfolios;
+    private readonly IEntitlementService _entitlementService;
 
     public SuggestionService(
         IUnitOfWork unitOfWork,
@@ -32,7 +26,8 @@ public sealed class SuggestionService : ISuggestionService
         SuggestionDocumentBuilder documentBuilder,
         ISuggestionIndexingService indexing,
         ISuggestionSearchService search,
-        ILogger<SuggestionService> logger)
+        ILogger<SuggestionService> logger,
+        IEntitlementService entitlementService)
     {
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
@@ -40,6 +35,7 @@ public sealed class SuggestionService : ISuggestionService
         _indexing = indexing;
         _search = search;
         _logger = logger;
+        _entitlementService = entitlementService;
 
         _developers = _unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
         _teams = _unitOfWork.Repository<ITeamRepository, Team>();
@@ -51,6 +47,12 @@ public sealed class SuggestionService : ISuggestionService
 
     public async Task<ApiResponse<TeamsForMeResponseDto>> SuggestTeamsForMeAsync(int topK = 10, CancellationToken ct = default)
     {
+        // Check if the user has quota to consume the TeamSuggestions feature
+        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.TeamSuggestions, ct);
+        if (!quota.IsAllowed)
+            return ApiResponse.Failure<TeamsForMeResponseDto>(quota.ToAppError());
+        
+
         var sw = Stopwatch.StartNew();
         try
         {
@@ -102,6 +104,10 @@ public sealed class SuggestionService : ISuggestionService
             }
 
             sw.Stop();
+
+            // Consume the TeamSuggestions feature quota for the user
+            await _entitlementService.ConsumeAsync(_currentUser.UserId, FeatureType.TeamSuggestions, ct);
+
             return ApiResponse.Success(new TeamsForMeResponseDto
             {
                 Suggestions = suggestions,
@@ -124,9 +130,7 @@ public sealed class SuggestionService : ISuggestionService
     }
 
     public async Task<ApiResponse<ProjectCandidatesResponseDto>> SuggestCandidatesForProjectAsync(
-        Guid projectId,
-        int topK = 10,
-        CancellationToken ct = default)
+        Guid projectId, int topK = 10, CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
         try

@@ -1,5 +1,5 @@
 using FreeGency.Application.Features.ProjectInvitations.Dtos;
-using Hangfire;
+
 
 namespace FreeGency.Application.Features.ProjectInvitations;
 
@@ -17,15 +17,18 @@ public class ProjectInvitationService : IProjectInvitationService
     private readonly IMessageRepository _messageRepository;
     private readonly IUserRepository _userRepository;
     private readonly IDeveloperProfileRepository _developerProfileRepository;
+    private readonly IEntitlementService _entitlementService;
 
     public ProjectInvitationService(
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IEntitlementService entitlementService)
     {
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
         _notificationService = notificationService;
+        _entitlementService = entitlementService;
         _invitationRepository = unitOfWork.Repository<IProjectInvitationRepository, ProjectInvitation>();
         _projectRepository = unitOfWork.Repository<IProjectRepository, Project>();
         _proposalRepository = unitOfWork.Repository<IProjectProposalRepository, ProjectProposal>();
@@ -59,6 +62,12 @@ public class ProjectInvitationService : IProjectInvitationService
             return ApiResponse.Failure<ProjectInvitationDto>(
                 AppError.Validation(
                     "This project already has an active discussion. Close it before sending invitations."));
+
+
+        // check entitlement:
+        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.SendInvitation, ct);
+        if (!quota.IsAllowed)
+            return ApiResponse.Failure<ProjectInvitationDto>(quota.ToAppError());
 
         if (dto.InviteeType == ApplicantType.User)
         {

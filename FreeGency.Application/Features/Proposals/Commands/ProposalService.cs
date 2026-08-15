@@ -1,13 +1,7 @@
-using AutoMapper.Execution;
-using FreeGency.Application.Features.NotificationFeature.Commands;
-using FreeGency.Application.Features.NotificationFeature.Dtos;
+
 using FreeGency.Application.Features.Proposals.Dtos;
-using FreeGency.Domain.Interfaces.Repositories.Teams;
-using FreeGency.Infrastructure.Integrations.Cloudinary;
-using FreeGency.Infrastructure.Interfaces;
-using FreeGency.Infrastructure.Persistence;
-using FreeGency.Infrastructure.Persistence.Repositories.Teams;
-using Hangfire;
+using Stripe;
+
 
 namespace FreeGency.Application.Features.Proposals.Commands;
 
@@ -25,11 +19,13 @@ public partial class ProposalService : IProposalService
     private readonly IStorageService _storageService;
     private readonly INotificationService _notificationService;
     private readonly ITeamRepository _teamRepository;
+    private readonly IEntitlementService _entitlementService;
     public ProposalService(
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        IStorageService storageService,INotificationService notificationService,ITeamRepository teamRepository)
+        IStorageService storageService,INotificationService notificationService,ITeamRepository teamRepository,
+        IEntitlementService entitlementService)
     {
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
@@ -37,6 +33,7 @@ public partial class ProposalService : IProposalService
         _storageService = storageService;
         _notificationService = notificationService;
         _teamRepository = teamRepository;
+        _entitlementService = entitlementService;
         _proposalRepository = _unitOfWork.Repository<IProjectProposalRepository, ProjectProposal>();
         _projectRepository = _unitOfWork.Repository<IProjectRepository, Project>();
         _teamMemberRepository = _unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
@@ -67,6 +64,11 @@ public partial class ProposalService : IProposalService
 
         if (await _proposalRepository.HasPendingOrActiveAsync(dto.ProjectId, dto.ApplicantType, applicantId, ct))
             return ApiResponse.Failure(AppError.Validation("You already have a pending or active proposal for this project."));
+
+        // check entitlement before building the proposal:
+        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.SendProposal, ct);
+        if (!quota.IsAllowed)
+            return ApiResponse.Failure(quota.ToAppError());
 
         var proposal = new ProjectProposal
         {
