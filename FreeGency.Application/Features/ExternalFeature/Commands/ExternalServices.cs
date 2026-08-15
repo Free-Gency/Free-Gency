@@ -4,9 +4,13 @@ using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Common.Mappings.AuthenticationMapping;
 using FreeGency.Application.Features.ExternalFeature.Dtos;
 using FreeGency.Domain.Entities;
+using FreeGency.Domain.Entities.Plans;
 using FreeGency.Domain.Enums;
 using FreeGency.Domain.Interfaces;
 using FreeGency.Domain.Interfaces.Repositories;
+using FreeGency.Domain.Interfaces.Repositories.Plans;
+using FreeGency.Infrastructure.Persistence.Repositories.Plans;
+using FreeGency.Infrastructure.Persistence.Seeding;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -24,6 +28,9 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
         private readonly IWalletRepository walletRepository = unitOfWork.Repository<IWalletRepository, Wallet>();
         private readonly IClientNotificationSettingsRepository clientNotificationSettingsRepository = unitOfWork.Repository<IClientNotificationSettingsRepository, ClientNotificationSettings>();
         private readonly IDeveloperNotificationSettingsRepository developerNotificationSettingsRepository = unitOfWork.Repository<IDeveloperNotificationSettingsRepository, DeveloperNotificationSettings>();
+        private readonly IPlanFeatureRepository planFeatureRepository = unitOfWork.Repository<IPlanFeatureRepository, PlanFeature>();
+        private readonly ISubscriptionRepository subscriptionRepository = unitOfWork.Repository<ISubscriptionRepository, Subscription>();
+        private readonly IUsageRecordRepository usageRecordRepository = unitOfWork.Repository<IUsageRecordRepository, UsageRecord>();
         public async Task<Result<AuthResponseDto>> LoginWithGoogleAsync()
         {
             var info = await signInManager.GetExternalLoginInfoAsync();
@@ -78,12 +85,44 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
                 await walletRepository.AddAsync(wallet);
                 await clientNotificationSettingsRepository.AddAsync(new ClientNotificationSettings { Id = Guid.NewGuid(), ProfileId = clientProfile.Id });
                 await developerNotificationSettingsRepository.AddAsync(new DeveloperNotificationSettings { Id = Guid.NewGuid(), ProfileId = developerProfile.Id });
-                await unitOfWork.SaveChangesAsync();
                 var loginResult = await userManager.AddLoginAsync(user, info);
                 if (!loginResult.Succeeded)
                     return Result.Failure<AuthResponseDto>(ExternalErrors.ExternalLoginFailed);
 
                 await EnsureProfileForModeAsync(user.Id, profileModeValue);
+                var features = await planFeatureRepository
+                                                      .GetByPlanIdAsync(PlanSeeds.FreePlanId);
+                var now = DateTime.UtcNow;
+                var subscription = new Subscription
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    PlanId = PlanSeeds.FreePlanId,
+
+                    Status = SubscriptionStatus.Active,
+
+                    StartedAt = now,
+                    ExpiresAt = now.AddMonths(1),
+
+                    AutoRenew = true
+                };
+                await subscriptionRepository.AddAsync(subscription);
+
+                var usageRecords = features
+                                            .Where(x => x.IsEnabled)
+                                            .Select(x => new UsageRecord
+                                            {
+                                                Id = Guid.NewGuid(),
+                                                SubscriptionId = subscription.Id,
+                                                Feature = x.Feature,
+                                                Used = 0,
+                                                PeriodStart = now,
+                                                PeriodEnd = subscription.ExpiresAt!.Value
+                                            })
+                                            .ToList();
+                await usageRecordRepository.AddRangeAsync(usageRecords);
+                await unitOfWork.SaveChangesAsync();
+
             }
             else
             {
@@ -270,7 +309,37 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
                         Id = Guid.NewGuid(),
                         ProfileId = developerProfile.Id
                     });
+                var features = await planFeatureRepository
+                                                    .GetByPlanIdAsync(PlanSeeds.FreePlanId);
+                var now = DateTime.UtcNow;
+                var subscription = new Subscription
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = user.Id,
+                    PlanId = PlanSeeds.FreePlanId,
 
+                    Status = SubscriptionStatus.Active,
+
+                    StartedAt = now,
+                    ExpiresAt = now.AddMonths(1),
+
+                    AutoRenew = true
+                };
+                await subscriptionRepository.AddAsync(subscription);
+
+                var usageRecords = features
+                                            .Where(x => x.IsEnabled)
+                                            .Select(x => new UsageRecord
+                                            {
+                                                Id = Guid.NewGuid(),
+                                                SubscriptionId = subscription.Id,
+                                                Feature = x.Feature,
+                                                Used = 0,
+                                                PeriodStart = now,
+                                                PeriodEnd = subscription.ExpiresAt!.Value
+                                            })
+                                            .ToList();
+                await usageRecordRepository.AddRangeAsync(usageRecords);
                 await unitOfWork.SaveChangesAsync();
 
                 // ربط LinkedIn بالـ User

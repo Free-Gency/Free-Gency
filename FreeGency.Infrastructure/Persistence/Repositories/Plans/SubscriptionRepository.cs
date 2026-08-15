@@ -1,5 +1,5 @@
 ﻿
-namespace FreeGency.Infrastructure.Persistence.Repositories.Plan;
+namespace FreeGency.Infrastructure.Persistence.Repositories.Plans;
 
 public class SubscriptionRepository: GenericRepository<Subscription>, ISubscriptionRepository
 {

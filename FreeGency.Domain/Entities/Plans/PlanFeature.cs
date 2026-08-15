@@ -14,12 +14,12 @@ public class PlanFeature : ISoftDeletableEntity
 
     public Guid PlanId { get; set; }
     [ForeignKey(nameof(PlanId))]
-    public Plan Plan { get; set; } = null!;
+    public virtual Plan Plan { get; set; } = null!;
 
     public FeatureType Feature { get; set; }
 
     public int? Limit { get; set; }
-    public bool IsEnabled { get; set; }
+    public bool IsEnabled { get; set; } = true;
 }
 public enum FeatureType
 {
