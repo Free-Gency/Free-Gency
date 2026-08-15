@@ -308,14 +308,15 @@ Inbox is **profile-scoped** (active `ClientProfile` or `DeveloperProfile`), same
 
 ---
 
-## 22. AiController — AI
+## 22. SuggestionsController — For You (RAG)
+
+Gemini embeddings + Qdrant. Index warms on API startup via Hangfire and daily via recurring job.
 
 | Method | Path | Notes |
 | ------ | ---- | ----- |
-| GET | `/ai/health` | Health |
-| POST | `/ai/match/projects` · `/teams` · `/team-jobs` | Matching |
-| POST | `/ai/index/projects/{id}` · `/ai/index/rebuild` | Index |
-| POST | `/ai/moderate-text` | Chat gate |
+| GET | `/suggestions/teams-for-me?topK=` | Developer For you — open team jobs (auth) |
+| GET | `/suggestions/candidates-for-project/{projectId}?topK=` | Client For you — teams + developers (auth) |
+| POST | `/suggestions/admin/reindex` | **Open (AllowAnonymous)** — full reindex, returns indexed counts |
 
 ---
 
@@ -325,7 +326,6 @@ Inbox is **profile-scoped** (active `ClientProfile` or `DeveloperProfile`), same
 | ------ | ---- | ----- |
 | GET | `/admin/users` · `/admin/projects` | Lists |
 | PATCH | `/admin/users/{id}/role` | `user` / `admin` |
-| POST | `/admin/ai/index/rebuild` | Force reindex |
 
 ---
 

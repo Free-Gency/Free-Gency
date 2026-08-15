@@ -10,11 +10,6 @@ public interface ISuggestionIndexingService
     Task UpsertBatchAsync(IEnumerable<BuiltSuggestionDocument> documents, CancellationToken ct = default);
     Task DeleteAsync(string collection, string id, CancellationToken ct = default);
     Task ResetCollectionsAsync(CancellationToken ct = default);
-
-    /// <summary>
-    /// Incremental reindex: embed then upsert. Never wipes collections.
-    /// </summary>
-    Task RebuildCollectionsAsync(IEnumerable<BuiltSuggestionDocument> documents, CancellationToken ct = default);
 }
 
 public sealed class SuggestionIndexingService : ISuggestionIndexingService
@@ -53,8 +48,13 @@ public sealed class SuggestionIndexingService : ISuggestionIndexingService
                 .ToList();
 
             var vectors = await _embeddings.EmbedBatchAsync(texts, ct);
-            var entries = new List<VectorStoreEntry>(docs.Count);
+            if (vectors.Count != docs.Count)
+            {
+                throw new InvalidOperationException(
+                    $"Embedding batch size mismatch for collection '{group.Key}': expected {docs.Count}, got {vectors.Count}.");
+            }
 
+            var entries = new List<VectorStoreEntry>(docs.Count);
             for (var i = 0; i < docs.Count; i++)
             {
                 entries.Add(new VectorStoreEntry
@@ -66,7 +66,10 @@ public sealed class SuggestionIndexingService : ISuggestionIndexingService
             }
 
             await _vectorStore.UpsertBatchAsync(group.Key, entries, ct);
-            _logger.LogInformation("Upserted {Count} suggestion vectors into {Collection}.", entries.Count, group.Key);
+            _logger.LogInformation(
+                "Upserted {Count} suggestion vectors into {Collection}.",
+                entries.Count,
+                group.Key);
         }
     }
 
@@ -78,11 +81,9 @@ public sealed class SuggestionIndexingService : ISuggestionIndexingService
         foreach (var collection in SuggestionCollections.All)
         {
             await _vectorStore.DeleteCollectionAsync(collection, ct);
+            _logger.LogInformation("Reset suggestion collection {Collection}.", collection);
         }
     }
-
-    public Task RebuildCollectionsAsync(IEnumerable<BuiltSuggestionDocument> documents, CancellationToken ct = default)
-        => UpsertBatchAsync(documents, ct);
 
     private async Task<float[]> EmbedDocumentAsync(BuiltSuggestionDocument document, CancellationToken ct)
     {

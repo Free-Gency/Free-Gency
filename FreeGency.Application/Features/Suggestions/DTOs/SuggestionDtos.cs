@@ -75,3 +75,9 @@ public sealed class ReindexResultDto
     public int ProjectsIndexed { get; init; }
     public long ElapsedMs { get; init; }
 }
+
+public sealed class ReindexQueuedDto
+{
+    public bool Queued { get; init; } = true;
+    public string JobId { get; init; } = string.Empty;
+}

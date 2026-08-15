@@ -69,10 +69,7 @@ public sealed class SuggestionSearchService : ISuggestionSearchService
             () => _builder.BuildDeveloper(developer),
             ct);
 
-        // Only open jobs are indexed in team_jobs (closed jobs are deleted),
-        // so avoid a Qdrant payload filter — Cloud often rejects keyword filters
-        // without a payload index, which breaks Teams → For you while Client For you
-        // (unfiltered teams/developers search) still works.
+        // Open jobs only are indexed; skip Qdrant payload filters (Cloud often lacks indexes).
         var recallK = Math.Max(topK * 4, topK);
         var hits = await _vectorStore.SearchAsync(
             SuggestionCollections.TeamJobs,
@@ -83,48 +80,46 @@ public sealed class SuggestionSearchService : ISuggestionSearchService
             ct);
 
         var developerSkills = developer.SkillIds.ToHashSet();
-        var scored = hits.Select(hit =>
-        {
-            var jobSkills = ParseIds(hit.Metadata, "skillIds");
-            var skillOverlap = OverlapRatio(developerSkills, jobSkills);
-            var rating = NormalizeRating(
-                ParseDecimal(hit.Metadata, "teamAverageRating"),
-                ParseInt(hit.Metadata, "teamRatingCount"));
-            var portfolio = string.Equals(
-                GetMeta(hit.Metadata, "teamHasPublicPortfolio"),
-                "true",
-                StringComparison.OrdinalIgnoreCase)
-                ? 1f
-                : 0f;
-
-            var final = (0.55f * hit.Score)
-                        + (0.25f * skillOverlap)
-                        + (0.15f * rating)
-                        + (0.05f * portfolio);
-
-            return new ScoredSuggestion
+        return hits
+            .Select(hit =>
             {
-                Id = hit.Id,
-                CandidateType = "TeamJob",
-                VectorScore = hit.Score,
-                FinalScore = final,
-                Metadata = hit.Metadata,
-                Breakdown = new ScoreBreakdown
-                {
-                    Vector = hit.Score,
-                    SkillOverlap = skillOverlap,
-                    Rating = rating,
-                    Portfolio = portfolio
-                }
-            };
-        })
-        .GroupBy(s => GetMeta(s.Metadata, "teamId"), StringComparer.OrdinalIgnoreCase)
-        .Select(g => g.OrderByDescending(x => x.FinalScore).First())
-        .OrderByDescending(s => s.FinalScore)
-        .Take(topK)
-        .ToList();
+                var skillOverlap = OverlapRatio(developerSkills, ParseIds(hit.Metadata, "skillIds"));
+                var rating = NormalizeRating(
+                    ParseDecimal(hit.Metadata, "teamAverageRating"),
+                    ParseInt(hit.Metadata, "teamRatingCount"));
+                var portfolio = string.Equals(
+                    GetMeta(hit.Metadata, "teamHasPublicPortfolio"),
+                    "true",
+                    StringComparison.OrdinalIgnoreCase)
+                    ? 1f
+                    : 0f;
 
-        return scored;
+                var final = (0.55f * hit.Score)
+                            + (0.25f * skillOverlap)
+                            + (0.15f * rating)
+                            + (0.05f * portfolio);
+
+                return new ScoredSuggestion
+                {
+                    Id = hit.Id,
+                    CandidateType = "TeamJob",
+                    VectorScore = hit.Score,
+                    FinalScore = final,
+                    Metadata = hit.Metadata,
+                    Breakdown = new ScoreBreakdown
+                    {
+                        Vector = hit.Score,
+                        SkillOverlap = skillOverlap,
+                        Rating = rating,
+                        Portfolio = portfolio
+                    }
+                };
+            })
+            .GroupBy(s => GetMeta(s.Metadata, "teamId"), StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.OrderByDescending(x => x.FinalScore).First())
+            .OrderByDescending(s => s.FinalScore)
+            .Take(topK)
+            .ToList();
     }
 
     public async Task<IReadOnlyList<ScoredSuggestion>> SearchCandidatesForProjectAsync(
@@ -138,8 +133,8 @@ public sealed class SuggestionSearchService : ISuggestionSearchService
             project.ProjectId.ToString(),
             () => _builder.BuildProject(project),
             ct);
-        var recallK = Math.Max(topK * 3, topK);
 
+        var recallK = Math.Max(topK * 3, topK);
         var teamTask = _vectorStore.SearchAsync(
             SuggestionCollections.Teams,
             queryVector,
@@ -147,7 +142,6 @@ public sealed class SuggestionSearchService : ISuggestionSearchService
             _options.SimilarityThreshold,
             null,
             ct);
-
         var developerTask = _vectorStore.SearchAsync(
             SuggestionCollections.Developers,
             queryVector,
@@ -161,14 +155,10 @@ public sealed class SuggestionSearchService : ISuggestionSearchService
         var projectSkills = project.SkillIds.ToHashSet();
         var projectSpecialties = project.SpecialtyIds.ToHashSet();
 
-        var teamScores = teamTask.Result.Select(hit =>
-            ScoreCandidate(hit, "Team", projectSkills, projectSpecialties));
-
-        var developerScores = developerTask.Result.Select(hit =>
-            ScoreCandidate(hit, "Developer", projectSkills, projectSpecialties));
-
-        return teamScores
-            .Concat(developerScores)
+        return teamTask.Result
+            .Select(hit => ScoreCandidate(hit, "Team", projectSkills, projectSpecialties))
+            .Concat(developerTask.Result.Select(hit =>
+                ScoreCandidate(hit, "Developer", projectSkills, projectSpecialties)))
             .OrderByDescending(s => s.FinalScore)
             .Take(topK)
             .ToList();
@@ -184,10 +174,12 @@ public sealed class SuggestionSearchService : ISuggestionSearchService
         if (stored is { Length: > 0 })
             return stored;
 
-        return await EmbedBuiltAsync(buildFallback(), ct);
+        var built = buildFallback();
+        var prefixed = EmbeddingContentTypes.GetPrefix(built.ContentType) + built.Text;
+        return await _embeddings.EmbedAsync(prefixed, ct);
     }
 
-    private ScoredSuggestion ScoreCandidate(
+    private static ScoredSuggestion ScoreCandidate(
         VectorSearchResult hit,
         string candidateType,
         HashSet<Guid> projectSkills,
@@ -221,12 +213,6 @@ public sealed class SuggestionSearchService : ISuggestionSearchService
         };
     }
 
-    private async Task<float[]> EmbedBuiltAsync(BuiltSuggestionDocument built, CancellationToken ct)
-    {
-        var prefixed = EmbeddingContentTypes.GetPrefix(built.ContentType) + built.Text;
-        return await _embeddings.EmbedAsync(prefixed, ct);
-    }
-
     private int NormalizeTopK(int topK)
     {
         if (topK <= 0)
@@ -240,8 +226,7 @@ public sealed class SuggestionSearchService : ISuggestionSearchService
         if (left.Count == 0 || right.Count == 0)
             return 0f;
 
-        var intersection = left.Count(right.Contains);
-        return (float)intersection / left.Count;
+        return (float)left.Count(right.Contains) / left.Count;
     }
 
     private static float NormalizeRating(decimal averageRating, int ratingCount)

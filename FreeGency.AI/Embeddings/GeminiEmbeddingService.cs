@@ -74,7 +74,7 @@ public sealed class GeminiEmbeddingService : IEmbeddingGenerator<string, Embeddi
         var vectors = new List<Embedding<float>>(texts.Count);
 
         // Keep batches small to stay under free-tier rate limits.
-        const int batchSize = 8;
+        const int batchSize = 4;
         for (var offset = 0; offset < texts.Count; offset += batchSize)
         {
             var batch = texts.Skip(offset).Take(batchSize).ToList();
@@ -82,7 +82,7 @@ public sealed class GeminiEmbeddingService : IEmbeddingGenerator<string, Embeddi
             vectors.AddRange(embedded.Select(v => new Embedding<float>(v)));
 
             if (offset + batchSize < texts.Count)
-                await Task.Delay(200, cancellationToken);
+                await Task.Delay(800, cancellationToken);
         }
 
         return new GeneratedEmbeddings<Embedding<float>>(vectors);
@@ -118,14 +118,29 @@ public sealed class GeminiEmbeddingService : IEmbeddingGenerator<string, Embeddi
         var json = JsonSerializer.Serialize(payload);
         var url = $"v1beta/{modelPath}:batchEmbedContents?key={Uri.EscapeDataString(_apiKey)}";
 
-        using var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync(url, content, ct);
-        var body = await response.Content.ReadAsStringAsync(ct);
-
-        if (!response.IsSuccessStatusCode)
+        const int maxAttempts = 6;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync(url, content, ct);
+            var body = await response.Content.ReadAsStringAsync(ct);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var doc = JsonDocument.Parse(body);
+                if (!doc.RootElement.TryGetProperty("embeddings", out var embeddings) ||
+                    embeddings.ValueKind != JsonValueKind.Array)
+                {
+                    throw new InvalidOperationException("Gemini batchEmbed response missing embeddings[].");
+                }
+
+                return embeddings.EnumerateArray()
+                    .Select(e => NormalizeIfNeeded(ParseValues(e)))
+                    .ToList();
+            }
+
             _logger.LogError("Gemini batchEmbed failed ({Status}): {Body}", (int)response.StatusCode, body);
-            // Fallback to sequential single embeds if batch endpoint rejects the payload.
+
             if ((int)response.StatusCode is 400 or 404)
             {
                 var fallback = new List<float[]>(texts.Count);
@@ -134,19 +149,20 @@ public sealed class GeminiEmbeddingService : IEmbeddingGenerator<string, Embeddi
                 return fallback;
             }
 
+            if ((int)response.StatusCode == 429 && attempt < maxAttempts)
+            {
+                var delayMs = Math.Min(30_000, 1_000 * (1 << attempt));
+                _logger.LogWarning(
+                    "Gemini rate limited on batchEmbed (attempt {Attempt}/{Max}). Waiting {Delay}ms.",
+                    attempt, maxAttempts, delayMs);
+                await Task.Delay(delayMs, ct);
+                continue;
+            }
+
             response.EnsureSuccessStatusCode();
         }
 
-        using var doc = JsonDocument.Parse(body);
-        if (!doc.RootElement.TryGetProperty("embeddings", out var embeddings) ||
-            embeddings.ValueKind != JsonValueKind.Array)
-        {
-            throw new InvalidOperationException("Gemini batchEmbed response missing embeddings[].");
-        }
-
-        return embeddings.EnumerateArray()
-            .Select(e => NormalizeIfNeeded(ParseValues(e)))
-            .ToList();
+        throw new InvalidOperationException("Gemini batchEmbed failed after retries.");
     }
 
     private async Task<float[]> EmbedSingleAsync(string text, string taskType, CancellationToken ct)
@@ -165,21 +181,38 @@ public sealed class GeminiEmbeddingService : IEmbeddingGenerator<string, Embeddi
         var json = JsonSerializer.Serialize(payload);
         var url = $"v1beta/{modelPath}:embedContent?key={Uri.EscapeDataString(_apiKey)}";
 
-        using var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync(url, content, ct);
-        var body = await response.Content.ReadAsStringAsync(ct);
-
-        if (!response.IsSuccessStatusCode)
+        const int maxAttempts = 6;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync(url, content, ct);
+            var body = await response.Content.ReadAsStringAsync(ct);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var doc = JsonDocument.Parse(body);
+                if (!doc.RootElement.TryGetProperty("embedding", out var embedding))
+                    throw new InvalidOperationException("Gemini embedContent response missing embedding.");
+
+                return NormalizeIfNeeded(ParseValues(embedding));
+            }
+
             _logger.LogError("Gemini embedContent failed ({Status}): {Body}", (int)response.StatusCode, body);
+
+            if ((int)response.StatusCode == 429 && attempt < maxAttempts)
+            {
+                var delayMs = Math.Min(30_000, 1_000 * (1 << attempt));
+                _logger.LogWarning(
+                    "Gemini rate limited on embedContent (attempt {Attempt}/{Max}). Waiting {Delay}ms.",
+                    attempt, maxAttempts, delayMs);
+                await Task.Delay(delayMs, ct);
+                continue;
+            }
+
             response.EnsureSuccessStatusCode();
         }
 
-        using var doc = JsonDocument.Parse(body);
-        if (!doc.RootElement.TryGetProperty("embedding", out var embedding))
-            throw new InvalidOperationException("Gemini embedContent response missing embedding.");
-
-        return NormalizeIfNeeded(ParseValues(embedding));
+        throw new InvalidOperationException("Gemini embedContent failed after retries.");
     }
 
     private static float[] ParseValues(JsonElement embeddingElement)
