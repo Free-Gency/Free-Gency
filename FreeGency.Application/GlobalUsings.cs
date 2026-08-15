@@ -1,7 +1,4 @@
-global using AutoMapper;
-global using AutoMapper.QueryableExtensions;
-global using FluentValidation;
-global using FluentValidation.AspNetCore;
+
 global using FreeGency.AI.Suggestions;
 global using FreeGency.Application.Common.Errors;
 global using FreeGency.Application.Common.Exceptions;
@@ -63,6 +60,21 @@ global using FreeGency.Domain.Interfaces.Repositories.Tasks;
 global using FreeGency.Domain.Interfaces.Repositories.Teams;
 global using FreeGency.Infrastructure.Integrations.Cloudinary;
 global using FreeGency.Infrastructure.Interfaces;
+global using FreeGency.Domain.Entities.Plans;
+global using FreeGency.Application.Features.Plans.Dtos;
+global using FreeGency.Domain.Interfaces.Repositories.Plans;
+global using FreeGency.Application.Features.Plans;
+global using FreeGency.Application.Features.LedgerEntryFeature.Queries;
+global using FreeGency.Application.Features.Moderation;
+global using FreeGency.Application.Features.Plans.Commands;
+global using FreeGency.Application.Features.Plans.Queries;
+global using FreeGency.Application.Features.UserProfiles;
+
+
+global using AutoMapper;
+global using AutoMapper.QueryableExtensions;
+global using FluentValidation;
+global using FluentValidation.AspNetCore;
 global using Hangfire;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Identity;

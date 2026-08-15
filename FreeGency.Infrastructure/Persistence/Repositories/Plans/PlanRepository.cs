@@ -1,9 +1,7 @@
 ﻿
-using FreeGency.Domain.Interfaces.Repositories.Plans;
-
 namespace FreeGency.Infrastructure.Persistence.Repositories.Plans;
 
-public class PlanRepository : GenericRepository<Domain.Entities.Plans.Plan>, IPlanRepository
+public class PlanRepository : GenericRepository<Plan>, IPlanRepository
 {
     public PlanRepository(ApplicationDbContext context) : base(context)
     {
@@ -18,4 +16,9 @@ public class PlanRepository : GenericRepository<Domain.Entities.Plans.Plan>, IPl
     {
         return _dbSet.AsQueryable();
     }
+
+
+    public async Task<Plan?> GetFreePlanAsync(CancellationToken ct = default)
+    => await _dbSet.AsNoTracking().FirstOrDefaultAsync(p => p.Name == "Free", ct);
+
 }
