@@ -8,6 +8,11 @@ public class SubscriptionRepository : GenericRepository<Subscription>, ISubscrip
     {
     }
 
+    public async Task<List<Subscription>> GetExpireSubscription()
+    {
+        return await _dbSet.Include(x=>x.Plan).Where(x => x.ExpiresAt <= DateTime.UtcNow).ToListAsync();
+    }
+
     public async Task<Subscription?> GetActiveByUserIdAsync(Guid userId, CancellationToken ct = default)
     {
         var now = DateTime.UtcNow;

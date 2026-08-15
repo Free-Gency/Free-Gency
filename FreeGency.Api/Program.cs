@@ -170,7 +170,10 @@ namespace FreeGency.Api
                 "suggestions-full-reindex",
                 service => service.ReindexAllAsync(CancellationToken.None),
                 Cron.Daily);
-
+            var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+            using var scope = scopeFactory.CreateScope();
+            var planBackground = scope.ServiceProvider.GetRequiredService<IBackGroundJobPlanService>();
+            RecurringJob.AddOrUpdate("planService", () => planBackground.ProcessPlansAsync(), Cron.Daily);
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
