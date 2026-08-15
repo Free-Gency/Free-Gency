@@ -6,4 +6,9 @@ public class SubscriptionRepository: GenericRepository<Subscription>, ISubscript
     public SubscriptionRepository(ApplicationDbContext context) : base(context)
     {
     }
+
+    public async Task<List<Subscription>> GetExpireSubscription()
+    {
+        return await _dbSet.Include(x=>x.Plan).Where(x => x.ExpiresAt <= DateTime.UtcNow).ToListAsync();
+    }
 }

@@ -1,4 +1,5 @@
 
+using FreeGency.Application.Features.BackGroundJobPlan.Commands;
 using FreeGency.Application.Features.LedgerEntryFeature.Queries;
 using FreeGency.Application.Features.Moderation;
 using FreeGency.Application.Features.Plans.Commands;
@@ -17,6 +18,7 @@ public static class DependencyInjection
             cfg.AddMaps(typeof(ProposalMapping).Assembly);
             cfg.AddMaps(typeof(TaskMapping).Assembly);
         });
+        services.AddScoped<IBackGroundJobPlanService, BackGroundJobPlanService>();
         services.AddScoped<IPlanService, PlanService>();
         services.AddScoped<ILedgerEntryService, LedgerEntryService>();
         services.AddScoped<INotificationService, NotificationService>();
