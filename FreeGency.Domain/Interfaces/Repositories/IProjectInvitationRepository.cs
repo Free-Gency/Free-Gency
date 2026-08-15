@@ -1,5 +1,4 @@
-using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
+
 
 namespace FreeGency.Domain.Interfaces.Repositories;
 
@@ -32,4 +31,7 @@ public interface IProjectInvitationRepository : IGenericRepository<ProjectInvita
     Task<IReadOnlyList<ProjectInvitation>> GetPendingByProjectIdAsync(
         Guid projectId,
         CancellationToken ct = default);
+
+
+    Task<int> CountSentByClientSinceAsync(Guid clientUserId, DateTime since, CancellationToken ct = default);
 }

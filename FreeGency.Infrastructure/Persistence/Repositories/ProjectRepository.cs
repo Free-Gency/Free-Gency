@@ -221,4 +221,8 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync(ct);
     }
+
+    public async Task<int> CountCreatedByClientSinceAsync(Guid clientId, DateTime since, CancellationToken ct = default)
+    => await _dbSet.AsNoTracking()
+        .CountAsync(p => p.ClientId == clientId && p.CreatedAt >= since, ct);
 }

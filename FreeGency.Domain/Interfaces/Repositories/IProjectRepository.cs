@@ -1,5 +1,4 @@
-﻿using FreeGency.Domain.Entities;
-
+﻿
 namespace FreeGency.Domain.Interfaces.Repositories
 {
     public interface IProjectRepository : IGenericRepository<Project>
@@ -37,5 +36,7 @@ namespace FreeGency.Domain.Interfaces.Repositories
             CancellationToken ct = default);
 
         IQueryable<Project> GetProjectsQuery();
+
+        Task<int> CountCreatedByClientSinceAsync(Guid clientId, DateTime since, CancellationToken ct = default);
     }
 }
