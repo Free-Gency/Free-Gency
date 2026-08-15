@@ -1,20 +1,16 @@
 ﻿using FreeGency.Application.Features.TeamJoinRequests.Dtos;
 using FreeGency.Domain.Specifications;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
-namespace FreeGency.Application.Common.Interfaces
+
+namespace FreeGency.Application.Common.Interfaces;
+
+public interface ITeamJoinRequestService
 {
-    public interface ITeamJoinRequestService
-    {
-        Task<Result> ApplyToTeamJobAsync(ApplyToTeamJobCommand applyToTeamJob);
-        Task<Result> JoinByCodeAsync(JoinTeamByCodeCommand joinTeamByCode);
-        Task<Result<PaginatedResult<TeamJoinRequestResponseDto>>> GetJoinRequestAsync(TeamJoinRequestSpecificationParam param);
-        Task<Result<PaginatedResult<UserRequestJoinResponseDto>>> GetUserJoinRequestsAsync(UserJoinRequestSpecificationParam param);
-        public  Task<Result> AcceptJoinRequestAsync(Guid requestId);
-        public Task<Result> RejectJoinRequestAsync(Guid requestId);
+    Task<Result> ApplyToTeamJobAsync(ApplyToTeamJobCommand applyToTeamJob, CancellationToken ct= default);
+    Task<Result> JoinByCodeAsync(JoinTeamByCodeCommand joinTeamByCode, CancellationToken ct= default);
+    Task<Result<PaginatedResult<TeamJoinRequestResponseDto>>> GetJoinRequestAsync(TeamJoinRequestSpecificationParam param, CancellationToken ct = default);
+    Task<Result<PaginatedResult<UserRequestJoinResponseDto>>> GetUserJoinRequestsAsync(UserJoinRequestSpecificationParam param, CancellationToken ct = default);
+    public  Task<Result> AcceptJoinRequestAsync(Guid requestId, CancellationToken ct = default);
+    public Task<Result> RejectJoinRequestAsync(Guid requestId, CancellationToken ct = default);
 
-    }
 }

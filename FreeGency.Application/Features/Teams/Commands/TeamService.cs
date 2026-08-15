@@ -13,6 +13,7 @@ public partial class TeamService : ITeamService
     private readonly ILedgerEntryRepository _ledgerEntryRepository;
     private readonly IContentModerationService _contentModerationService;
     private readonly IUserRepository _userRepository;
+    private readonly IEntitlementService _entitlementService;
 
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly IMilestoneRepository _milestoneRepository;
@@ -22,12 +23,13 @@ public partial class TeamService : ITeamService
     private readonly ITaskRepository _taskRepository;
 
     public TeamService(IUnitOfWork unitOfWork, IStorageService storageService,
-        ICurrentUserService currentUserService, IContentModerationService contentModerationService)
+        ICurrentUserService currentUserService, IContentModerationService contentModerationService, IEntitlementService entitlementService)
     {
         _unitOfWork = unitOfWork;
         _storageService = storageService;
         _currentUserService = currentUserService;
         _contentModerationService = contentModerationService;
+        _entitlementService = entitlementService;
         _walletRepository = _unitOfWork.Repository<IWalletRepository, Wallet>();
         _teamRepository = _unitOfWork.Repository<ITeamRepository, Team>();
         _projectRepository = _unitOfWork.Repository<IProjectRepository, Project>();
@@ -78,6 +80,12 @@ public partial class TeamService : ITeamService
         }
 
         var ownerUserId = _currentUserService.UserId;
+
+        // JoinedTeams gate — creating a team makes you a member of it.
+        var teamQuota = await _entitlementService.CanConsumeAsync(ownerUserId, FeatureType.JoinedTeams, ct);
+        if (!teamQuota.IsAllowed)
+            return ApiResponse.Failure<Guid>(teamQuota.ToAppError());
+
         var team = dto.ToEntity(ownerUserId, teamCode, logoUrl, coverUrl);
 
         var categories = dto.Categories.Select(c => (c.CategoryId, c.IsPrimary));
