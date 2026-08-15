@@ -640,6 +640,11 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
+                    b.Property<bool>("IsHirePyBot")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("ProfileImage")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -657,6 +662,10 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id", "UserId");
+
+                    b.HasIndex("IsHirePyBot")
+                        .IsUnique()
+                        .HasFilter("[IsHirePyBot] = 1");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -740,6 +749,385 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("EscrowHolds", "finance");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.HirePyEvaluation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ArchitectureScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BudgetScore")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CandidateName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("CommunicationScore")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcernsJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime?>("EvaluatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("FreelancerUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HirePySessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ImplementationScore")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("MilestoneScore")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MilestoneSummary")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<int>("OverallScore")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProjectProposalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("ProposedBudget")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ProposedTimeline")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("RankingPosition")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RankingScore")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<int>("RequirementsScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RiskScore")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RisksJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StrengthsJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TechnicalScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TimelineScore")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HirePySessionId");
+
+                    b.ToTable("HirePyEvaluations", "ai");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.HirePyInterview", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChatRoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ConcludedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("FailReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("FailureCount")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("FreelancerDeveloperProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FreelancerUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HirePySessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid?>("LastUserMessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PlanningRounds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("ProcessingAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProjectProposalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Started");
+
+                    b.Property<int>("TurnCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatRoomId");
+
+                    b.HasIndex("ProjectProposalId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("HirePyInterviews", "ai");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.HirePySession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AcceptedPlanVersionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("BudgetMax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("BudgetMin")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CategoryName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("ClientUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Complexity")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<string>("Currency")
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<DateTime?>("Deadline")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DecisionReason")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(5000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("EstimatedDurationDays")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FailReason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("FeaturesJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GeneratedDescription")
+                        .HasMaxLength(5000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsFixedPrice")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MilestoneSummary")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("RecommendationCompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RequirementsJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RisksJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("SelectedBudget")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("SelectedCandidateName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("SelectedCandidatesJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("SelectedFreelancerUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SelectedProposalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SelectedTimeline")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("SkillIdsJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SpecialtyIdsJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Draft");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("HirePySessions", "ai");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.LedgerEntry", b =>
@@ -2393,6 +2781,9 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Property<string>("DeletedBy")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid?>("InviteeTeamId")
                         .HasColumnType("uniqueidentifier");
@@ -5020,6 +5411,16 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasForeignKey("FreeGency.Domain.Entities.EscrowHold", "ProjectId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.HirePySession", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Project");
                 });

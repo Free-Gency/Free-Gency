@@ -107,4 +107,15 @@ public class ProjectInvitationRepository
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync(ct);
     }
+
+    public async Task<IReadOnlyList<ProjectInvitation>> GetByProjectIdAsync(
+        Guid projectId,
+        CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Where(i => i.ProjectId == projectId)
+            .OrderByDescending(i => i.CreatedAt)
+            .ToListAsync(ct);
+    }
 }

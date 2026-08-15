@@ -12,9 +12,11 @@ namespace FreeGency.Application.Common.Interfaces
 
         // Writes
         Task<ApiResponse<Guid>> CreateAsync(CreateProjectRequestDto newProject, CancellationToken ct = default);
+        Task<ApiResponse<Guid>> CreateForClientAsync(CreateProjectRequestDto newProject, Guid clientUserId, CancellationToken ct = default);
         Task<ApiResponse> DeleteAsync(Guid id, CancellationToken ct = default);
         Task<ApiResponse> EditAsync(UpdateProjectRequestDto updatedProject, CancellationToken ct = default);
         Task<ApiResponse> PublishAsync(Guid id, CancellationToken ct = default);
+        Task<ApiResponse> PublishForClientAsync(Guid id, Guid clientUserId, CancellationToken ct = default);
         Task<ApiResponse> SaveAsync(Guid id, CancellationToken ct = default);
         Task<ApiResponse> UnSaveAsync(Guid id, CancellationToken ct = default);
         Task<ApiResponse> ReplaceSkillsAsync(Guid id, IEnumerable<Guid> skillIds, CancellationToken ct = default);

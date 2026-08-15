@@ -25,6 +25,7 @@ public class ProjectInvitation : ISoftDeletableEntity
     public string Message { get; set; } = string.Empty;
     public ProjectInvitationStatus Status { get; set; } = ProjectInvitationStatus.Pending;
 
+    public DateTime? ExpiresAt { get; set; }
     public DateTime? RespondedAt { get; set; }
     public Guid? RespondedByUserId { get; set; }
 

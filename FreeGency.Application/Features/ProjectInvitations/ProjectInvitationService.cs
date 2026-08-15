@@ -1,5 +1,6 @@
 using FreeGency.Application.Features.ProjectInvitations.Dtos;
 using Hangfire;
+using Microsoft.EntityFrameworkCore;
 
 namespace FreeGency.Application.Features.ProjectInvitations;
 
@@ -8,6 +9,7 @@ public class ProjectInvitationService : IProjectInvitationService
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly INotificationService _notificationService;
+    private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IProjectInvitationRepository _invitationRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly IProjectProposalRepository _proposalRepository;
@@ -18,14 +20,19 @@ public class ProjectInvitationService : IProjectInvitationService
     private readonly IUserRepository _userRepository;
     private readonly IDeveloperProfileRepository _developerProfileRepository;
 
+    /// <summary>How long a pending invitation stays valid before it is expired.</summary>
+    private const int InvitationValidityDays = 7;
+
     public ProjectInvitationService(
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IBackgroundJobClient backgroundJobClient)
     {
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
         _notificationService = notificationService;
+        _backgroundJobClient = backgroundJobClient;
         _invitationRepository = unitOfWork.Repository<IProjectInvitationRepository, ProjectInvitation>();
         _projectRepository = unitOfWork.Repository<IProjectRepository, Project>();
         _proposalRepository = unitOfWork.Repository<IProjectProposalRepository, ProjectProposal>();
@@ -40,12 +47,18 @@ public class ProjectInvitationService : IProjectInvitationService
     public async Task<ApiResponse<ProjectInvitationDto>> CreateAsync(
         CreateProjectInvitationDto dto,
         CancellationToken ct = default)
+        => await CreateForClientAsync(dto, _currentUser.UserId, ct);
+
+    public async Task<ApiResponse<ProjectInvitationDto>> CreateForClientAsync(
+        CreateProjectInvitationDto dto,
+        Guid clientUserId,
+        CancellationToken ct = default)
     {
         var project = await _projectRepository.GetByIdAsync(dto.ProjectId, ct);
         if (project is null)
             return ApiResponse.Failure<ProjectInvitationDto>(AppError.NotFound(nameof(Project), dto.ProjectId));
 
-        if (project.ClientId != _currentUser.UserId)
+        if (project.ClientId != clientUserId)
             return ApiResponse.Failure<ProjectInvitationDto>(
                 AppError.Forbidden("Only the project's client can send invitations."));
 
@@ -66,7 +79,7 @@ public class ProjectInvitationService : IProjectInvitationService
                 return ApiResponse.Failure<ProjectInvitationDto>(
                     AppError.Validation("InviteeUserId is required."));
 
-            if (dto.InviteeUserId == _currentUser.UserId)
+            if (dto.InviteeUserId == clientUserId)
                 return ApiResponse.Failure<ProjectInvitationDto>(
                     AppError.Validation("You cannot invite yourself."));
 
@@ -99,14 +112,15 @@ public class ProjectInvitationService : IProjectInvitationService
         {
             Id = Guid.NewGuid(),
             ProjectId = dto.ProjectId,
-            ClientUserId = _currentUser.UserId,
+            ClientUserId = clientUserId,
             InviteeType = dto.InviteeType,
             InviteeUserId = dto.InviteeType == ApplicantType.User ? dto.InviteeUserId : null,
             InviteeTeamId = dto.InviteeType == ApplicantType.Team ? dto.InviteeTeamId : null,
             Message = dto.Message.Trim(),
             Status = ProjectInvitationStatus.Pending,
+            ExpiresAt = DateTime.UtcNow.AddDays(InvitationValidityDays),
             CreatedAt = DateTime.UtcNow,
-            CreatedBy = _currentUser.UserId.ToString()
+            CreatedBy = clientUserId.ToString()
         };
 
         await _invitationRepository.AddAsync(invitation, ct);
@@ -371,6 +385,13 @@ public class ProjectInvitationService : IProjectInvitationService
         invitation.UpdatedBy = _currentUser.UserId.ToString();
         _invitationRepository.Update(invitation);
         await _unitOfWork.SaveChangesAsync(ct);
+
+        _backgroundJobClient.Enqueue<IHirePyCandidateService>(
+            s => s.OnInvitationAcceptedAsync(
+                invitation.ProjectId,
+                invitation.ProposalId!.Value,
+                invitation.RespondedByUserId!.Value,
+                CancellationToken.None));
     }
 
     public async Task<ApiResponse> RejectAsync(Guid invitationId, CancellationToken ct = default)
@@ -399,6 +420,9 @@ public class ProjectInvitationService : IProjectInvitationService
         if (project is not null)
             await NotifyInviteRejectedAsync(invitation, project, ct);
 
+        _backgroundJobClient.Enqueue<IHirePyCandidateService>(
+            s => s.OnInvitationDeclinedAsync(invitation.ProjectId, CancellationToken.None));
+
         return ApiResponse.Success("Invitation rejected.");
     }
 
@@ -423,6 +447,30 @@ public class ProjectInvitationService : IProjectInvitationService
         await _unitOfWork.SaveChangesAsync(ct);
 
         return ApiResponse.Success("Invitation cancelled.");
+    }
+
+    public async Task<ApiResponse<int>> ExpireOverdueInvitationsAsync(CancellationToken ct = default)
+    {
+        var now = DateTime.UtcNow;
+        var overdue = await _invitationRepository.Query()
+            .Where(i => i.Status == ProjectInvitationStatus.Pending
+                        && i.ExpiresAt.HasValue
+                        && i.ExpiresAt <= now)
+            .ToListAsync(ct);
+
+        if (overdue.Count == 0)
+            return ApiResponse.Success(0);
+
+        foreach (var invitation in overdue)
+        {
+            invitation.Status = ProjectInvitationStatus.Expired;
+            invitation.RespondedAt = now;
+            invitation.UpdatedAt = now;
+            _invitationRepository.Update(invitation);
+        }
+
+        await _unitOfWork.SaveChangesAsync(ct);
+        return ApiResponse.Success(overdue.Count, "Overdue invitations expired.");
     }
 
     private async Task<ApiResponse> EnsureCanRespondAsync(ProjectInvitation invitation, CancellationToken ct)
@@ -467,6 +515,7 @@ public class ProjectInvitationService : IProjectInvitationService
             Message = i.Message,
             Status = i.Status,
             CreatedAt = i.CreatedAt,
+            ExpiresAt = i.ExpiresAt,
             RespondedAt = i.RespondedAt,
             ProposalId = i.ProposalId,
             ChatRoomId = i.ChatRoomId

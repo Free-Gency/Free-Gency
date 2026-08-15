@@ -18,5 +18,10 @@ public class DeveloperProfileConfiguration : IEntityTypeConfiguration<DeveloperP
         builder.Property(p => p.Bio).HasMaxLength(500);
         builder.Property(p => p.AverageRating).HasColumnType("decimal(3,2)").HasDefaultValue(0m);
         builder.Property(p => p.RatingCount).HasDefaultValue(0);
+        builder.Property(p => p.IsHirePyBot).HasDefaultValue(false);
+
+        builder.HasIndex(p => p.IsHirePyBot)
+            .IsUnique()
+            .HasFilter("[IsHirePyBot] = 1");
     }
 }

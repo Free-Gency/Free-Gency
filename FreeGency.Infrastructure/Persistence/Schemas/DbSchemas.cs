@@ -10,4 +10,5 @@ public static class DbSchemas
     public const string Chat = "chat";
     public const string Portfolio = "portfolio";
     public const string Core = "core";
+    public const string AI = "ai";
 }

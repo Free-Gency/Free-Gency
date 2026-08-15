@@ -69,6 +69,14 @@ public partial class MilestoneService
 
     public async Task<ApiResponse<MilestonePlanVersionDto>> ProposePlanAsync(
         ProposeMilestonePlanDto dto, CancellationToken ct = default)
+        => await ProposePlanAsync(dto, _currentUser.UserId, ct);
+
+    /// <summary>
+    /// Persists a milestone plan on behalf of an explicit user. Used by the HirePy AI background
+    /// flow where there is no HTTP context (the current user would be Guid.Empty).
+    /// </summary>
+    public async Task<ApiResponse<MilestonePlanVersionDto>> ProposePlanAsync(
+        ProposeMilestonePlanDto dto, Guid actingUserId, CancellationToken ct = default)
     {
         if (dto.Milestones is null || dto.Milestones.Count == 0)
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Validation("At least one milestone is required."));
@@ -103,11 +111,11 @@ public partial class MilestoneService
         if (project.AssignedUserId is not null || project.AssignedTeamId is not null)
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Validation("Project already has a hired assignee."));
 
-        if (!await IsProposalNegotiationSpeakerAsync(proposal, ct))
+        if (!await IsProposalNegotiationSpeakerAsync(proposal, actingUserId, ct))
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Forbidden(
                 "Only the team leader who submitted this proposal can propose a milestone plan."));
 
-        var profileError = await RequireActiveProfileModeAsync(profileMode.Developer, ct);
+        var profileError = await RequireActiveProfileModeAsync(profileMode.Developer, actingUserId, ct);
         if (profileError is not null)
             return ApiResponse.Failure<MilestonePlanVersionDto>(profileError);
 
@@ -138,7 +146,7 @@ public partial class MilestoneService
             ProposalId = dto.ProposalId,
             Version = nextVersion,
             Status = PlanVersionStatus.Proposed,
-            ProposedByUserId = _currentUser.UserId,
+            ProposedByUserId = actingUserId,
             Items = dto.Milestones.Select((m, index) =>
             {
                 MilestoneChangeTag? tag = null;
@@ -192,7 +200,7 @@ public partial class MilestoneService
         Message? planMessage = null;
         if (proposalRoom is not null)
         {
-            var senderProfiles = await ResolveSenderProfilesForModeAsync(profileMode.Developer, ct);
+            var senderProfiles = await ResolveSenderProfilesForModeAsync(profileMode.Developer, actingUserId, ct);
             if (senderProfiles is null)
                 return ApiResponse.Failure<MilestonePlanVersionDto>(
                     AppError.Validation("A Developer profile is required for chat."));
@@ -1543,8 +1551,11 @@ public partial class MilestoneService
     }
 
     private async Task<AppError?> RequireActiveProfileModeAsync(profileMode required, CancellationToken ct)
+        => await RequireActiveProfileModeAsync(required, _currentUser.UserId, ct);
+
+    private async Task<AppError?> RequireActiveProfileModeAsync(profileMode required, Guid userId, CancellationToken ct)
     {
-        var active = await UserRepo.GetActiveProfileAsync(_currentUser.UserId, ct);
+        var active = await UserRepo.GetActiveProfileAsync(userId, ct);
         if (active is null)
         {
             return AppError.Validation(
@@ -1565,14 +1576,20 @@ public partial class MilestoneService
     private async Task<(Guid? ClientProfileId, Guid? DeveloperProfileId)?> ResolveSenderProfilesForModeAsync(
         profileMode required,
         CancellationToken ct)
+        => await ResolveSenderProfilesForModeAsync(required, _currentUser.UserId, ct);
+
+    private async Task<(Guid? ClientProfileId, Guid? DeveloperProfileId)?> ResolveSenderProfilesForModeAsync(
+        profileMode required,
+        Guid userId,
+        CancellationToken ct)
     {
         if (required == profileMode.Client)
         {
-            var clientProfileId = await UserRepo.GetClientProfileIdByUserIdAsync(_currentUser.UserId, ct);
+            var clientProfileId = await UserRepo.GetClientProfileIdByUserIdAsync(userId, ct);
             return clientProfileId is null ? null : (clientProfileId, null);
         }
 
-        var developerProfileId = await UserRepo.GetDeveloperProfileIdByUserIdAsync(_currentUser.UserId, ct);
+        var developerProfileId = await UserRepo.GetDeveloperProfileIdByUserIdAsync(userId, ct);
         return developerProfileId is null ? null : (null, developerProfileId);
     }
 
@@ -1607,15 +1624,18 @@ public partial class MilestoneService
     }
 
     private async Task<bool> IsProposalNegotiationSpeakerAsync(ProjectProposal proposal, CancellationToken ct)
+        => await IsProposalNegotiationSpeakerAsync(proposal, _currentUser.UserId, ct);
+
+    private async Task<bool> IsProposalNegotiationSpeakerAsync(ProjectProposal proposal, Guid userId, CancellationToken ct)
     {
-        if (proposal.UserId != _currentUser.UserId)
+        if (proposal.UserId != userId)
             return false;
 
         if (proposal.ApplicantType == ApplicantType.User)
             return true;
 
         return proposal.TeamId is not null &&
-               await TeamMemberRepo.IsLeaderAsync(proposal.TeamId.Value, _currentUser.UserId, ct);
+               await TeamMemberRepo.IsLeaderAsync(proposal.TeamId.Value, userId, ct);
     }
 
     private async Task<bool> IsProposalApplicantAsync(ProjectProposal proposal, CancellationToken ct)

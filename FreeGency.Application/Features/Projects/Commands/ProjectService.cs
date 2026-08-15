@@ -26,6 +26,9 @@ namespace FreeGency.Application.Features.Projects.Commands
 
 
         public async Task<ApiResponse<Guid>> CreateAsync(CreateProjectRequestDto request, CancellationToken ct = default)
+            => await CreateForClientAsync(request, _currentUser.UserId, ct);
+
+        public async Task<ApiResponse<Guid>> CreateForClientAsync(CreateProjectRequestDto request, Guid clientUserId, CancellationToken ct = default)
         {
             if (!await _categoryRepo.ExistsAsync(request.CategoryId))
                 return ApiResponse.Failure<Guid>(AppError.NotFound(nameof(Category), request.CategoryId));
@@ -36,7 +39,7 @@ namespace FreeGency.Application.Features.Projects.Commands
             {
                 Title = request.Title,
                 Description = request.Description,
-                ClientId = _currentUser.UserId,
+                ClientId = clientUserId,
                 CategoryId = request.CategoryId,
                 IsFixedPrice = request.IsFixedPrice,
                 BudgetMin = request.BudgetMin,
@@ -176,12 +179,15 @@ namespace FreeGency.Application.Features.Projects.Commands
         }
 
         public async Task<ApiResponse> PublishAsync(Guid id, CancellationToken ct = default)
+            => await PublishForClientAsync(id, _currentUser.UserId, ct);
+
+        public async Task<ApiResponse> PublishForClientAsync(Guid id, Guid clientUserId, CancellationToken ct = default)
         {
             var project = await _projectRepo.GetByIdAsync(id, ct);
             if (project == null)
                 return ApiResponse.Failure(AppError.NotFound(nameof(Project), id));
 
-            if (project.ClientId != _currentUser.UserId)
+            if (project.ClientId != clientUserId)
                 return ApiResponse.Failure(AppError.Forbidden("You do not own this project."));
 
             project.Status = ProjectStatus.Open;

@@ -32,4 +32,8 @@ public interface IProjectInvitationRepository : IGenericRepository<ProjectInvita
     Task<IReadOnlyList<ProjectInvitation>> GetPendingByProjectIdAsync(
         Guid projectId,
         CancellationToken ct = default);
+
+    Task<IReadOnlyList<ProjectInvitation>> GetByProjectIdAsync(
+        Guid projectId,
+        CancellationToken ct = default);
 }

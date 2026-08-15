@@ -22,6 +22,6 @@ public class Plan: ISoftDeletableEntity
 
     public bool IsActive { get; set; } = true;
 
-    public ICollection<PlanFeature> Features { get; set; }
+    public virtual ICollection<PlanFeature> Features { get; set; }
         = new List<PlanFeature>();
 }

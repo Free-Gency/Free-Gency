@@ -20,6 +20,7 @@ public class ProjectInvitationConfiguration : IEntityTypeConfiguration<ProjectIn
             .HasMaxLength(50)
             .HasDefaultValue(ProjectInvitationStatus.Pending);
         builder.Property(i => i.RespondedAt).HasColumnType("datetime2");
+        builder.Property(i => i.ExpiresAt).HasColumnType("datetime2");
 
         builder.HasIndex(i => new { i.ProjectId, i.InviteeUserId })
             .IsUnique()

@@ -19,6 +19,9 @@ public class DeveloperProfile : ISoftDeletableEntity
     public decimal AverageRating { get; set; } = 0;
     public int RatingCount { get; set; } = 0;
 
+    /// <summary>True for the seeded HirePy AI assistant profile used for AI chat messages.</summary>
+    public bool IsHirePyBot { get; set; } = false;
+
     public virtual User User { get; set; } = null!;
     public virtual ICollection<UserInterest> UserInterests { get; set; } = [];
     public virtual ICollection<UserSpecialty> UserSpecialties { get; set; } = [];

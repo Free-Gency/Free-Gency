@@ -10,5 +10,7 @@
     <Project Path="FreeGency.Domain/FreeGency.Domain.csproj" />
     <Project Path="FreeGency.Infrastructure/FreeGency.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="tests/FreeGency.Tests/FreeGency.Tests.csproj" />
+  </Folder>
 </Solution>

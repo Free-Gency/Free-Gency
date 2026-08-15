@@ -12,6 +12,7 @@ public interface IMilestoneService
     Task<ApiResponse<MilestonePlanVersionDto>> GetLatestPlanAsync(Guid projectId, CancellationToken ct = default);
 
     Task<ApiResponse<MilestonePlanVersionDto>> ProposePlanAsync(ProposeMilestonePlanDto dto, CancellationToken ct = default);
+    Task<ApiResponse<MilestonePlanVersionDto>> ProposePlanAsync(ProposeMilestonePlanDto dto, Guid actingUserId, CancellationToken ct = default);
     Task<ApiResponse> RequestPlanChangesAsync(RequestPlanChangesDto dto, CancellationToken ct = default);
     Task<ApiResponse> AcceptPlanAsync(Guid planVersionId, CancellationToken ct = default);
 

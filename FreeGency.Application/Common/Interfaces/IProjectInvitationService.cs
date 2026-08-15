@@ -11,4 +11,9 @@ public interface IProjectInvitationService
     Task<ApiResponse<Guid>> AcceptAsync(Guid invitationId, CancellationToken ct = default);
     Task<ApiResponse> RejectAsync(Guid invitationId, CancellationToken ct = default);
     Task<ApiResponse> CancelAsync(Guid invitationId, CancellationToken ct = default);
+    Task<ApiResponse<ProjectInvitationDto>> CreateForClientAsync(
+        CreateProjectInvitationDto dto,
+        Guid clientUserId,
+        CancellationToken ct = default);
+    Task<ApiResponse<int>> ExpireOverdueInvitationsAsync(CancellationToken ct = default);
 }

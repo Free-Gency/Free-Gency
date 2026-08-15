@@ -1,4 +1,5 @@
 
+using FreeGency.Application.Features.HirePy;
 using FreeGency.Application.Features.LedgerEntryFeature.Queries;
 using FreeGency.Application.Features.Moderation;
 
@@ -57,6 +58,14 @@ public static class DependencyInjection
         services.AddScoped<IEscrowService, EscrowService>();
         services.AddScoped<IProjectEventService, ProjectEventService>();
         services.AddScoped<IPayoutSplitService, PayoutSplitService>();
+
+        // HirePy AI session
+        services.AddScoped<IHirePyEventPublisher, HirePyEventPublisher>();
+        services.AddScoped<IHirePySessionService, HirePySessionService>();
+        services.AddScoped<IHirePyCandidateService, HirePyCandidateService>();
+        services.AddScoped<IHirePyInterviewService, HirePyInterviewService>();
+        services.AddScoped<IHirePyEvaluationService, HirePyEvaluationService>();
+        services.AddScoped<IHirePyApprovalService, HirePyApprovalService>();
 
         services.AddScoped<ITaskService, TaskService>();
 

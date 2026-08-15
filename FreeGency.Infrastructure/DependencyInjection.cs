@@ -56,6 +56,11 @@ public static class DependencyInjection
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<ILedgerEntryRepository, LedgerEntryRepository>();
 
+        // HirePy AI sessions
+        services.AddScoped<IHirePySessionRepository, HirePySessionRepository>();
+        services.AddScoped<IHirePyInterviewRepository, HirePyInterviewRepository>();
+        services.AddScoped<IHirePyEvaluationRepository, HirePyEvaluationRepository>();
+
         // Task repositories
         services.AddScoped<ITaskRepository, TaskRepository>();
         services.AddScoped<ITaskCommentRepository, TaskCommentRepository>();

@@ -32,6 +32,16 @@ public class MilestonePlanVersionRepository
             .FirstOrDefaultAsync(ct);
     }
 
+    public async Task<MilestonePlanVersion?> GetLatestByProposalIdAsync(
+        Guid proposalId, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .Include(v => v.Items.OrderBy(i => i.SortOrder))
+            .Where(v => v.ProposalId == proposalId)
+            .OrderByDescending(v => v.Version)
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<MilestonePlanVersion?> GetByIdWithItemsAsync(
         Guid id, CancellationToken ct = default)
     {

@@ -167,6 +167,21 @@ namespace FreeGency.Api
                 service => service.ReindexAllAsync(CancellationToken.None),
                 Cron.Daily);
 
+            RecurringJob.AddOrUpdate<FreeGency.Application.Common.Interfaces.IProjectInvitationService>(
+                "expire-project-invitations",
+                service => service.ExpireOverdueInvitationsAsync(CancellationToken.None),
+                Cron.Hourly);
+
+            RecurringJob.AddOrUpdate<FreeGency.Application.Common.Interfaces.IHirePyInterviewService>(
+                "hirepy-interview-driver",
+                service => service.ProcessPendingAsync(CancellationToken.None),
+                "*/20 * * * * *");
+
+            RecurringJob.AddOrUpdate<FreeGency.Application.Common.Interfaces.IHirePyEvaluationService>(
+                "hirepy-evaluation-driver",
+                service => service.ProcessPendingEvaluationsAsync(CancellationToken.None),
+                "*/20 * * * * *");
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {

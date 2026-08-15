@@ -14,11 +14,11 @@ public class Subscription : ISoftDeletableEntity
 
     public Guid UserId { get; set; }
     [ForeignKey(nameof(UserId))]
-    public User User { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
 
     public Guid PlanId { get; set; }
     [ForeignKey(nameof(PlanId))]
-    public Plan Plan { get; set; } = null!;
+    public virtual Plan Plan { get; set; } = null!;
 
     public SubscriptionStatus Status { get; set; }
 

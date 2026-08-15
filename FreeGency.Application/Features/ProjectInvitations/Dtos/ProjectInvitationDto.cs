@@ -15,6 +15,7 @@ public sealed class ProjectInvitationDto
     public string Message { get; init; } = string.Empty;
     public ProjectInvitationStatus Status { get; init; }
     public DateTime CreatedAt { get; init; }
+    public DateTime? ExpiresAt { get; init; }
     public DateTime? RespondedAt { get; init; }
     public Guid? ProposalId { get; init; }
     public Guid? ChatRoomId { get; init; }

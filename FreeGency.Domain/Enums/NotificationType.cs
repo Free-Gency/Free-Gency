@@ -30,4 +30,14 @@ public enum NotificationType
     InviteReceived = 110,
     InviteAccepted = 111,
     InviteRejected = 112,
+
+    HirePyProjectCreated = 120,
+    HirePyNoCandidatesFound = 121,
+    HirePyInvitationsSent = 122,
+    HirePyFailed = 123,
+    HirePyDiscussionStarted = 124,
+    HirePyMilestonePlanRequested = 125,
+    HirePyMilestonePlanFinalized = 126,
+    HirePyRecommendationReady = 127,
+    HirePyHiringCompleted = 128,
 }

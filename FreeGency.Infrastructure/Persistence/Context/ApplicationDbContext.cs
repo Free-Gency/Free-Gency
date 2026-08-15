@@ -92,6 +92,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Subscription> subscriptions => Set<Subscription>();
     public DbSet<UsageRecord> usageRecords => Set<UsageRecord>();
 
+    // HirePy AI sessions
+    public DbSet<HirePySession> HirePySessions => Set<HirePySession>();
+    public DbSet<HirePyInterview> HirePyInterviews => Set<HirePyInterview>();
+    public DbSet<HirePyEvaluation> HirePyEvaluations => Set<HirePyEvaluation>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
