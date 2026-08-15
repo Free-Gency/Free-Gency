@@ -4,6 +4,7 @@ using FreeGency.Application.Features.LedgerEntryFeature.Queries;
 using FreeGency.Application.Features.Moderation;
 using FreeGency.Application.Features.Plans.Commands;
 using FreeGency.Application.Features.UserProfiles;
+
 namespace FreeGency.Application;
 
 public static class DependencyInjection
@@ -64,6 +65,8 @@ public static class DependencyInjection
         services.AddScoped<IPayoutSplitService, PayoutSplitService>();
 
         services.AddScoped<ITaskService, TaskService>();
+
+        services.AddScoped<IEntitlementService, EntitlementService>();
 
         services.AddFluentValidationAutoValidation()
                 .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

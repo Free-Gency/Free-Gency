@@ -173,6 +173,7 @@ public partial class TeamService : ITeamService
 
         _teamRepository.Update(team);
         await _unitOfWork.SaveChangesAsync(ct);
+        BackgroundJob.Enqueue<ISuggestionService>(s => s.IndexTeamAsync(team.Id, CancellationToken.None));
 
         return ApiResponse.Success("Team updated successfully.");
     }
@@ -186,6 +187,7 @@ public partial class TeamService : ITeamService
         var categories = dto.Categories.Select(c => (c.CategoryId, c.IsPrimary));
         await _teamRepository.ReplaceCategoriesAsync(teamId, categories, ct);
         await _unitOfWork.SaveChangesAsync(ct);
+        BackgroundJob.Enqueue<ISuggestionService>(s => s.IndexTeamAsync(teamId, CancellationToken.None));
 
         return ApiResponse.Success("Team categories updated successfully.");
     }
@@ -198,6 +200,7 @@ public partial class TeamService : ITeamService
 
         await _teamRepository.ReplaceSpecialtiesAsync(teamId, dto.SpecialtyIds, ct);
         await _unitOfWork.SaveChangesAsync(ct);
+        BackgroundJob.Enqueue<ISuggestionService>(s => s.IndexTeamAsync(teamId, CancellationToken.None));
 
         return ApiResponse.Success("Team specialties updated successfully.");
     }
@@ -210,6 +213,7 @@ public partial class TeamService : ITeamService
 
         await _teamRepository.ReplaceSkillsAsync(teamId, dto.SkillIds, ct);
         await _unitOfWork.SaveChangesAsync(ct);
+        BackgroundJob.Enqueue<ISuggestionService>(s => s.IndexTeamAsync(teamId, CancellationToken.None));
 
         return ApiResponse.Success("Team skills updated successfully.");
     }

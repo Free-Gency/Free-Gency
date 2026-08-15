@@ -1,6 +1,4 @@
 
-using FreeGency.Domain.Entities;
-
 namespace FreeGency.Domain.Interfaces.Repositories;
 
 public interface IProjectProposalRepository : IGenericRepository<ProjectProposal>
@@ -23,5 +21,8 @@ public interface IProjectProposalRepository : IGenericRepository<ProjectProposal
     Task AddAttachmentAsync(ProposalAttachment attachment,CancellationToken ct = default);
 
     Task DeleteAttachmentAsync(Guid attachmentId,CancellationToken ct = default);
+
+
+    Task<int> CountSubmittedByUserSinceAsync(Guid userId, DateTime since, CancellationToken ct = default);
 
 }

@@ -162,6 +162,10 @@ namespace FreeGency.Api
             app.UseHangfireDashboard("/jobs");
             DatabaseInitializer.InitializeAsync(app.Services).GetAwaiter().GetResult();
 
+            // Warm local SQL → Qdrant on every API start (background; does not block listen).
+            BackgroundJob.Enqueue<FreeGency.Application.Common.Interfaces.ISuggestionService>(
+                service => service.ReindexAllAsync(CancellationToken.None));
+
             RecurringJob.AddOrUpdate<FreeGency.Application.Common.Interfaces.ISuggestionService>(
                 "suggestions-full-reindex",
                 service => service.ReindexAllAsync(CancellationToken.None),

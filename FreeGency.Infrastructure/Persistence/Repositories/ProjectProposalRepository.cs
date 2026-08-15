@@ -154,4 +154,8 @@ public class ProjectProposalRepository
     {
         return await _dbSet.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefaultAsync();
     }
+
+    public async Task<int> CountSubmittedByUserSinceAsync(Guid userId, DateTime since, CancellationToken ct = default)
+    => await _dbSet.AsNoTracking()
+        .CountAsync(p => p.UserId == userId && p.AppliedAt >= since, ct);
 }

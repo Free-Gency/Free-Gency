@@ -4,6 +4,9 @@ using FreeGency.AI.Embeddings;
 
 namespace FreeGency.AI.Suggestions;
 
+/// <summary>
+/// Builds deterministic text documents + Qdrant payloads for suggestion indexing/search.
+/// </summary>
 public sealed class SuggestionDocumentBuilder
 {
     public BuiltSuggestionDocument BuildDeveloper(DeveloperSuggestionDocument doc)
@@ -172,8 +175,7 @@ public sealed class SuggestionDocumentBuilder
         sb.AppendLine($"rating: {FormatDecimal(averageRating)} from {ratingCount} reviews");
     }
 
-    private static string JoinIds(IReadOnlyList<Guid> ids)
-        => string.Join(',', ids);
+    private static string JoinIds(IReadOnlyList<Guid> ids) => string.Join(',', ids);
 
     private static string FormatDecimal(decimal value)
         => value.ToString("0.##", CultureInfo.InvariantCulture);

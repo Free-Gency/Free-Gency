@@ -1,22 +1,17 @@
-using System.Diagnostics;
 using FreeGency.AI.Suggestions;
-using FreeGency.Application.Common.Errors;
-using FreeGency.Application.Common.Results;
+using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Features.Suggestions.DTOs;
-using FreeGency.Domain.Enums;
-using FreeGency.Domain.Interfaces.Repositories.Teams;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FreeGency.Application.Features.Suggestions;
 
 public sealed class SuggestionService : ISuggestionService
 {
-    private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
     private readonly SuggestionDocumentBuilder _documentBuilder;
     private readonly ISuggestionIndexingService _indexing;
     private readonly ISuggestionSearchService _search;
+    private readonly IEntitlementService _entitlementService;
     private readonly ILogger<SuggestionService> _logger;
 
     private readonly IDeveloperProfileRepository _developers;
@@ -32,41 +27,44 @@ public sealed class SuggestionService : ISuggestionService
         SuggestionDocumentBuilder documentBuilder,
         ISuggestionIndexingService indexing,
         ISuggestionSearchService search,
+        IEntitlementService entitlementService,
         ILogger<SuggestionService> logger)
     {
-        _unitOfWork = unitOfWork;
         _currentUser = currentUser;
         _documentBuilder = documentBuilder;
         _indexing = indexing;
         _search = search;
+        _entitlementService = entitlementService;
         _logger = logger;
 
-        _developers = _unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
-        _teams = _unitOfWork.Repository<ITeamRepository, Team>();
-        _teamMembers = _unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
-        _teamJobs = _unitOfWork.Repository<ITeamJobRepository, TeamJob>();
-        _projects = _unitOfWork.Repository<IProjectRepository, Project>();
-        _portfolios = _unitOfWork.Repository<IPortfolioRepository, PortfolioProject>();
+        _developers = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
+        _teams = unitOfWork.Repository<ITeamRepository, Team>();
+        _teamMembers = unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
+        _teamJobs = unitOfWork.Repository<ITeamJobRepository, TeamJob>();
+        _projects = unitOfWork.Repository<IProjectRepository, Project>();
+        _portfolios = unitOfWork.Repository<IPortfolioRepository, PortfolioProject>();
     }
 
-    public async Task<ApiResponse<TeamsForMeResponseDto>> SuggestTeamsForMeAsync(int topK = 10, CancellationToken ct = default)
+    public async Task<ApiResponse<TeamsForMeResponseDto>> SuggestTeamsForMeAsync(
+        int topK = 10,
+        CancellationToken ct = default)
     {
+        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.TeamSuggestions, ct);
+        if (!quota.IsAllowed)
+            return ApiResponse.Failure<TeamsForMeResponseDto>(quota.ToAppError());
+
         var sw = Stopwatch.StartNew();
         try
         {
             var profile = await _developers.GetByUserIdWithSkillsAndInterestsAsync(_currentUser.UserId, ct);
             if (profile is null)
-                return ApiResponse.Failure<TeamsForMeResponseDto>(AppError.NotFound(nameof(DeveloperProfile), _currentUser.UserId));
+                return ApiResponse.Failure<TeamsForMeResponseDto>(
+                    AppError.NotFound(nameof(DeveloperProfile), _currentUser.UserId));
 
             var doc = await MapDeveloperAsync(profile, ct);
             var scored = await _search.SearchTeamJobsForDeveloperAsync(doc, topK, ct);
 
-            var jobIds = scored
-                .Select(s => Guid.TryParse(s.Id, out var id) ? id : Guid.Empty)
-                .Where(id => id != Guid.Empty)
-                .Distinct()
-                .ToList();
-
+            var jobIds = ParseDistinctGuids(scored.Select(s => s.Id));
             var jobs = jobIds.Count == 0
                 ? []
                 : await _teamJobs.Query()
@@ -78,7 +76,6 @@ public sealed class SuggestionService : ISuggestionService
                     .ToListAsync(ct);
 
             var jobsById = jobs.ToDictionary(j => j.Id);
-
             var suggestions = new List<SuggestedTeamJobDto>();
             foreach (var item in scored)
             {
@@ -94,7 +91,10 @@ public sealed class SuggestionService : ISuggestionService
                     JobId = job.Id,
                     JobTitle = job.Title,
                     JobDescription = job.Description,
-                    RequiredSkills = job.TeamJobSkills.Select(s => s.Skill.Name).Where(n => !string.IsNullOrWhiteSpace(n)).ToList(),
+                    RequiredSkills = job.TeamJobSkills
+                        .Select(s => s.Skill.Name)
+                        .Where(n => !string.IsNullOrWhiteSpace(n))
+                        .ToList(),
                     FinalScore = item.FinalScore,
                     VectorScore = item.VectorScore,
                     Breakdown = MapBreakdown(item.Breakdown)
@@ -102,6 +102,8 @@ public sealed class SuggestionService : ISuggestionService
             }
 
             sw.Stop();
+            await _entitlementService.ConsumeAsync(_currentUser.UserId, FeatureType.TeamSuggestions, ct);
+
             return ApiResponse.Success(new TeamsForMeResponseDto
             {
                 Suggestions = suggestions,
@@ -131,37 +133,239 @@ public sealed class SuggestionService : ISuggestionService
         var sw = Stopwatch.StartNew();
         try
         {
+            var project = await _projects.GetByIdWithDetailsAsync(projectId, ct);
+            if (project is null)
+                return ApiResponse.Failure<ProjectCandidatesResponseDto>(
+                    AppError.NotFound(nameof(Project), projectId));
+
+            if (project.ClientId != _currentUser.UserId)
+                return ApiResponse.Failure<ProjectCandidatesResponseDto>(
+                    AppError.Forbidden("You do not own this project."));
+
+            if (project.Status != ProjectStatus.Open)
+                return ApiResponse.Failure<ProjectCandidatesResponseDto>(
+                    AppError.Validation("Project must be published (Open) before requesting candidate suggestions."));
+
+            var scored = await _search.SearchCandidatesForProjectAsync(MapProject(project), topK, ct);
+            var candidates = await HydrateCandidatesAsync(scored, ct);
+
+            sw.Stop();
+            return ApiResponse.Success(new ProjectCandidatesResponseDto
+            {
+                ProjectId = projectId,
+                Candidates = candidates,
+                Metadata = new SuggestionMetadataDto
+                {
+                    ReturnedCount = candidates.Count,
+                    ElapsedMs = sw.ElapsedMilliseconds,
+                    Warnings = candidates.Count == 0
+                        ? ["No candidates matched. Ensure developers/teams are indexed."]
+                        : []
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "SuggestCandidatesForProject failed for project {ProjectId}", projectId);
+            return ApiResponse.Failure<ProjectCandidatesResponseDto>(
+                AppError.Validation(DescribeSuggestionFailure(ex)));
+        }
+    }
+
+    public async Task<ApiResponse<ReindexResultDto>> ReindexAllAsync(CancellationToken ct = default)
+    {
+        var sw = Stopwatch.StartNew();
+        _logger.LogInformation("Starting full suggestions reindex.");
+
+        var developerDocs = new List<BuiltSuggestionDocument>();
+        var developers = await _developers.Query()
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(d => d.UserSkills).ThenInclude(s => s.Skill)
+            .Include(d => d.UserSpecialties).ThenInclude(s => s.Specialty)
+            .Include(d => d.UserInterests).ThenInclude(i => i.Category)
+            .ToListAsync(ct);
+
+        foreach (var developer in developers)
+            developerDocs.Add(_documentBuilder.BuildDeveloper(await MapDeveloperAsync(developer, ct)));
+
+        var teamDocs = new List<BuiltSuggestionDocument>();
+        var teams = await _teams.Query()
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(t => t.TeamSkills).ThenInclude(s => s.Skill)
+            .Include(t => t.TeamSpecialties).ThenInclude(s => s.Specialty)
+            .Include(t => t.TeamCategories).ThenInclude(c => c.Category)
+            .Include(t => t.TeamJobs)
+            .ToListAsync(ct);
+
+        foreach (var team in teams)
+            teamDocs.Add(_documentBuilder.BuildTeam(await MapTeamAsync(team, ct)));
+
+        var jobDocs = new List<BuiltSuggestionDocument>();
+        var openJobs = await _teamJobs.Query()
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(j => j.Status == TeamJobStatus.open)
+            .Include(j => j.Team).ThenInclude(t => t.TeamSkills).ThenInclude(s => s.Skill)
+            .Include(j => j.TeamJobSkills).ThenInclude(s => s.Skill)
+            .ToListAsync(ct);
+
+        foreach (var job in openJobs)
+            jobDocs.Add(_documentBuilder.BuildTeamJob(await MapTeamJobAsync(job, ct)));
+
+        var projectDocs = new List<BuiltSuggestionDocument>();
+        var openProjects = await _projects.Query()
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(p => p.Status == ProjectStatus.Open)
+            .Include(p => p.Category)
+            .Include(p => p.ProjectSkills).ThenInclude(s => s.Skill)
+            .Include(p => p.ProjectSpecialties).ThenInclude(s => s.Specialty)
+            .ToListAsync(ct);
+
+        foreach (var project in openProjects)
+            projectDocs.Add(_documentBuilder.BuildProject(MapProject(project)));
+
+        var allDocs = developerDocs.Concat(teamDocs).Concat(jobDocs).Concat(projectDocs);
+        await _indexing.UpsertBatchAsync(allDocs, ct);
+        await PruneStaleSuggestionVectorsAsync(ct);
+
+        sw.Stop();
+        _logger.LogInformation(
+            "Suggestions reindex finished in {Elapsed}ms (devs={Devs}, teams={Teams}, jobs={Jobs}, projects={Projects}).",
+            sw.ElapsedMilliseconds,
+            developerDocs.Count,
+            teamDocs.Count,
+            jobDocs.Count,
+            projectDocs.Count);
+
+        return ApiResponse.Success(new ReindexResultDto
+        {
+            DevelopersIndexed = developerDocs.Count,
+            TeamsIndexed = teamDocs.Count,
+            TeamJobsIndexed = jobDocs.Count,
+            ProjectsIndexed = projectDocs.Count,
+            ElapsedMs = sw.ElapsedMilliseconds
+        });
+    }
+
+    public async Task IndexDeveloperAsync(Guid userId, CancellationToken ct = default)
+    {
+        var profile = await _developers.GetByUserIdWithSkillsAndInterestsAsync(userId, ct);
+        if (profile is null)
+            return;
+
+        await _indexing.UpsertAsync(
+            _documentBuilder.BuildDeveloper(await MapDeveloperAsync(profile, ct)),
+            ct);
+    }
+
+    public async Task IndexTeamAsync(Guid teamId, CancellationToken ct = default)
+    {
+        var team = await _teams.Query()
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(t => t.TeamSkills).ThenInclude(s => s.Skill)
+            .Include(t => t.TeamSpecialties).ThenInclude(s => s.Specialty)
+            .Include(t => t.TeamCategories).ThenInclude(c => c.Category)
+            .Include(t => t.TeamJobs)
+            .FirstOrDefaultAsync(t => t.Id == teamId, ct);
+
+        if (team is null)
+            return;
+
+        await _indexing.UpsertAsync(
+            _documentBuilder.BuildTeam(await MapTeamAsync(team, ct)),
+            ct);
+    }
+
+    public async Task IndexTeamJobAsync(Guid jobId, CancellationToken ct = default)
+    {
+        var job = await _teamJobs.Query()
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(j => j.Id == jobId)
+            .Include(j => j.Team).ThenInclude(t => t.TeamSkills).ThenInclude(s => s.Skill)
+            .Include(j => j.TeamJobSkills).ThenInclude(s => s.Skill)
+            .FirstOrDefaultAsync(ct);
+
+        if (job is null)
+            return;
+
+        if (job.Status != TeamJobStatus.open)
+        {
+            await _indexing.DeleteAsync(SuggestionCollections.TeamJobs, job.Id.ToString(), ct);
+            await IndexTeamAsync(job.TeamId, ct);
+            return;
+        }
+
+        await _indexing.UpsertAsync(
+            _documentBuilder.BuildTeamJob(await MapTeamJobAsync(job, ct)),
+            ct);
+        await IndexTeamAsync(job.TeamId, ct);
+    }
+
+    public async Task RemoveTeamJobAsync(Guid jobId, Guid teamId, CancellationToken ct = default)
+    {
+        await _indexing.DeleteAsync(SuggestionCollections.TeamJobs, jobId.ToString(), ct);
+        await IndexTeamAsync(teamId, ct);
+    }
+
+    public async Task IndexProjectAsync(Guid projectId, CancellationToken ct = default)
+    {
         var project = await _projects.GetByIdWithDetailsAsync(projectId, ct);
         if (project is null)
-            return ApiResponse.Failure<ProjectCandidatesResponseDto>(AppError.NotFound(nameof(Project), projectId));
-
-        if (project.ClientId != _currentUser.UserId)
-            return ApiResponse.Failure<ProjectCandidatesResponseDto>(AppError.Forbidden("You do not own this project."));
+            return;
 
         if (project.Status != ProjectStatus.Open)
-            return ApiResponse.Failure<ProjectCandidatesResponseDto>(
-                AppError.Validation("Project must be published (Open) before requesting candidate suggestions."));
+        {
+            await _indexing.DeleteAsync(SuggestionCollections.Projects, projectId.ToString(), ct);
+            return;
+        }
 
-        var projectDoc = MapProject(project);
-        var scored = await _search.SearchCandidatesForProjectAsync(projectDoc, topK, ct);
+        await _indexing.UpsertAsync(_documentBuilder.BuildProject(MapProject(project)), ct);
+    }
 
-        var teamIds = scored
-            .Where(s => string.Equals(s.CandidateType, "Team", StringComparison.OrdinalIgnoreCase))
-            .Select(s => Guid.TryParse(s.Id, out var id) ? id : Guid.Empty)
-            .Where(id => id != Guid.Empty)
-            .Distinct()
-            .ToList();
+    public async Task RemoveProjectAsync(Guid projectId, CancellationToken ct = default)
+        => await _indexing.DeleteAsync(SuggestionCollections.Projects, projectId.ToString(), ct);
 
-        var developerIds = scored
-            .Where(s => !string.Equals(s.CandidateType, "Team", StringComparison.OrdinalIgnoreCase))
-            .Select(s => Guid.TryParse(s.Id, out var id) ? id : Guid.Empty)
-            .Where(id => id != Guid.Empty)
-            .Distinct()
-            .ToList();
+    private async Task PruneStaleSuggestionVectorsAsync(CancellationToken ct)
+    {
+        var staleJobIds = await _teamJobs.Query()
+            .AsNoTracking()
+            .Where(j => j.Status != TeamJobStatus.open)
+            .Select(j => j.Id)
+            .ToListAsync(ct);
 
-        var teamsTask = teamIds.Count == 0
-            ? Task.FromResult(new List<Team>())
-            : _teams.Query()
+        foreach (var id in staleJobIds)
+            await _indexing.DeleteAsync(SuggestionCollections.TeamJobs, id.ToString(), ct);
+
+        var staleProjectIds = await _projects.Query()
+            .AsNoTracking()
+            .Where(p => p.Status != ProjectStatus.Open)
+            .Select(p => p.Id)
+            .ToListAsync(ct);
+
+        foreach (var id in staleProjectIds)
+            await _indexing.DeleteAsync(SuggestionCollections.Projects, id.ToString(), ct);
+    }
+
+    private async Task<List<SuggestedCandidateDto>> HydrateCandidatesAsync(
+        IReadOnlyList<ScoredSuggestion> scored,
+        CancellationToken ct)
+    {
+        var teamIds = ParseDistinctGuids(
+            scored.Where(s => string.Equals(s.CandidateType, "Team", StringComparison.OrdinalIgnoreCase))
+                .Select(s => s.Id));
+
+        var developerIds = ParseDistinctGuids(
+            scored.Where(s => !string.Equals(s.CandidateType, "Team", StringComparison.OrdinalIgnoreCase))
+                .Select(s => s.Id));
+
+        var teams = teamIds.Count == 0
+            ? []
+            : await _teams.Query()
                 .AsNoTracking()
                 .AsSplitQuery()
                 .Where(t => teamIds.Contains(t.Id))
@@ -170,9 +374,9 @@ public sealed class SuggestionService : ISuggestionService
                 .Include(t => t.TeamCategories).ThenInclude(c => c.Category)
                 .ToListAsync(ct);
 
-        var developersTask = developerIds.Count == 0
-            ? Task.FromResult(new List<DeveloperProfile>())
-            : _developers.Query()
+        var developers = developerIds.Count == 0
+            ? []
+            : await _developers.Query()
                 .AsNoTracking()
                 .AsSplitQuery()
                 .Where(d => developerIds.Contains(d.UserId))
@@ -181,9 +385,9 @@ public sealed class SuggestionService : ISuggestionService
                 .Include(d => d.UserSpecialties).ThenInclude(s => s.Specialty)
                 .ToListAsync(ct);
 
-        var portfoliosTask = (teamIds.Count == 0 && developerIds.Count == 0)
-            ? Task.FromResult(new List<PortfolioProject>())
-            : _portfolios.Query()
+        var portfolios = teamIds.Count == 0 && developerIds.Count == 0
+            ? []
+            : await _portfolios.Query()
                 .AsNoTracking()
                 .Where(p =>
                     (p.OwnerTeamId.HasValue && teamIds.Contains(p.OwnerTeamId.Value)) ||
@@ -191,18 +395,18 @@ public sealed class SuggestionService : ISuggestionService
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync(ct);
 
-        var memberCountsTask = teamIds.Count == 0
-            ? Task.FromResult(new Dictionary<Guid, int>())
-            : _teamMembers.Query()
+        var memberCounts = teamIds.Count == 0
+            ? new Dictionary<Guid, int>()
+            : await _teamMembers.Query()
                 .AsNoTracking()
                 .Where(m => teamIds.Contains(m.TeamId))
                 .GroupBy(m => m.TeamId)
                 .Select(g => new { TeamId = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(x => x.TeamId, x => x.Count, ct);
 
-        var completedCountsTask = teamIds.Count == 0
-            ? Task.FromResult(new Dictionary<Guid, int>())
-            : _projects.GetProjectsQuery()
+        var completedCounts = teamIds.Count == 0
+            ? new Dictionary<Guid, int>()
+            : await _projects.GetProjectsQuery()
                 .AsNoTracking()
                 .Where(p => p.AssignedTeamId.HasValue
                             && teamIds.Contains(p.AssignedTeamId.Value)
@@ -211,13 +415,8 @@ public sealed class SuggestionService : ISuggestionService
                 .Select(g => new { TeamId = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(x => x.TeamId, x => x.Count, ct);
 
-        await Task.WhenAll(teamsTask, developersTask, portfoliosTask, memberCountsTask, completedCountsTask);
-
-        var teamsById = teamsTask.Result.ToDictionary(t => t.Id);
-        var developersById = developersTask.Result.ToDictionary(d => d.UserId);
-        var portfolios = portfoliosTask.Result;
-        var memberCounts = memberCountsTask.Result;
-        var completedCounts = completedCountsTask.Result;
+        var teamsById = teams.ToDictionary(t => t.Id);
+        var developersById = developers.ToDictionary(d => d.UserId);
 
         var teamPortfolios = portfolios
             .Where(p => p.OwnerTeamId.HasValue)
@@ -260,11 +459,11 @@ public sealed class SuggestionService : ISuggestionService
                     Specialties = team.TeamSpecialties
                         .Select(s => string.IsNullOrWhiteSpace(s.Specialty.NameEn) ? s.Specialty.NameAr : s.Specialty.NameEn)
                         .Where(n => !string.IsNullOrWhiteSpace(n))
-                        .ToList(),
+                        .ToList()!,
                     Categories = team.TeamCategories
                         .Select(c => string.IsNullOrWhiteSpace(c.Category.NameEn) ? c.Category.Name : c.Category.NameEn)
                         .Where(n => !string.IsNullOrWhiteSpace(n))
-                        .ToList(),
+                        .ToList()!,
                     PortfolioProjectCount = teamPortfolio.Count,
                     CompletedProjectsCount = Math.Max(completedCount, teamPortfolio.Count(p => p.CompletionDate.HasValue)),
                     MemberCount = memberCount,
@@ -299,7 +498,7 @@ public sealed class SuggestionService : ISuggestionService
                     Specialties = developer.UserSpecialties
                         .Select(s => string.IsNullOrWhiteSpace(s.Specialty.NameEn) ? s.Specialty.NameAr : s.Specialty.NameEn)
                         .Where(n => !string.IsNullOrWhiteSpace(n))
-                        .ToList(),
+                        .ToList()!,
                     Categories = [],
                     PortfolioProjectCount = developerPortfolio.Count,
                     CompletedProjectsCount = developerPortfolio.Count(p => p.CompletionDate.HasValue),
@@ -313,212 +512,7 @@ public sealed class SuggestionService : ISuggestionService
             }
         }
 
-        sw.Stop();
-        return ApiResponse.Success(new ProjectCandidatesResponseDto
-        {
-            ProjectId = projectId,
-            Candidates = candidates,
-            Metadata = new SuggestionMetadataDto
-            {
-                ReturnedCount = candidates.Count,
-                ElapsedMs = sw.ElapsedMilliseconds,
-                Warnings = candidates.Count == 0
-                    ? ["No candidates matched. Ensure developers/teams are indexed."]
-                    : []
-            }
-        });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "SuggestCandidatesForProject failed for project {ProjectId}", projectId);
-            return ApiResponse.Failure<ProjectCandidatesResponseDto>(
-                AppError.Validation(DescribeSuggestionFailure(ex)));
-        }
-    }
-
-    public async Task<ApiResponse<ReindexResultDto>> ReindexAllAsync(CancellationToken ct = default)
-    {
-        var sw = Stopwatch.StartNew();
-        _logger.LogInformation("Starting full suggestions reindex.");
-
-        // Build documents first — never wipe Qdrant until embeddings are ready.
-        var developerDocs = new List<BuiltSuggestionDocument>();
-        var developers = await _developers.Query()
-            .AsNoTracking()
-            .AsSplitQuery()
-            .Include(d => d.UserSkills).ThenInclude(s => s.Skill)
-            .Include(d => d.UserSpecialties).ThenInclude(s => s.Specialty)
-            .Include(d => d.UserInterests).ThenInclude(i => i.Category)
-            .ToListAsync(ct);
-
-        foreach (var developer in developers)
-        {
-            var mapped = await MapDeveloperAsync(developer, ct);
-            developerDocs.Add(_documentBuilder.BuildDeveloper(mapped));
-        }
-
-        var teamDocs = new List<BuiltSuggestionDocument>();
-        var teams = await _teams.Query()
-            .AsNoTracking()
-            .AsSplitQuery()
-            .Include(t => t.TeamSkills).ThenInclude(s => s.Skill)
-            .Include(t => t.TeamSpecialties).ThenInclude(s => s.Specialty)
-            .Include(t => t.TeamCategories).ThenInclude(c => c.Category)
-            .Include(t => t.TeamJobs)
-            .ToListAsync(ct);
-
-        foreach (var team in teams)
-        {
-            var mapped = await MapTeamAsync(team, ct);
-            teamDocs.Add(_documentBuilder.BuildTeam(mapped));
-        }
-
-        var jobDocs = new List<BuiltSuggestionDocument>();
-        var openJobs = await _teamJobs.Query()
-            .AsNoTracking()
-            .AsSplitQuery()
-            .Where(j => j.Status == TeamJobStatus.open)
-            .Include(j => j.Team).ThenInclude(t => t.TeamSkills).ThenInclude(s => s.Skill)
-            .Include(j => j.TeamJobSkills).ThenInclude(s => s.Skill)
-            .ToListAsync(ct);
-
-        foreach (var job in openJobs)
-        {
-            var mapped = await MapTeamJobAsync(job, ct);
-            jobDocs.Add(_documentBuilder.BuildTeamJob(mapped));
-        }
-
-        var projectDocs = new List<BuiltSuggestionDocument>();
-        var openProjects = await _projects.Query()
-            .AsNoTracking()
-            .AsSplitQuery()
-            .Where(p => p.Status == ProjectStatus.Open)
-            .Include(p => p.Category)
-            .Include(p => p.ProjectSkills).ThenInclude(s => s.Skill)
-            .Include(p => p.ProjectSpecialties).ThenInclude(s => s.Specialty)
-            .ToListAsync(ct);
-
-        foreach (var project in openProjects)
-            projectDocs.Add(_documentBuilder.BuildProject(MapProject(project)));
-
-        var allDocs = developerDocs.Concat(teamDocs).Concat(jobDocs).Concat(projectDocs);
-        // Upsert only — never wipe Qdrant. Stale closed jobs / non-open projects are deleted by id.
-        await _indexing.UpsertBatchAsync(allDocs, ct);
-        await PruneStaleSuggestionVectorsAsync(ct);
-
-        sw.Stop();
-        _logger.LogInformation(
-            "Suggestions reindex finished in {Elapsed}ms (devs={Devs}, teams={Teams}, jobs={Jobs}, projects={Projects}).",
-            sw.ElapsedMilliseconds, developerDocs.Count, teamDocs.Count, jobDocs.Count, projectDocs.Count);
-
-        return ApiResponse.Success(new ReindexResultDto
-        {
-            DevelopersIndexed = developerDocs.Count,
-            TeamsIndexed = teamDocs.Count,
-            TeamJobsIndexed = jobDocs.Count,
-            ProjectsIndexed = projectDocs.Count,
-            ElapsedMs = sw.ElapsedMilliseconds
-        });
-    }
-
-    private async Task PruneStaleSuggestionVectorsAsync(CancellationToken ct)
-    {
-        var staleJobIds = await _teamJobs.Query()
-            .AsNoTracking()
-            .Where(j => j.Status != TeamJobStatus.open)
-            .Select(j => j.Id)
-            .ToListAsync(ct);
-
-        foreach (var id in staleJobIds)
-            await _indexing.DeleteAsync(SuggestionCollections.TeamJobs, id.ToString(), ct);
-
-        var staleProjectIds = await _projects.Query()
-            .AsNoTracking()
-            .Where(p => p.Status != ProjectStatus.Open)
-            .Select(p => p.Id)
-            .ToListAsync(ct);
-
-        foreach (var id in staleProjectIds)
-            await _indexing.DeleteAsync(SuggestionCollections.Projects, id.ToString(), ct);
-    }
-
-    public async Task IndexDeveloperAsync(Guid userId, CancellationToken ct = default)
-    {
-        var profile = await _developers.GetByUserIdWithSkillsAndInterestsAsync(userId, ct);
-        if (profile is null)
-            return;
-
-        var doc = await MapDeveloperAsync(profile, ct);
-        await _indexing.UpsertAsync(_documentBuilder.BuildDeveloper(doc), ct);
-    }
-
-    public async Task IndexTeamAsync(Guid teamId, CancellationToken ct = default)
-    {
-        var team = await _teams.Query()
-            .AsNoTracking()
-            .AsSplitQuery()
-            .Include(t => t.TeamSkills).ThenInclude(s => s.Skill)
-            .Include(t => t.TeamSpecialties).ThenInclude(s => s.Specialty)
-            .Include(t => t.TeamCategories).ThenInclude(c => c.Category)
-            .Include(t => t.TeamJobs)
-            .FirstOrDefaultAsync(t => t.Id == teamId, ct);
-
-        if (team is null)
-            return;
-
-        var doc = await MapTeamAsync(team, ct);
-        await _indexing.UpsertAsync(_documentBuilder.BuildTeam(doc), ct);
-    }
-
-    public async Task IndexTeamJobAsync(Guid jobId, CancellationToken ct = default)
-    {
-        var job = await _teamJobs.Query()
-            .AsNoTracking()
-            .AsSplitQuery()
-            .Where(j => j.Id == jobId)
-            .Include(j => j.Team).ThenInclude(t => t.TeamSkills).ThenInclude(s => s.Skill)
-            .Include(j => j.TeamJobSkills).ThenInclude(s => s.Skill)
-            .FirstOrDefaultAsync(ct);
-
-        if (job is null)
-            return;
-
-        if (job.Status != TeamJobStatus.open)
-        {
-            await _indexing.DeleteAsync(SuggestionCollections.TeamJobs, job.Id.ToString(), ct);
-            await IndexTeamAsync(job.TeamId, ct);
-            return;
-        }
-
-        var doc = await MapTeamJobAsync(job, ct);
-        await _indexing.UpsertAsync(_documentBuilder.BuildTeamJob(doc), ct);
-        await IndexTeamAsync(job.TeamId, ct);
-    }
-
-    public async Task RemoveTeamJobAsync(Guid jobId, Guid teamId, CancellationToken ct = default)
-    {
-        await _indexing.DeleteAsync(SuggestionCollections.TeamJobs, jobId.ToString(), ct);
-        await IndexTeamAsync(teamId, ct);
-    }
-
-    public async Task IndexProjectAsync(Guid projectId, CancellationToken ct = default)
-    {
-        var project = await _projects.GetByIdWithDetailsAsync(projectId, ct);
-        if (project is null)
-            return;
-
-        if (project.Status != ProjectStatus.Open)
-        {
-            await _indexing.DeleteAsync(SuggestionCollections.Projects, projectId.ToString(), ct);
-            return;
-        }
-
-        await _indexing.UpsertAsync(_documentBuilder.BuildProject(MapProject(project)), ct);
-    }
-
-    public async Task RemoveProjectAsync(Guid projectId, CancellationToken ct = default)
-    {
-        await _indexing.DeleteAsync(SuggestionCollections.Projects, projectId.ToString(), ct);
+        return candidates;
     }
 
     private async Task<DeveloperSuggestionDocument> MapDeveloperAsync(DeveloperProfile profile, CancellationToken ct)
@@ -602,54 +596,54 @@ public sealed class SuggestionService : ISuggestionService
         };
     }
 
-    private static ProjectSuggestionDocument MapProject(Project project)
+    private static ProjectSuggestionDocument MapProject(Project project) => new()
     {
-        return new ProjectSuggestionDocument
-        {
-            ProjectId = project.Id,
-            ClientId = project.ClientId,
-            Title = project.Title,
-            Description = project.Description,
-            Status = "open",
-            CategoryName = string.IsNullOrWhiteSpace(project.Category?.NameEn)
-                ? project.Category?.Name
-                : project.Category?.NameEn,
-            CategoryId = project.CategoryId,
-            BudgetMin = project.BudgetMin,
-            BudgetMax = project.BudgetMax,
-            Currency = string.IsNullOrWhiteSpace(project.Currency) ? "USD" : project.Currency,
-            SkillNames = project.ProjectSkills.Select(s => s.Skill.Name).Where(n => !string.IsNullOrWhiteSpace(n)).ToList(),
-            SkillIds = project.ProjectSkills.Select(s => s.SkillId).Distinct().ToList(),
-            SpecialtyNames = project.ProjectSpecialties
-                .Select(s => string.IsNullOrWhiteSpace(s.Specialty.NameEn) ? s.Specialty.NameAr : s.Specialty.NameEn)
-                .Where(n => !string.IsNullOrWhiteSpace(n))
-                .ToList()!,
-            SpecialtyIds = project.ProjectSpecialties.Select(s => s.SpecialtyId).Distinct().ToList()
-        };
-    }
+        ProjectId = project.Id,
+        ClientId = project.ClientId,
+        Title = project.Title,
+        Description = project.Description,
+        Status = "open",
+        CategoryName = string.IsNullOrWhiteSpace(project.Category?.NameEn)
+            ? project.Category?.Name
+            : project.Category?.NameEn,
+        CategoryId = project.CategoryId,
+        BudgetMin = project.BudgetMin,
+        BudgetMax = project.BudgetMax,
+        Currency = string.IsNullOrWhiteSpace(project.Currency) ? "USD" : project.Currency,
+        SkillNames = project.ProjectSkills.Select(s => s.Skill.Name).Where(n => !string.IsNullOrWhiteSpace(n)).ToList(),
+        SkillIds = project.ProjectSkills.Select(s => s.SkillId).Distinct().ToList(),
+        SpecialtyNames = project.ProjectSpecialties
+            .Select(s => string.IsNullOrWhiteSpace(s.Specialty.NameEn) ? s.Specialty.NameAr : s.Specialty.NameEn)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .ToList()!,
+        SpecialtyIds = project.ProjectSpecialties.Select(s => s.SpecialtyId).Distinct().ToList()
+    };
 
-    private static PortfolioSnippet MapPortfolio(PortfolioProject portfolio)
+    private static PortfolioSnippet MapPortfolio(PortfolioProject portfolio) => new()
     {
-        return new PortfolioSnippet
-        {
-            Title = portfolio.Title,
-            Description = portfolio.Description,
-            SkillNames = portfolio.PortfolioSkills?
-                .Select(s => s.Skill?.Name ?? string.Empty)
-                .Where(n => !string.IsNullOrWhiteSpace(n))
-                .ToList() ?? []
-        };
-    }
+        Title = portfolio.Title,
+        Description = portfolio.Description,
+        SkillNames = portfolio.PortfolioSkills?
+            .Select(s => s.Skill?.Name ?? string.Empty)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .ToList() ?? []
+    };
 
-    private static SuggestionScoreBreakdownDto MapBreakdown(ScoreBreakdown breakdown)
-        => new()
-        {
-            Vector = breakdown.Vector,
-            SkillOverlap = breakdown.SkillOverlap,
-            SpecialtyOverlap = breakdown.SpecialtyOverlap,
-            Rating = breakdown.Rating,
-            Portfolio = breakdown.Portfolio
-        };
+    private static List<Guid> ParseDistinctGuids(IEnumerable<string> ids)
+        => ids
+            .Select(id => Guid.TryParse(id, out var guid) ? guid : Guid.Empty)
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+    private static SuggestionScoreBreakdownDto MapBreakdown(ScoreBreakdown breakdown) => new()
+    {
+        Vector = breakdown.Vector,
+        SkillOverlap = breakdown.SkillOverlap,
+        SpecialtyOverlap = breakdown.SpecialtyOverlap,
+        Rating = breakdown.Rating,
+        Portfolio = breakdown.Portfolio
+    };
 
     private static string GetMeta(IDictionary<string, string>? metadata, string key)
     {

@@ -1,3 +1,4 @@
+using FreeGency.Application.Common.Errors;
 using FreeGency.Application.Common.Interfaces;
 using FreeGency.Application.Common.Results;
 using FreeGency.Application.Features.Suggestions.DTOs;
@@ -31,11 +32,21 @@ public class SuggestionsController(ISuggestionService suggestionService) : BaseA
         => HandleResult(await suggestionService.SuggestCandidatesForProjectAsync(projectId, topK, ct));
 
     /// <summary>
-    /// Incremental reindex: upsert developers, teams, open jobs, and open projects into Qdrant.
-    /// Does not wipe existing vectors. Available to any authenticated user.
+    /// Full suggestions reindex (Gemini embed → Qdrant). Open route — no auth.
     /// </summary>
-    [HttpPost("reindex")]
+    [AllowAnonymous]
+    [HttpPost("admin/reindex")]
     [ProducesResponseType(typeof(ApiResponse<ReindexResultDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Reindex(CancellationToken ct = default)
-        => HandleResult(await suggestionService.ReindexAllAsync(ct));
+    {
+        try
+        {
+            return HandleResult(await suggestionService.ReindexAllAsync(ct));
+        }
+        catch (Exception ex)
+        {
+            return HandleResult(ApiResponse.Failure<ReindexResultDto>(
+                AppError.Validation($"Reindex failed: {ex.InnerException?.Message ?? ex.Message}")));
+        }
+    }
 }

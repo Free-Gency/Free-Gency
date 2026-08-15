@@ -1,8 +1,4 @@
-using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
-using FreeGency.Domain.Interfaces.Repositories;
-using FreeGency.Infrastructure.Persistence.Context;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace FreeGency.Infrastructure.Persistence.Repositories;
 
@@ -107,4 +103,8 @@ public class ProjectInvitationRepository
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync(ct);
     }
+
+    public async Task<int> CountSentByClientSinceAsync(Guid clientUserId, DateTime since, CancellationToken ct = default)
+    => await _dbSet.AsNoTracking()
+        .CountAsync(i => i.ClientUserId == clientUserId && i.CreatedAt >= since, ct);
 }
