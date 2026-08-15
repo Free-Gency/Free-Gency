@@ -1,9 +1,4 @@
-﻿using FreeGency.Domain.Entities;
-using FreeGency.Domain.Interfaces.Repositories;
-using FreeGency.Infrastructure.Persistence.Context;
-using Microsoft.EntityFrameworkCore;
-
-namespace FreeGency.Infrastructure.Persistence.Repositories;
+﻿namespace FreeGency.Infrastructure.Persistence.Repositories;
 
 public sealed class ClientProfileRepository : GenericRepository<ClientProfile>, IClientProfileRepository
 {
@@ -197,4 +192,17 @@ public sealed class ClientProfileRepository : GenericRepository<ClientProfile>, 
     {
         return await _dbSet.Include(x => x.User).Where(x => x.Id == ProfileId).Select(x => x.User.Email).FirstOrDefaultAsync();
     }
+
+
+    public async Task<ClientProfile?> GetByUserIdWithSkillsAndInterestsAsync(Guid userId, CancellationToken ct = default)
+            => await _dbSet
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Include(dp => dp.UserSkills)
+                    .ThenInclude(us => us.Skill)
+                .Include(dp => dp.UserInterests)
+                    .ThenInclude(ui => ui.Category)
+                .Include(dp => dp.UserSpecialties)
+                    .ThenInclude(us => us.Specialty)
+                .SingleOrDefaultAsync(dp => dp.UserId == userId, ct);
 }
