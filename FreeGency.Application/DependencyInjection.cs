@@ -1,6 +1,7 @@
 
 using FreeGency.Application.Features.LedgerEntryFeature.Queries;
 using FreeGency.Application.Features.Moderation;
+using FreeGency.Application.Features.UserProfiles;
 
 namespace FreeGency.Application;
 
@@ -38,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IProposalService, ProposalService>();
         services.AddScoped<IProjectInvitationService, ProjectInvitationService>();
         services.AddScoped<ITeamService, TeamService>();
+        services.AddScoped<IUserProfile, UserProfile>();
 
         // Proposal Ranking
         services.AddScoped<IProposalRankingService, ProposalRankingService>();
