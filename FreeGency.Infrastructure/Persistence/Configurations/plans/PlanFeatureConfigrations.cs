@@ -31,52 +31,49 @@ public class PlanFeatureConfigrations : IEntityTypeConfiguration<PlanFeature>
             .OnDelete(DeleteBehavior.Cascade);
         builder.HasData(
 
-            // =================================================
-            // FREE
-            // =================================================
-
+        #region Free Plan
             Feature(
                 "11111111-0000-0000-0000-000000000001",
                 PlanSeeds.FreePlanId,
                 FeatureType.CreateProject,
-                2,
+                3,
                 true),
 
             Feature(
                 "11111111-0000-0000-0000-000000000002",
                 PlanSeeds.FreePlanId,
                 FeatureType.SendProposal,
-                5
+                3
                 , true),
 
             Feature(
                 "11111111-0000-0000-0000-000000000003",
                 PlanSeeds.FreePlanId,
-                FeatureType.TeamMembers,
+                FeatureType.JoinedTeams,
                 3, true),
             Feature(
                 "11111111-0000-0000-0000-000000000004",
                 PlanSeeds.FreePlanId,
                 FeatureType.ActiveProjects,
-                1, true),
+                2, true),
 
             Feature(
                 "11111111-0000-0000-0000-000000000005",
                 PlanSeeds.FreePlanId,
-                FeatureType.FileStorage,
-                100, true),
+                FeatureType.ProjectSendInvitation,
+                5, true),
 
             Feature(
                 "11111111-0000-0000-0000-000000000006",
                 PlanSeeds.FreePlanId,
-                FeatureType.SendInvitation,
-                5, true),
+                FeatureType.TeamInvite,
+                10, true),
 
             Feature(
                 "11111111-0000-0000-0000-000000000007",
                 PlanSeeds.FreePlanId,
                 FeatureType.GenerateProjectDraft,
-                3, true),
+                2, true),
              Feature(
                 "11111111-0000-0000-0000-000000000008",
                 PlanSeeds.FreePlanId,
@@ -86,56 +83,64 @@ public class PlanFeatureConfigrations : IEntityTypeConfiguration<PlanFeature>
             Feature(
                 "11111111-0000-0000-0000-000000000009",
                 PlanSeeds.FreePlanId,
-                FeatureType.AIChat,
-                10, true),
+                FeatureType.AIChatProposal,
+                20, true),
+
+                Feature(
+                "11111111-0000-0000-0000-000000000010",
+                PlanSeeds.FreePlanId,
+                FeatureType.ProposalRanking,
+                5, true),
 
             Feature(
-                "11111111-0000-0000-0000-000000000010",
+                "11111111-0000-0000-0000-000000000011",
                 PlanSeeds.FreePlanId,
                 FeatureType.HiringAgent,
                 null,
                 false),
-            //premium
+        #endregion
+
+        #region Premium Plan
             Feature(
                 "22222222-0000-0000-0000-000000000001",
                 PlanSeeds.PremiumPlanId,
                 FeatureType.CreateProject,
-                10, true),
+                20, true),
 
             Feature(
                 "22222222-0000-0000-0000-000000000002",
                 PlanSeeds.PremiumPlanId,
                 FeatureType.SendProposal,
-                30, true),
+                10, true), // per day
 
             Feature(
                 "22222222-0000-0000-0000-000000000003",
                 PlanSeeds.PremiumPlanId,
-                FeatureType.TeamMembers,
+                FeatureType.JoinedTeams,
                 10, true),
 
             Feature(
                 "22222222-0000-0000-0000-000000000004",
                 PlanSeeds.PremiumPlanId,
                 FeatureType.ActiveProjects,
-                5, true),
+                10, true),
             Feature(
                 "22222222-0000-0000-0000-000000000005",
                 PlanSeeds.PremiumPlanId,
-                FeatureType.FileStorage,
-                2048, true),
+                FeatureType.ProjectSendInvitation,
+                30, true),
 
             Feature(
                 "22222222-0000-0000-0000-000000000006",
                 PlanSeeds.PremiumPlanId,
-                FeatureType.SendInvitation,
-                30, true),
+                FeatureType.TeamInvite,
+                50, true),
 
             Feature(
                 "22222222-0000-0000-0000-000000000007",
                 PlanSeeds.PremiumPlanId,
                 FeatureType.GenerateProjectDraft,
-                20, true),
+                15, true),
 
             Feature(
                 "22222222-0000-0000-0000-000000000008",
@@ -146,74 +151,90 @@ public class PlanFeatureConfigrations : IEntityTypeConfiguration<PlanFeature>
             Feature(
                 "22222222-0000-0000-0000-000000000009",
                 PlanSeeds.PremiumPlanId,
-                FeatureType.AIChat,
-                100, true),
+                FeatureType.AIChatProposal,
+                200, true),
+
             Feature(
                 "22222222-0000-0000-0000-000000000010",
                 PlanSeeds.PremiumPlanId,
+                FeatureType.ProposalRanking,
+                30, true),
+            Feature(
+                "22222222-0000-0000-0000-000000000011",
+                PlanSeeds.PremiumPlanId,
                 FeatureType.HiringAgent,
-                10, true),
+                5, true),
+        #endregion
+
+        #region Pro Plan
             Feature(
                 "33333333-0000-0000-0000-000000000001",
                 PlanSeeds.ProPlanId,
                 FeatureType.CreateProject,
-                null, true),
+                150, true),
 
             Feature(
                 "33333333-0000-0000-0000-000000000002",
                 PlanSeeds.ProPlanId,
                 FeatureType.SendProposal,
-                null, true),
+                30, true), // per day
 
             Feature(
                 "33333333-0000-0000-0000-000000000003",
                 PlanSeeds.ProPlanId,
-                FeatureType.TeamMembers,
-                null, true),
+                FeatureType.JoinedTeams,
+                25, true),
 
             Feature(
                 "33333333-0000-0000-0000-000000000004",
                 PlanSeeds.ProPlanId,
                 FeatureType.ActiveProjects,
-                null, true),
+                30, true),
 
             Feature(
                 "33333333-0000-0000-0000-000000000005",
                 PlanSeeds.ProPlanId,
-                FeatureType.FileStorage,
-                10240, true),
+                FeatureType.ProjectSendInvitation,
+                100, true),
             Feature(
                 "33333333-0000-0000-0000-000000000006",
                 PlanSeeds.ProPlanId,
-                FeatureType.SendInvitation,
-                null, true),
+                FeatureType.TeamInvite,
+                150, true),
 
             Feature(
                 "33333333-0000-0000-0000-000000000007",
                 PlanSeeds.ProPlanId,
                 FeatureType.GenerateProjectDraft,
-                null, true),
+                50, true),
 
             Feature(
                 "33333333-0000-0000-0000-000000000008",
                 PlanSeeds.ProPlanId,
                 FeatureType.TeamSuggestions,
-                null, true),
+                100, true),
 
             Feature(
                 "33333333-0000-0000-0000-000000000009",
                 PlanSeeds.ProPlanId,
-                FeatureType.AIChat,
-                null, true),
+                FeatureType.AIChatProposal,
+                1000, true),
 
             Feature(
                 "33333333-0000-0000-0000-000000000010",
                 PlanSeeds.ProPlanId,
+                FeatureType.ProposalRanking,
+                150, true),
+
+            Feature(
+                "33333333-0000-0000-0000-000000000011",
+                PlanSeeds.ProPlanId,
                 FeatureType.HiringAgent,
-                null, true)
+                30, true)
             );
+        #endregion
     }
-            private static PlanFeature Feature(
+    private static PlanFeature Feature(
         string id,
         Guid planId,
         FeatureType feature,

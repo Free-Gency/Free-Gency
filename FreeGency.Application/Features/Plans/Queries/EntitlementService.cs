@@ -110,7 +110,7 @@ public class EntitlementService : IEntitlementService
 
             FeatureType.CreateProject => await _projectRepo.CountCreatedByClientSinceAsync(userId, monthStart, ct),
 
-            FeatureType.SendInvitation => await _invitationRepo.CountSentByClientSinceAsync(userId, monthStart, ct),
+            FeatureType.ProjectSendInvitation => await _invitationRepo.CountSentByClientSinceAsync(userId, monthStart, ct),
 
             // GenerateProjectDraft, TeamSuggestions, AIChat, HiringAgent → UsageRecord bucket
             _ => await GetUsageRecordUsedAsync(userId, feature, now, ct)

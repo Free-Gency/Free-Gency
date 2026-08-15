@@ -1,6 +1,4 @@
-using FreeGency.AI.Suggestions;
-using FreeGency.Application.Common.Interfaces;
-using FreeGency.Application.Features.Suggestions.DTOs;
+
 using Microsoft.Extensions.Logging;
 
 namespace FreeGency.Application.Features.Suggestions;
