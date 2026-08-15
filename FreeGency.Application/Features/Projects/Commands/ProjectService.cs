@@ -191,6 +191,11 @@ public partial class ProjectService : IProjectService
         if (project.ClientId != _currentUser.UserId)
             return ApiResponse.Failure(AppError.Forbidden("You do not own this project."));
 
+        // ActiveProjects gate — a published project becomes "active" (Open).
+        var activeQuota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.ActiveProjects, ct);
+        if (!activeQuota.IsAllowed)
+            return ApiResponse.Failure(activeQuota.ToAppError());
+
         project.Status = ProjectStatus.Open;
         await _unitOfWork.SaveChangesAsync(ct);
 
