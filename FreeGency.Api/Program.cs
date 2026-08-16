@@ -14,8 +14,6 @@ using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
@@ -162,6 +160,12 @@ namespace FreeGency.Api
             app.UseHangfireDashboard("/jobs");
             DatabaseInitializer.InitializeAsync(app.Services).GetAwaiter().GetResult();
             RecurringJob.RemoveIfExists("suggestions-full-reindex");
+
+            var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+            using var scope = scopeFactory.CreateScope();
+            var planBackground = scope.ServiceProvider.GetRequiredService<IBackGroundJobPlanService>();
+            RecurringJob.AddOrUpdate("planService", () => planBackground.ProcessPlansAsync(), Cron.Daily);
+            RecurringJob.AddOrUpdate("TeamPlanService", () => planBackground.ProcessPlansTeamAsync(), Cron.Daily);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

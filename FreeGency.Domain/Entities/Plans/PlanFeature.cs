@@ -25,12 +25,14 @@ public enum FeatureType
 {
     CreateProject,
     SendProposal,
-    TeamMembers,
+    JoinedTeams,
     ActiveProjects,
-    FileStorage,
-    SendInvitation,
+    ProjectSendInvitation,
+    TeamInvite,
+    // AI Features
     GenerateProjectDraft,
     TeamSuggestions,
-    AIChat,
+    AIChatProposal,
+    ProposalRanking,
     HiringAgent
 }

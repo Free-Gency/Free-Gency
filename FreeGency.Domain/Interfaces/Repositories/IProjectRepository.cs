@@ -38,5 +38,9 @@ namespace FreeGency.Domain.Interfaces.Repositories
         IQueryable<Project> GetProjectsQuery();
 
         Task<int> CountCreatedByClientSinceAsync(Guid clientId, DateTime since, CancellationToken ct = default);
+
+
+        /// <summary>Active projects for the client (Open + InProgress) — ActiveProjects limit.</summary>
+        Task<int> CountActiveByClientAsync(Guid clientId, CancellationToken ct = default);
     }
 }

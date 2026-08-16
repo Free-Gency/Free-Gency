@@ -23,6 +23,7 @@ public class Subscription : ISoftDeletableEntity
     public DateTime StartedAt { get; set; }
 
     public DateTime? ExpiresAt { get; set; }
+    public BillingPeriod BillingPeriod { get; set; }
 
     public bool AutoRenew { get; set; }
     public virtual ICollection<UsageRecord> UsageRecords { get; set; }
@@ -34,4 +35,9 @@ public enum SubscriptionStatus
     Expired,
     Cancelled,
     Trialing
+}
+public enum BillingPeriod
+{
+    Monthly,
+    Yearly
 }

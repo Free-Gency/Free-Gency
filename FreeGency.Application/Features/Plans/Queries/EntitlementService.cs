@@ -12,6 +12,7 @@ public class EntitlementService : IEntitlementService
     private readonly IProjectRepository _projectRepo;
     private readonly IProjectProposalRepository _proposalRepo;
     private readonly IProjectInvitationRepository _invitationRepo;
+    private readonly ITeamMemberRepository _teamMemberRepo;
     #endregion
 
     #region Constructor
@@ -25,6 +26,7 @@ public class EntitlementService : IEntitlementService
         _projectRepo = unitOfWork.Repository<IProjectRepository, Project>();
         _proposalRepo = unitOfWork.Repository<IProjectProposalRepository, ProjectProposal>();
         _invitationRepo = unitOfWork.Repository<IProjectInvitationRepository, ProjectInvitation>();
+        _teamMemberRepo = unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
     }
     #endregion
 
@@ -110,7 +112,12 @@ public class EntitlementService : IEntitlementService
 
             FeatureType.CreateProject => await _projectRepo.CountCreatedByClientSinceAsync(userId, monthStart, ct),
 
-            FeatureType.SendInvitation => await _invitationRepo.CountSentByClientSinceAsync(userId, monthStart, ct),
+            FeatureType.ProjectSendInvitation => await _invitationRepo.CountSentByClientSinceAsync(userId, monthStart, ct),
+
+            FeatureType.JoinedTeams => await _teamMemberRepo.CountByUserIdAsync(userId, ct),
+
+            FeatureType.ActiveProjects => await _projectRepo.CountActiveByClientAsync(userId, ct),
+
 
             // GenerateProjectDraft, TeamSuggestions, AIChat, HiringAgent → UsageRecord bucket
             _ => await GetUsageRecordUsedAsync(userId, feature, now, ct)

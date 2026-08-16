@@ -71,7 +71,7 @@ public class ProjectInvitationService : IProjectInvitationService
 
 
         // check entitlement:
-        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.SendInvitation, ct);
+        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.ProjectSendInvitation, ct);
         if (!quota.IsAllowed)
             return ApiResponse.Failure<ProjectInvitationDto>(quota.ToAppError());
 

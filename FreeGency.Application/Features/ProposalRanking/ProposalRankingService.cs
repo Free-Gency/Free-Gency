@@ -1,10 +1,5 @@
-using FreeGency.AI.Interfaces;
 using FreeGency.AI.Ranking.ProposalRanking;
-using FreeGency.Domain.Entities;
-using FreeGency.Domain.Enums;
-using FreeGency.Domain.Interfaces.Repositories;
-using FreeGency.Domain.Interfaces.Repositories.Teams;
-using Microsoft.EntityFrameworkCore;
+
 
 using IApplicationProposalRankingService = FreeGency.Application.Common.Interfaces.IProposalRankingService;
 using IOrchestrator = FreeGency.AI.Interfaces.IAIOrchestrator;
@@ -19,11 +14,15 @@ public sealed class ProposalRankingService : IApplicationProposalRankingService
     private readonly IProjectRepository _projectRepository;
     private readonly IProjectProposalRepository _proposalRepository;
     private readonly ITeamRepository _teamRepository;
+    private readonly ICurrentUserService _currentUser;
+    private readonly IEntitlementService _entitlementService;
 
-    public ProposalRankingService(IUnitOfWork unitOfWork, IOrchestrator orchestrator)
+    public ProposalRankingService(IUnitOfWork unitOfWork, IOrchestrator orchestrator, ICurrentUserService currentUser, IEntitlementService entitlementService)
     {
         _unitOfWork = unitOfWork;
         _orchestrator = orchestrator;
+        _currentUser = currentUser;
+        _entitlementService = entitlementService;
         _projectRepository = _unitOfWork.Repository<IProjectRepository, Project>();
         _proposalRepository = _unitOfWork.Repository<IProjectProposalRepository, ProjectProposal>();
         _teamRepository = _unitOfWork.Repository<ITeamRepository, Team>();
@@ -38,6 +37,15 @@ public sealed class ProposalRankingService : IApplicationProposalRankingService
 
         if (project is null)
             return ApiResponse.Failure<ProjectRankingResponse>(AppError.NotFound(nameof(Project), projectId));
+
+        // Ownership + ProposalRanking gate.
+        if (project.ClientId != _currentUser.UserId)
+            return ApiResponse.Failure<ProjectRankingResponse>(AppError.Forbidden("Only the project's client can rank proposals."));
+
+        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.ProposalRanking, ct);
+        if (!quota.IsAllowed)
+            return ApiResponse.Failure<ProjectRankingResponse>(quota.ToAppError());
+
 
         // Rank open + decided proposals so clients still see match scores — skip withdrawn only.
         var proposals = await _proposalRepository.Query()
@@ -64,7 +72,11 @@ public sealed class ProposalRankingService : IApplicationProposalRankingService
 
         var request = MapToRequest(project, proposals, topK);
         var result = await _orchestrator.RankProjectAsync(request, ct);
+
+        // Consume quota after successful ranking.
+        await _entitlementService.ConsumeAsync(_currentUser.UserId, FeatureType.ProposalRanking, ct);
         return ApiResponse.Success(result);
+
     }
 
     private static ProjectRankingRequest MapToRequest(Project project, List<ProjectProposal> proposals, int topK)

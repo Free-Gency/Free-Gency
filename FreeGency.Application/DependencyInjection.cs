@@ -1,4 +1,7 @@
 
+using FreeGency.Application.Features.BackGroundJobPlan.Commands;
+using FreeGency.Application.Features.PlanTeamFeature.Commands;
+using FreeGency.Application.Features.PlanTeamFeature.Queries;
 
 namespace FreeGency.Application;
 
@@ -14,6 +17,8 @@ public static class DependencyInjection
             cfg.AddMaps(typeof(ProposalMapping).Assembly);
             cfg.AddMaps(typeof(TaskMapping).Assembly);
         });
+        services.AddScoped<IPlanTeamService, PlanTeamService>();
+        services.AddScoped<IBackGroundJobPlanService, BackGroundJobPlanService>();
         services.AddScoped<IPlanService, PlanService>();
         services.AddScoped<ILedgerEntryService, LedgerEntryService>();
         services.AddScoped<INotificationService, NotificationService>();
@@ -62,7 +67,9 @@ public static class DependencyInjection
 
         services.AddScoped<ITaskService, TaskService>();
 
+        // Entitlements For Plans
         services.AddScoped<IEntitlementService, EntitlementService>();
+        services.AddScoped<ITeamEntitlementService, TeamEntitlementService>();
 
         services.AddFluentValidationAutoValidation()
                 .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

@@ -103,7 +103,7 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
 
                     StartedAt = now,
                     ExpiresAt = now.AddMonths(1),
-
+                    BillingPeriod=BillingPeriod.Monthly,
                     AutoRenew = true
                 };
                 await subscriptionRepository.AddAsync(subscription);
@@ -322,7 +322,7 @@ namespace FreeGency.Application.Features.ExternalFeature.Commands
 
                     StartedAt = now,
                     ExpiresAt = now.AddMonths(1),
-
+                    BillingPeriod = BillingPeriod.Monthly,
                     AutoRenew = true
                 };
                 await subscriptionRepository.AddAsync(subscription);

@@ -1,6 +1,4 @@
-using FreeGency.AI.Suggestions;
-using FreeGency.Application.Common.Interfaces;
-using FreeGency.Application.Features.Suggestions.DTOs;
+
 using Microsoft.Extensions.Logging;
 
 namespace FreeGency.Application.Features.Suggestions;
@@ -131,6 +129,12 @@ public sealed class SuggestionService : ISuggestionService
         CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
+
+        // Check if the user has permission to consume the TeamSuggestions feature
+        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.TeamSuggestions, ct);
+        if (!quota.IsAllowed)
+            return ApiResponse.Failure<ProjectCandidatesResponseDto>(quota.ToAppError());
+
         try
         {
             var project = await _projects.GetByIdWithDetailsAsync(projectId, ct);
@@ -150,6 +154,10 @@ public sealed class SuggestionService : ISuggestionService
             var candidates = await HydrateCandidatesAsync(scored, ct);
 
             sw.Stop();
+
+            // Consume the TeamSuggestions feature quota for the current user
+            await _entitlementService.ConsumeAsync(_currentUser.UserId, FeatureType.TeamSuggestions, ct);
+
             return ApiResponse.Success(new ProjectCandidatesResponseDto
             {
                 ProjectId = projectId,

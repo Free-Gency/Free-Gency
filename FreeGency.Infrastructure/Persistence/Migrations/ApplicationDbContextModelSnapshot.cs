@@ -1910,7 +1910,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 0,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 2,
+                            Limit = 3,
                             PlanId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -1921,7 +1921,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 1,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 5,
+                            Limit = 3,
                             PlanId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -1943,7 +1943,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 3,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 1,
+                            Limit = 2,
                             PlanId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -1954,7 +1954,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 4,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 100,
+                            Limit = 5,
                             PlanId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -1965,7 +1965,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 5,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 5,
+                            Limit = 10,
                             PlanId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -1976,7 +1976,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 6,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 3,
+                            Limit = 2,
                             PlanId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -1998,7 +1998,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 8,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 10,
+                            Limit = 20,
                             PlanId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -2007,6 +2007,17 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "System",
                             Feature = 9,
+                            IsDeleted = false,
+                            IsEnabled = true,
+                            Limit = 5,
+                            PlanId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            Id = new Guid("11111111-0000-0000-0000-000000000011"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "System",
+                            Feature = 10,
                             IsDeleted = false,
                             IsEnabled = false,
                             PlanId = new Guid("11111111-1111-1111-1111-111111111111")
@@ -2019,7 +2030,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 0,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 10,
+                            Limit = 20,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2030,7 +2041,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 1,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 30,
+                            Limit = 10,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2052,7 +2063,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 3,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 5,
+                            Limit = 10,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2063,7 +2074,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 4,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 2048,
+                            Limit = 30,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2074,7 +2085,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 5,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 30,
+                            Limit = 50,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2085,7 +2096,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 6,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 20,
+                            Limit = 15,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2107,7 +2118,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 8,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 100,
+                            Limit = 200,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2118,7 +2129,18 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 9,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 10,
+                            Limit = 30,
+                            PlanId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-0000-0000-0000-000000000011"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "System",
+                            Feature = 10,
+                            IsDeleted = false,
+                            IsEnabled = true,
+                            Limit = 5,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2129,6 +2151,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 0,
                             IsDeleted = false,
                             IsEnabled = true,
+                            Limit = 150,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2139,6 +2162,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 1,
                             IsDeleted = false,
                             IsEnabled = true,
+                            Limit = 30,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2149,6 +2173,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 2,
                             IsDeleted = false,
                             IsEnabled = true,
+                            Limit = 25,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2159,6 +2184,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 3,
                             IsDeleted = false,
                             IsEnabled = true,
+                            Limit = 30,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2169,7 +2195,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 4,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 10240,
+                            Limit = 100,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2180,6 +2206,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 5,
                             IsDeleted = false,
                             IsEnabled = true,
+                            Limit = 150,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2190,6 +2217,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 6,
                             IsDeleted = false,
                             IsEnabled = true,
+                            Limit = 50,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2200,6 +2228,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 7,
                             IsDeleted = false,
                             IsEnabled = true,
+                            Limit = 100,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2210,6 +2239,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 8,
                             IsDeleted = false,
                             IsEnabled = true,
+                            Limit = 1000,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2220,6 +2250,18 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 9,
                             IsDeleted = false,
                             IsEnabled = true,
+                            Limit = 150,
+                            PlanId = new Guid("33333333-3333-3333-3333-333333333333")
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-0000-0000-0000-000000000011"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedBy = "System",
+                            Feature = 10,
+                            IsDeleted = false,
+                            IsEnabled = true,
+                            Limit = 30,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         });
                 });
@@ -2234,6 +2276,9 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
+
+                    b.Property<int>("BillingPeriod")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -4759,6 +4804,325 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.ToTable("TeamPayoutSplits", "finance");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(350)
+                        .HasColumnType("nvarchar(350)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<decimal?>("MonthlyPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<decimal?>("YearlyPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TeamPlans", "TeamPlans");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "",
+                            Description = "Perfect for small teams just getting started",
+                            IsDeleted = false,
+                            MonthlyPrice = 0m,
+                            Name = "Free",
+                            YearlyPrice = 0m
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "",
+                            Description = "Great for growing teams",
+                            IsDeleted = false,
+                            MonthlyPrice = 5m,
+                            Name = "Premium",
+                            YearlyPrice = 50m
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "",
+                            Description = "Perfect for large teams",
+                            IsDeleted = false,
+                            MonthlyPrice = 10m,
+                            Name = "Pro",
+                            YearlyPrice = 100m
+                        });
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamPlanFeature", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Feature")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("Limit")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TeamPlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamPlanId", "Feature")
+                        .IsUnique();
+
+                    b.ToTable("TeamPlanFeatures", "TeamPlans");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "",
+                            Feature = "CreateProposal",
+                            IsDeleted = false,
+                            IsEnabled = true,
+                            Limit = 5,
+                            TeamPlanId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "",
+                            Feature = "CreateProposal",
+                            IsDeleted = false,
+                            IsEnabled = true,
+                            Limit = 15,
+                            TeamPlanId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "",
+                            Feature = "CreateProposal",
+                            IsDeleted = false,
+                            IsEnabled = true,
+                            Limit = 70,
+                            TeamPlanId = new Guid("33333333-3333-3333-3333-333333333333")
+                        });
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamSubscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("AutoRenew")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("BillingPeriod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TeamPlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId")
+                        .IsUnique();
+
+                    b.HasIndex("TeamPlanId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TeamSubscriptions", "TeamPlans");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamUsageRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Feature")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("PeriodEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TeamSubscriptionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("Used")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamSubscriptionId", "Feature")
+                        .IsUnique();
+
+                    b.ToTable("TeamUsageRecords", "TeamPlans");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.TeamSkill", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6647,6 +7011,55 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamPlanFeature", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.TeamPlans.TeamPlan", "TeamPlan")
+                        .WithMany("Features")
+                        .HasForeignKey("TeamPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TeamPlan");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamSubscription", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.Team", "Team")
+                        .WithOne("Subscription")
+                        .HasForeignKey("FreeGency.Domain.Entities.TeamPlans.TeamSubscription", "TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.TeamPlans.TeamPlan", "TeamPlan")
+                        .WithMany()
+                        .HasForeignKey("TeamPlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.User", "User")
+                        .WithMany("TeamSubscriptions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+
+                    b.Navigation("TeamPlan");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamUsageRecord", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.TeamPlans.TeamSubscription", "Subscription")
+                        .WithMany("UsageRecords")
+                        .HasForeignKey("TeamSubscriptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Subscription");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.TeamSkill", b =>
                 {
                     b.HasOne("FreeGency.Domain.Entities.Skill", "Skill")
@@ -7094,6 +7507,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.Navigation("SocialLinks");
 
+                    b.Navigation("Subscription");
+
                     b.Navigation("TeamCategories");
 
                     b.Navigation("TeamFeedbacks");
@@ -7118,6 +7533,16 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("TeamJobSkills");
 
                     b.Navigation("TeamJoinRequests");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamPlan", b =>
+                {
+                    b.Navigation("Features");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamSubscription", b =>
+                {
+                    b.Navigation("UsageRecords");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.User", b =>
@@ -7169,6 +7594,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("TeamMemberships");
 
                     b.Navigation("TeamPayoutSplits");
+
+                    b.Navigation("TeamSubscriptions");
 
                     b.Navigation("UploadedProjectFiles");
 

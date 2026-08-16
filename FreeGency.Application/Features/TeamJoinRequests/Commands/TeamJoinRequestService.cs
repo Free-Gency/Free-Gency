@@ -1,227 +1,230 @@
-﻿using FreeGency.Application.Features.NotificationFeature.Dtos;
+﻿using FreeGency.Application.Common.Models;
 using FreeGency.Application.Features.TeamJoinRequests.Dtos;
 using FreeGency.Application.Features.TeamJoinRequests.Mapping;
-using FreeGency.Domain.Interfaces.Repositories.Teams;
 using FreeGency.Domain.Specifications;
-using Hangfire;
-using Microsoft.JSInterop;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace FreeGency.Application.Features.TeamJoinRequests.Commands
+
+namespace FreeGency.Application.Features.TeamJoinRequests.Commands;
+
+public partial class TeamJoinRequestService(IUnitOfWork unitOfWork,ICurrentUserService currentUserService,INotificationService notificationService, IEntitlementService entitlementService) : ITeamJoinRequestService
 {
-    public partial class TeamJoinRequestService(IUnitOfWork unitOfWork,ICurrentUserService currentUserService,INotificationService notificationService ) : ITeamJoinRequestService
+    private readonly ITeamJobRepository _teamJobRepository = unitOfWork.Repository<ITeamJobRepository, TeamJob>();
+    private readonly ITeamMemberRepository _teamMemberRepository = unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
+    private readonly ITeamJoinRequestRepository _teamJoinRequestRepository = unitOfWork.Repository<ITeamJoinRequestRepository, TeamJoinRequest>();
+    private readonly ITeamRepository _teamRepository = unitOfWork.Repository<ITeamRepository, Team>();
+    public async Task<Result> ApplyToTeamJobAsync(ApplyToTeamJobCommand applyToTeamJob, CancellationToken ct = default)
     {
-        private readonly ITeamJobRepository _teamJobRepository = unitOfWork.Repository<ITeamJobRepository, TeamJob>();
-        private readonly ITeamMemberRepository _teamMemberRepository = unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
-        private readonly ITeamJoinRequestRepository _teamJoinRequestRepository = unitOfWork.Repository<ITeamJoinRequestRepository, TeamJoinRequest>();
-        private readonly ITeamRepository _teamRepository = unitOfWork.Repository<ITeamRepository, Team>();
-        public async Task<Result> ApplyToTeamJobAsync(ApplyToTeamJobCommand applyToTeamJob)
+        var spec = new TeamJobSpecification(applyToTeamJob.JobId);
+        var teamJob = await _teamJobRepository.GetEntityWithSpec(spec);
+        if (teamJob == null) return Result.Failure(TeamErrors.TeamJobNotFound);
+
+        var userId = currentUserService.UserId;
+        var teamMemberSpec = new TeamMemberSpecification(teamJob.TeamId, userId);
+        var teamMember = await _teamMemberRepository.GetEntityWithSpec(teamMemberSpec);
+        if (teamMember != null) return Result.Failure(TeamErrors.AlreadyMember);
+
+        var teamJobRequestSpec = new TeamJoinRequestSpecification(teamJob.TeamId, userId);
+        var teamJobRequest = await _teamJoinRequestRepository.GetEntityWithSpec(teamJobRequestSpec);
+        if (teamJobRequest != null) return Result.Failure(TeamErrors.JoinRequestAlreadyExists);
+
+        var request = teamJob.ToEntity(userId, applyToTeamJob.CoverLetter);
+        await _teamJoinRequestRepository.AddAsync(request);
+        await unitOfWork.SaveChangesAsync();
+        await NotifyTeamLeadersAsync(teamJob.TeamId);
+
+
+        return Result.Success();
+    }
+
+   
+
+    public async Task<Result> JoinByCodeAsync(JoinTeamByCodeCommand joinTeamByCode, CancellationToken ct = default)
+    {
+        var teamSpec = new TeamSpecification(joinTeamByCode.code);
+        var team = await _teamRepository.GetEntityWithSpec(teamSpec);
+        if (team == null) return Result.Failure(TeamErrors.TeamNotFound);
+        var userId = currentUserService.UserId;
+        var teamMemberSpec = new TeamMemberSpecification(team.Id, userId);
+        var teamMember = await _teamMemberRepository.GetEntityWithSpec(teamMemberSpec);
+        if (teamMember != null) return Result.Failure(TeamErrors.AlreadyMember);
+        var teamJobRequestSpec = new TeamJoinRequestSpecification(team.Id, userId);
+        var teamJobRequest = await _teamJoinRequestRepository.GetEntityWithSpec(teamJobRequestSpec);
+        if (teamJobRequest != null) return Result.Failure(TeamErrors.JoinRequestAlreadyExists);
+        var request = team.ToEntity(userId, joinTeamByCode.CoverLetter);
+        await _teamJoinRequestRepository.AddAsync(request);
+        await unitOfWork.SaveChangesAsync();
+        await NotifyTeamLeadersAsync(team.Id);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> AcceptJoinRequestAsync(Guid requestId, CancellationToken ct = default)
+    {
+        var request = await _teamJoinRequestRepository.GetEntityWithSpec(
+            new TeamJoinRequestSpecification(requestId));
+
+        if (request == null)
+            return Result.Failure(TeamErrors.JoinRequestNotFound);
+
+        var team = await _teamRepository.GetByIdAsync(request.TeamId);
+        if (team is null)
+            return Result.Failure(TeamErrors.TeamNotFound);
+
+        var isLeader = await _teamMemberRepository.IsLeaderAsync(
+                                                    request.TeamId,
+                                                    currentUserService.UserId)
+            || team.OwnerUserId == currentUserService.UserId;
+        if (!isLeader)
+            return Result.Failure(TeamErrors.NotAuthorized);
+        if (request.Status != TeamJoinRequestStatus.pending)
+            return Result.Failure(TeamErrors.RequestAlreadyHandled);
+
+        var member = await _teamMemberRepository.GetEntityWithSpec(
+            new TeamMemberSpecification(request.TeamId, request.UserId));
+
+        if (member != null)
+            return Result.Failure(TeamErrors.AlreadyMember);
+
+        // JoinedTeams gate — check the JOINING user's quota before adding them.
+        var joiningQuota = await entitlementService.CanConsumeAsync(request.UserId, FeatureType.JoinedTeams, ct);
+        if (!joiningQuota.IsAllowed)
         {
-            var spec = new TeamJobSpecification(applyToTeamJob.JobId);
-            var teamJob = await _teamJobRepository.GetEntityWithSpec(spec);
-            if (teamJob == null) return Result.Failure(TeamErrors.TeamJobNotFound);
-
-            var userId = currentUserService.UserId;
-            var teamMemberSpec = new TeamMemberSpecification(teamJob.TeamId, userId);
-            var teamMember = await _teamMemberRepository.GetEntityWithSpec(teamMemberSpec);
-            if (teamMember != null) return Result.Failure(TeamErrors.AlreadyMember);
-
-            var teamJobRequestSpec = new TeamJoinRequestSpecification(teamJob.TeamId, userId);
-            var teamJobRequest = await _teamJoinRequestRepository.GetEntityWithSpec(teamJobRequestSpec);
-            if (teamJobRequest != null) return Result.Failure(TeamErrors.JoinRequestAlreadyExists);
-
-            var request = teamJob.ToEntity(userId, applyToTeamJob.CoverLetter);
-            await _teamJoinRequestRepository.AddAsync(request);
-            await unitOfWork.SaveChangesAsync();
-            await NotifyTeamLeadersAsync(teamJob.TeamId);
-
-
-            return Result.Success();
+            var err = joiningQuota.ToAppError();
+            return Result.Failure(new Error(err.code, err.message, err.statusCode));
         }
+
+
+        await _teamMemberRepository.AddAsync(new TeamMember
+        {
+            Id = Guid.NewGuid(),
+            TeamId = request.TeamId,
+            UserId = request.UserId,
+            TeamRole = Role.TeamMember,
+            Job = request.Job,
+            JoinedAt = DateTime.UtcNow.ToString("O")
+        });
+
+        request.Status = TeamJoinRequestStatus.Accepted;
+        request.ResponseAt = DateTime.UtcNow;
+        request.RespondedByUserId = currentUserService.UserId.ToString();
+
+        _teamJoinRequestRepository.Update(request);
+
+        var chatRoomRepo = unitOfWork.Repository<IChatRoomRepository, ChatRoom>();
+        var userRepo = unitOfWork.Repository<IUserRepository, User>();
+        var mainRoom = await chatRoomRepo.GetTeamMainAsync(request.TeamId);
+        var developerProfileId =
+               await userRepo.GetDeveloperProfileIdByUserIdAsync(request.UserId);
+        if (mainRoom is not null)
+        {
+           
+            if (developerProfileId is not null)
+            {
+                await chatRoomRepo.AddMemberAsync(
+                    mainRoom.Id,
+                    clientProfileId: null,
+                    developerProfileId: developerProfileId,
+                    canSend: true,
+                    roleLabel: "Team Member");
+            }
+        }
+
+        await unitOfWork.SaveChangesAsync();
 
        
 
-        public async Task<Result> JoinByCodeAsync(JoinTeamByCodeCommand joinTeamByCode)
+        if (developerProfileId is not null)
         {
-            var teamSpec = new TeamSpecification(joinTeamByCode.code);
-            var team = await _teamRepository.GetEntityWithSpec(teamSpec);
-            if (team == null) return Result.Failure(TeamErrors.TeamNotFound);
-            var userId = currentUserService.UserId;
-            var teamMemberSpec = new TeamMemberSpecification(team.Id, userId);
-            var teamMember = await _teamMemberRepository.GetEntityWithSpec(teamMemberSpec);
-            if (teamMember != null) return Result.Failure(TeamErrors.AlreadyMember);
-            var teamJobRequestSpec = new TeamJoinRequestSpecification(team.Id, userId);
-            var teamJobRequest = await _teamJoinRequestRepository.GetEntityWithSpec(teamJobRequestSpec);
-            if (teamJobRequest != null) return Result.Failure(TeamErrors.JoinRequestAlreadyExists);
-            var request = team.ToEntity(userId, joinTeamByCode.CoverLetter);
-            await _teamJoinRequestRepository.AddAsync(request);
-            await unitOfWork.SaveChangesAsync();
-            await NotifyTeamLeadersAsync(team.Id);
+            var teamId = request.TeamId;
+            var teamName = team.Name;
+            var profileId = developerProfileId.Value;
 
-            return Result.Success();
+            BackgroundJob.Enqueue(() =>
+                notificationService.CreateNotification(
+                    new CreateNotificationRequest
+                    {
+                        DeveloperProfileId = profileId,
+                        TeamId = teamId,
+                        Title = "Join request accepted",
+                        Body = $"Your request to join team \"{teamName}\" has been accepted.",
+                        Type = NotificationType.JoinRequestAccepted,
+                        ActionUrl = $"/developer/teams/{teamId}"
+                    }));
         }
 
-        public async Task<Result> AcceptJoinRequestAsync(Guid requestId)
+        return Result.Success();
+
+    }
+    public async Task<Result> RejectJoinRequestAsync(Guid requestId, CancellationToken ct = default)
+    {
+        var request = await _teamJoinRequestRepository.GetEntityWithSpec(
+            new TeamJoinRequestSpecification(requestId));
+
+        if (request == null)
+            return Result.Failure(TeamErrors.JoinRequestNotFound);
+
+        var team = await _teamRepository.GetByIdAsync(request.TeamId);
+        if (team is null)
+            return Result.Failure(TeamErrors.TeamNotFound);
+
+        var isLeader = await _teamMemberRepository.IsLeaderAsync(
+                                                    request.TeamId,
+                                                    currentUserService.UserId)
+            || team.OwnerUserId == currentUserService.UserId;
+        if (!isLeader)
+            return Result.Failure(TeamErrors.NotAuthorized);
+        if (request.Status != TeamJoinRequestStatus.pending)
+            return Result.Failure(TeamErrors.RequestAlreadyHandled);
+
+        request.Status = TeamJoinRequestStatus.Rejected;
+        request.ResponseAt = DateTime.UtcNow;
+        request.RespondedByUserId = currentUserService.UserId.ToString();
+
+        _teamJoinRequestRepository.Update(request);
+
+        await unitOfWork.SaveChangesAsync();
+        var developerProfileId =
+                           await unitOfWork
+                               .Repository<IUserRepository, User>()
+                               .GetDeveloperProfileIdByUserIdAsync(request.UserId);
+
+        if (developerProfileId is not null)
         {
-            var request = await _teamJoinRequestRepository.GetEntityWithSpec(
-                new TeamJoinRequestSpecification(requestId));
+            var teamId = request.TeamId;
+            var teamName = team.Name;
+            var profileId = developerProfileId.Value;
 
-            if (request == null)
-                return Result.Failure(TeamErrors.JoinRequestNotFound);
-
-            var team = await _teamRepository.GetByIdAsync(request.TeamId);
-            if (team is null)
-                return Result.Failure(TeamErrors.TeamNotFound);
-
-            var isLeader = await _teamMemberRepository.IsLeaderAsync(
-                                                        request.TeamId,
-                                                        currentUserService.UserId)
-                || team.OwnerUserId == currentUserService.UserId;
-            if (!isLeader)
-                return Result.Failure(TeamErrors.NotAuthorized);
-            if (request.Status != TeamJoinRequestStatus.pending)
-                return Result.Failure(TeamErrors.RequestAlreadyHandled);
-
-            var member = await _teamMemberRepository.GetEntityWithSpec(
-                new TeamMemberSpecification(request.TeamId, request.UserId));
-
-            if (member != null)
-                return Result.Failure(TeamErrors.AlreadyMember);
-
-            await _teamMemberRepository.AddAsync(new TeamMember
-            {
-                Id = Guid.NewGuid(),
-                TeamId = request.TeamId,
-                UserId = request.UserId,
-                TeamRole = Role.TeamMember,
-                Job = request.Job,
-                JoinedAt = DateTime.UtcNow.ToString("O")
-            });
-
-            request.Status = TeamJoinRequestStatus.Accepted;
-            request.ResponseAt = DateTime.UtcNow;
-            request.RespondedByUserId = currentUserService.UserId.ToString();
-
-            _teamJoinRequestRepository.Update(request);
-
-            var chatRoomRepo = unitOfWork.Repository<IChatRoomRepository, ChatRoom>();
-            var userRepo = unitOfWork.Repository<IUserRepository, User>();
-            var mainRoom = await chatRoomRepo.GetTeamMainAsync(request.TeamId);
-            var developerProfileId =
-                   await userRepo.GetDeveloperProfileIdByUserIdAsync(request.UserId);
-            if (mainRoom is not null)
-            {
-               
-                if (developerProfileId is not null)
-                {
-                    await chatRoomRepo.AddMemberAsync(
-                        mainRoom.Id,
-                        clientProfileId: null,
-                        developerProfileId: developerProfileId,
-                        canSend: true,
-                        roleLabel: "Team Member");
-                }
-            }
-
-            await unitOfWork.SaveChangesAsync();
-
-           
-
-            if (developerProfileId is not null)
-            {
-                var teamId = request.TeamId;
-                var teamName = team.Name;
-                var profileId = developerProfileId.Value;
-
-                BackgroundJob.Enqueue(() =>
-                    notificationService.CreateNotification(
-                        new CreateNotificationRequest
-                        {
-                            DeveloperProfileId = profileId,
-                            TeamId = teamId,
-                            Title = "Join request accepted",
-                            Body = $"Your request to join team \"{teamName}\" has been accepted.",
-                            Type = NotificationType.JoinRequestAccepted,
-                            ActionUrl = $"/developer/teams/{teamId}"
-                        }));
-            }
-
-            return Result.Success();
-
+            BackgroundJob.Enqueue(() =>
+                notificationService.CreateNotification(
+                    new CreateNotificationRequest
+                    {
+                        DeveloperProfileId = profileId,
+                        TeamId = teamId,
+                        Title = "Join request rejected",
+                        Body = $"Your request to join team \"{teamName}\" has been rejected.",
+                        Type = NotificationType.JoinRequestRejected,
+                        ActionUrl = $"/developer/teams/{teamId}"
+                    }));
         }
-        public async Task<Result> RejectJoinRequestAsync(Guid requestId)
+        return Result.Success();
+    }
+    private async Task NotifyTeamLeadersAsync(Guid TeamId, CancellationToken ct = default)
+    {
+        var TeamLeadersProfileIds = await _teamMemberRepository.GetLeaderDeveloperProfileIdsAsync(TeamId);
+        var senderName =
+                         $"{currentUserService.FirstName} {currentUserService.LastName}";
+        foreach (var ProfileId in TeamLeadersProfileIds)
         {
-            var request = await _teamJoinRequestRepository.GetEntityWithSpec(
-                new TeamJoinRequestSpecification(requestId));
 
-            if (request == null)
-                return Result.Failure(TeamErrors.JoinRequestNotFound);
-
-            var team = await _teamRepository.GetByIdAsync(request.TeamId);
-            if (team is null)
-                return Result.Failure(TeamErrors.TeamNotFound);
-
-            var isLeader = await _teamMemberRepository.IsLeaderAsync(
-                                                        request.TeamId,
-                                                        currentUserService.UserId)
-                || team.OwnerUserId == currentUserService.UserId;
-            if (!isLeader)
-                return Result.Failure(TeamErrors.NotAuthorized);
-            if (request.Status != TeamJoinRequestStatus.pending)
-                return Result.Failure(TeamErrors.RequestAlreadyHandled);
-
-            request.Status = TeamJoinRequestStatus.Rejected;
-            request.ResponseAt = DateTime.UtcNow;
-            request.RespondedByUserId = currentUserService.UserId.ToString();
-
-            _teamJoinRequestRepository.Update(request);
-
-            await unitOfWork.SaveChangesAsync();
-            var developerProfileId =
-                               await unitOfWork
-                                   .Repository<IUserRepository, User>()
-                                   .GetDeveloperProfileIdByUserIdAsync(request.UserId);
-
-            if (developerProfileId is not null)
+            BackgroundJob.Enqueue(() => notificationService.CreateNotification(new CreateNotificationRequest
             {
-                var teamId = request.TeamId;
-                var teamName = team.Name;
-                var profileId = developerProfileId.Value;
-
-                BackgroundJob.Enqueue(() =>
-                    notificationService.CreateNotification(
-                        new CreateNotificationRequest
-                        {
-                            DeveloperProfileId = profileId,
-                            TeamId = teamId,
-                            Title = "Join request rejected",
-                            Body = $"Your request to join team \"{teamName}\" has been rejected.",
-                            Type = NotificationType.JoinRequestRejected,
-                            ActionUrl = $"/developer/teams/{teamId}"
-                        }));
-            }
-            return Result.Success();
-        }
-        private async Task NotifyTeamLeadersAsync(Guid TeamId)
-        {
-            var TeamLeadersProfileIds = await _teamMemberRepository.GetLeaderDeveloperProfileIdsAsync(TeamId);
-            var senderName =
-                             $"{currentUserService.FirstName} {currentUserService.LastName}";
-            foreach (var ProfileId in TeamLeadersProfileIds)
-            {
-
-                BackgroundJob.Enqueue(() => notificationService.CreateNotification(new CreateNotificationRequest
-                {
-                    TeamId = TeamId,
-                    DeveloperProfileId = ProfileId,
-                    Title = "New team join request",
-                    Body = $"{senderName} wants to join your team.",
-                    Type = NotificationType.JoinRequestReceived,
-                    ActionUrl = $"/developer/teams/{TeamId}?tab=jobs"
-                }));
-            }
+                TeamId = TeamId,
+                DeveloperProfileId = ProfileId,
+                Title = "New team join request",
+                Body = $"{senderName} wants to join your team.",
+                Type = NotificationType.JoinRequestReceived,
+                ActionUrl = $"/developer/teams/{TeamId}?tab=jobs"
+            }));
         }
     }
 }

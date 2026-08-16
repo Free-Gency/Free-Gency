@@ -100,7 +100,7 @@ namespace FreeGency.Application.Features.Authentication
                 PlanId = PlanSeeds.FreePlanId,
 
                 Status = SubscriptionStatus.Active,
-
+                BillingPeriod = BillingPeriod.Monthly,
                 StartedAt = now,
                 ExpiresAt = now.AddMonths(1),
 

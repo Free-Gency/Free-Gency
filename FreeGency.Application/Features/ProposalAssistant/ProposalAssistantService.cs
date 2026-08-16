@@ -52,7 +52,7 @@ public sealed class ProposalAssistantService : IProposalAssistantService
             
 
         // Check if the user has enough quota to use the AI chat feature
-        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.AIChat, ct);
+        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.AIChatProposal, ct);
         if (!quota.IsAllowed)
             return ApiResponse.Failure<ProposalAssistantResponseDto>(quota.ToAppError());
         
@@ -87,7 +87,7 @@ public sealed class ProposalAssistantService : IProposalAssistantService
                 ct);
 
             // Consume one unit of the AI chat feature for the current user
-            await _entitlementService.ConsumeAsync(_currentUser.UserId, FeatureType.AIChat, ct);
+            await _entitlementService.ConsumeAsync(_currentUser.UserId, FeatureType.AIChatProposal, ct);
 
             return ApiResponse.Success(MapResponse(ai, proposals));
         }
