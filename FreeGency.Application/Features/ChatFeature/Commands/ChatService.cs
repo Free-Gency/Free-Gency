@@ -361,17 +361,12 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
             if (proposal.Status is not (ProposalStatus.Pending or ProposalStatus.Viewed))
                 return Result.Failure<Guid>(ChatErrors.InvalidProposalStatus);
 
-            var activeDiscussions =
-                (await _projectProposalRepository.GetActiveDiscussionByProjectIdAsync(proposal.ProjectId)).ToList();
-
             var hiringAgent = unitOfWork.Repository<IHiringAgentRunRepository, HiringAgentRun>();
             var activeRun = await hiringAgent.GetActiveByProjectIdAsync(proposal.ProjectId);
             if (activeRun is not null)
                 return Result.Failure<Guid>(ChatErrors.AnotherDiscussionActive);
 
-            if (activeDiscussions.Any(p => p.Id != proposal.Id))
-                return Result.Failure<Guid>(ChatErrors.AnotherDiscussionActive);
-
+            // Multiple concurrent InDiscussion proposals are allowed on the same project.
             var chatRoomIsExist = await _chatRoomRepository.GetByProposalIdAsync(dto.ProposalId);
             if (chatRoomIsExist != null) return Result.Failure<Guid>(ChatErrors.DiscussionAlreadyExists);
 

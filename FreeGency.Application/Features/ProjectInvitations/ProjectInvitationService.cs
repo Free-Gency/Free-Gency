@@ -58,17 +58,16 @@ public class ProjectInvitationService : IProjectInvitationService
 
         var hiringAgent = _unitOfWork.Repository<IHiringAgentRunRepository, HiringAgentRun>();
         var activeAgentRun = await hiringAgent.GetActiveByProjectIdAsync(dto.ProjectId, ct);
-        var discussionLimit = activeAgentRun?.TopK ?? 1;
-
-        var activeDiscussions =
-            (await _proposalRepository.GetActiveDiscussionByProjectIdAsync(dto.ProjectId, ct)).ToList();
-        if (activeDiscussions.Count >= discussionLimit)
-            return ApiResponse.Failure<ProjectInvitationDto>(
-                AppError.Validation(
-                    discussionLimit <= 1
-                        ? "This project already has an active discussion. Close it before sending invitations."
-                        : $"This project already has {activeDiscussions.Count} active discussions (limit {discussionLimit})."));
-
+        if (activeAgentRun is not null)
+        {
+            var discussionLimit = activeAgentRun.TopK;
+            var activeDiscussions =
+                (await _proposalRepository.GetActiveDiscussionByProjectIdAsync(dto.ProjectId, ct)).ToList();
+            if (activeDiscussions.Count >= discussionLimit)
+                return ApiResponse.Failure<ProjectInvitationDto>(
+                    AppError.Validation(
+                        $"This project already has {activeDiscussions.Count} active discussions (hiring agent limit {discussionLimit})."));
+        }
 
         // check entitlement:
         var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.ProjectSendInvitation, ct);

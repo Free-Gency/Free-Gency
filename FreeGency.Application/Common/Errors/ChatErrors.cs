@@ -76,7 +76,7 @@ namespace FreeGency.Application.Common.Errors
         public static readonly Error AnotherDiscussionActive =
             new(
                 "Chat.AnotherDiscussionActive",
-                "Another discussion is already active. Close it before starting a new one.",
+                "A hiring agent run is active for this project. Finish or cancel it before starting a discussion.",
                 StatusCodes.Status400BadRequest
             );
         public static readonly Error TeamHasNoLeaders =

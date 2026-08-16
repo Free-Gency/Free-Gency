@@ -48,7 +48,7 @@ namespace FreeGency.Application.Features.Projects.DTOs
 
         public int ProposalCount { get; init; }
 
-        /// <summary>True when at least one proposal is InDiscussion on this project.</summary>
+        /// <summary>True when at least one proposal is InDiscussion on this project (informational; multiple allowed).</summary>
         public bool HasActiveDiscussion { get; init; }
     }
 }
