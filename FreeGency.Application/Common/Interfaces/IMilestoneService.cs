@@ -13,7 +13,26 @@ public interface IMilestoneService
 
     Task<ApiResponse<MilestonePlanVersionDto>> ProposePlanAsync(ProposeMilestonePlanDto dto, CancellationToken ct = default);
     Task<ApiResponse> RequestPlanChangesAsync(RequestPlanChangesDto dto, CancellationToken ct = default);
+
+    /// <summary>
+    /// Same as <see cref="RequestPlanChangesAsync"/> but acts as the given client (Hangfire / Hiring Agent).
+    /// </summary>
+    Task<ApiResponse> RequestPlanChangesAsClientAsync(
+        Guid planVersionId,
+        Guid clientUserId,
+        string comment,
+        bool isAgentGenerated = true,
+        CancellationToken ct = default);
+
     Task<ApiResponse> AcceptPlanAsync(Guid planVersionId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Same as <see cref="AcceptPlanAsync"/> but acts as the given client (Hangfire / Hiring Agent).
+    /// </summary>
+    Task<ApiResponse> AcceptPlanAsClientAsync(
+        Guid planVersionId,
+        Guid clientUserId,
+        CancellationToken ct = default);
 
     Task<ApiResponse> FundNextMilestoneAsync(Guid projectId, CancellationToken ct = default);
     Task<ApiResponse> SubmitMilestoneAsync(Guid milestoneId, string? note = null, CancellationToken ct = default);

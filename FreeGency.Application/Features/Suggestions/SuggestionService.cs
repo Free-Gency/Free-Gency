@@ -172,6 +172,54 @@ public sealed class SuggestionService : ISuggestionService
         }
     }
 
+    public async Task<ApiResponse<ProjectCandidatesResponseDto>> SuggestCandidatesForProjectAsSystemAsync(
+        Guid projectId,
+        Guid clientUserId,
+        int topK = 10,
+        CancellationToken ct = default)
+    {
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            var project = await _projects.GetByIdWithDetailsAsync(projectId, ct);
+            if (project is null)
+                return ApiResponse.Failure<ProjectCandidatesResponseDto>(
+                    AppError.NotFound(nameof(Project), projectId));
+
+            if (project.ClientId != clientUserId)
+                return ApiResponse.Failure<ProjectCandidatesResponseDto>(
+                    AppError.Forbidden("You do not own this project."));
+
+            if (project.Status != ProjectStatus.Open)
+                return ApiResponse.Failure<ProjectCandidatesResponseDto>(
+                    AppError.Validation("Project must be published (Open) before requesting candidate suggestions."));
+
+            var scored = await _search.SearchCandidatesForProjectAsync(MapProject(project), topK, ct);
+            var candidates = await HydrateCandidatesAsync(scored, ct);
+
+            sw.Stop();
+            return ApiResponse.Success(new ProjectCandidatesResponseDto
+            {
+                ProjectId = projectId,
+                Candidates = candidates,
+                Metadata = new SuggestionMetadataDto
+                {
+                    ReturnedCount = candidates.Count,
+                    ElapsedMs = sw.ElapsedMilliseconds,
+                    Warnings = candidates.Count == 0
+                        ? ["No candidates matched. Ensure developers/teams are indexed."]
+                        : []
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "SuggestCandidatesForProjectAsSystem failed for project {ProjectId}", projectId);
+            return ApiResponse.Failure<ProjectCandidatesResponseDto>(
+                AppError.Validation(DescribeSuggestionFailure(ex)));
+        }
+    }
+
     public async Task<ApiResponse<ReindexResultDto>> ReindexAllAsync(CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();

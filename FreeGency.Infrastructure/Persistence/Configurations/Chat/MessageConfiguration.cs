@@ -34,9 +34,11 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
             .HasDefaultValue(ModerationStatus.Visible);
         builder.Property(m => m.ModerationNote).HasMaxLength(500);
         builder.Property(m => m.ModeratedText);
+        builder.Property(m => m.IsAgentGenerated).HasDefaultValue(false);
 
         builder.HasIndex(m => m.SenderClientProfileId);
         builder.HasIndex(m => m.SenderDeveloperProfileId);
+        builder.HasIndex(m => new { m.ChatRoomId, m.CreatedAt });
 
         builder.HasOne(m => m.ChatRoom)
             .WithMany(c => c.Messages)

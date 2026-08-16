@@ -56,12 +56,18 @@ public class ProjectInvitationService : IProjectInvitationService
             return ApiResponse.Failure<ProjectInvitationDto>(
                 AppError.Validation("Project is not open for invitations."));
 
+        var hiringAgent = _unitOfWork.Repository<IHiringAgentRunRepository, HiringAgentRun>();
+        var activeAgentRun = await hiringAgent.GetActiveByProjectIdAsync(dto.ProjectId, ct);
+        var discussionLimit = activeAgentRun?.TopK ?? 1;
+
         var activeDiscussions =
             (await _proposalRepository.GetActiveDiscussionByProjectIdAsync(dto.ProjectId, ct)).ToList();
-        if (activeDiscussions.Count > 0)
+        if (activeDiscussions.Count >= discussionLimit)
             return ApiResponse.Failure<ProjectInvitationDto>(
                 AppError.Validation(
-                    "This project already has an active discussion. Close it before sending invitations."));
+                    discussionLimit <= 1
+                        ? "This project already has an active discussion. Close it before sending invitations."
+                        : $"This project already has {activeDiscussions.Count} active discussions (limit {discussionLimit})."));
 
 
         // check entitlement:
@@ -228,6 +234,8 @@ public class ProjectInvitationService : IProjectInvitationService
 
             await MarkInvitationAcceptedAsync(invitation, existingForInvitee.Id, existingRoom.Id, ct);
             await NotifyInviteAcceptedAsync(invitation, project, existingRoom.Id, ct);
+            BackgroundJob.Enqueue<IHiringAgentService>(s =>
+                s.OnInvitationAcceptedAsync(invitationId, existingForInvitee.Id, existingRoom.Id, CancellationToken.None));
             return ApiResponse.Success(existingRoom.Id, "Invitation accepted. Discussion already open.");
         }
 
@@ -347,6 +355,8 @@ public class ProjectInvitationService : IProjectInvitationService
 
         await MarkInvitationAcceptedAsync(invitation, proposal.Id, chatRoom.Id, ct);
         await NotifyInviteAcceptedAsync(invitation, project, chatRoom.Id, ct);
+        BackgroundJob.Enqueue<IHiringAgentService>(s =>
+            s.OnInvitationAcceptedAsync(invitationId, proposal.Id, chatRoom.Id, CancellationToken.None));
 
         return ApiResponse.Success(chatRoom.Id, "Invitation accepted. Discussion opened.");
     }
@@ -407,6 +417,9 @@ public class ProjectInvitationService : IProjectInvitationService
                       ?? await _projectRepository.GetByIdAsync(invitation.ProjectId, ct);
         if (project is not null)
             await NotifyInviteRejectedAsync(invitation, project, ct);
+
+        BackgroundJob.Enqueue<IHiringAgentService>(s =>
+            s.OnInvitationRejectedAsync(invitationId, CancellationToken.None));
 
         return ApiResponse.Success("Invitation rejected.");
     }

@@ -30,4 +30,7 @@ public enum NotificationType
     InviteReceived = 110,
     InviteAccepted = 111,
     InviteRejected = 112,
+
+    HiringAgentReportReady = 120,
+    HiringAgentFailed = 121,
 }

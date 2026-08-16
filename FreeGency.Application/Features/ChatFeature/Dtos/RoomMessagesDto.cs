@@ -18,5 +18,6 @@ namespace FreeGency.Application.Features.ChatFeature.Dtos
         public Guid? OtherProfileId { get; set; }
         public string ModerationStatus { get; set; } = "Visible";
         public string? ModerationWarning { get; set; }
+        public bool IsAgentGenerated { get; set; }
     }
 }

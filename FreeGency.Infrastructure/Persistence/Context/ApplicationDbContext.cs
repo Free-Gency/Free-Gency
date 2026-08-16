@@ -38,6 +38,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ProjectMember> ProjectMembers => Set<ProjectMember>();
     public DbSet<ProjectProposal> ProjectProposals => Set<ProjectProposal>();
     public DbSet<ProjectInvitation> ProjectInvitations => Set<ProjectInvitation>();
+    public DbSet<HiringAgentRun> HiringAgentRuns => Set<HiringAgentRun>();
+    public DbSet<HiringAgentCandidate> HiringAgentCandidates => Set<HiringAgentCandidate>();
     public DbSet<ProposalAttachment> ProposalAttachments => Set<ProposalAttachment>();
     public DbSet<ProjectFile> ProjectFiles => Set<ProjectFile>();
     public DbSet<ProjectEvent> ProjectEvents => Set<ProjectEvent>();
