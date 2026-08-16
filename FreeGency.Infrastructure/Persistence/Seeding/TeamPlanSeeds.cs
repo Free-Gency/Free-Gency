@@ -7,19 +7,19 @@ public static class TeamPlanSeeds
     public static readonly Guid FreeTeamPlanId =
         Guid.Parse("11111111-1111-1111-1111-111111111111");
 
-    public static readonly Guid ProTeamPlanId =
+    public static readonly Guid PremiumTeamPlanId =
         Guid.Parse("22222222-2222-2222-2222-222222222222");
 
-    public static readonly Guid PremiumTeamPlanId =
+    public static readonly Guid ProTeamPlanId =
         Guid.Parse("33333333-3333-3333-3333-333333333333");
 
     public static readonly Guid FreeCreateProposalFeatureId =
         Guid.Parse("11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
 
-    public static readonly Guid ProCreateProposalFeatureId =
+    public static readonly Guid PremiumCreateProposalFeatureId =
         Guid.Parse("22222222-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
 
-    public static readonly Guid PremiumCreateProposalFeatureId =
+    public static readonly Guid ProCreateProposalFeatureId =
         Guid.Parse("33333333-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
 
     public static readonly TeamPlan[] Plans =
@@ -28,6 +28,7 @@ public static class TeamPlanSeeds
         {
             Id = FreeTeamPlanId,
             Name = "Free",
+            Description = "Perfect for small teams just getting started",
             MonthlyPrice = 0,
             YearlyPrice = 0,
             CreatedAt = new DateTime(2026, 1, 1)
@@ -35,19 +36,21 @@ public static class TeamPlanSeeds
 
         new TeamPlan
         {
-            Id = ProTeamPlanId,
-            Name = "Pro",
-            MonthlyPrice = 20,
-            YearlyPrice = 200,
+            Id = PremiumTeamPlanId,
+            Name = "Premium",
+            Description = "Great for growing teams",
+            MonthlyPrice = 5,
+            YearlyPrice = 50,
             CreatedAt = new DateTime(2026, 1, 1)
         },
 
         new TeamPlan
         {
-            Id = PremiumTeamPlanId,
-            Name = "Premium",
-            MonthlyPrice = 50,
-            YearlyPrice = 500,
+            Id = ProTeamPlanId,
+            Name = "Pro",
+            Description = "Perfect for large teams",
+            MonthlyPrice = 10,
+            YearlyPrice = 100,
             CreatedAt = new DateTime(2026, 1, 1)
         }
     ];
@@ -66,18 +69,18 @@ public static class TeamPlanSeeds
 
         new TeamPlanFeature
         {
-            Id = ProCreateProposalFeatureId,
-            TeamPlanId = ProTeamPlanId,
+            Id = PremiumCreateProposalFeatureId,
+            TeamPlanId = PremiumTeamPlanId,
             Feature = TeamFeatureType.CreateProposal,
-            Limit = 30,
+            Limit = 15,
             IsEnabled = true,
             CreatedAt = new DateTime(2026, 1, 1)
         },
 
         new TeamPlanFeature
         {
-            Id = PremiumCreateProposalFeatureId,
-            TeamPlanId = PremiumTeamPlanId,
+            Id = ProCreateProposalFeatureId,
+            TeamPlanId = ProTeamPlanId,
             Feature = TeamFeatureType.CreateProposal,
             Limit = 70, // Unlimited
             IsEnabled = true,
