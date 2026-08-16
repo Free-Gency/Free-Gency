@@ -1,4 +1,8 @@
 
+using FreeGency.Domain.Entities.TeamPlans;
+using FreeGency.Domain.Interfaces.Repositories.plansTeam;
+using FreeGency.Infrastructure.Persistence.Seeding;
+
 namespace FreeGency.Application.Features.Teams.Commands;
 
 public partial class TeamService : ITeamService
@@ -20,7 +24,10 @@ public partial class TeamService : ITeamService
     private readonly IMilestoneAssignmentRepository _milestoneAssignmentRepository;
     private readonly ITeamPayoutSplitRepository _payoutSplitRepository;
     private readonly ITaskRepository _taskRepository;
-
+    private readonly ITeamPlanRepository teamPlanRepository;
+    private readonly ITeamPlanFeatureRepository teamPlanFeatureRepository;
+    private readonly ITeamSubscriptionRepository teamSubscriptionRepository;
+    private readonly ITeamUsageRecordRepository teamUsageRecordRepository;
     public TeamService(IUnitOfWork unitOfWork, IStorageService storageService,
         ICurrentUserService currentUserService, IContentModerationService contentModerationService)
     {
@@ -41,6 +48,11 @@ public partial class TeamService : ITeamService
         _milestoneAssignmentRepository = _unitOfWork.Repository<IMilestoneAssignmentRepository, MilestoneAssignment>();
         _payoutSplitRepository = _unitOfWork.Repository<ITeamPayoutSplitRepository, TeamPayoutSplit>();
         _taskRepository = _unitOfWork.Repository<ITaskRepository, ProjectTask>();
+
+        teamPlanRepository = _unitOfWork.Repository<ITeamPlanRepository, TeamPlan>();
+        teamPlanFeatureRepository = _unitOfWork.Repository<ITeamPlanFeatureRepository, TeamPlanFeature>();
+        teamSubscriptionRepository = _unitOfWork.Repository<ITeamSubscriptionRepository, TeamSubscription>();
+        teamUsageRecordRepository = _unitOfWork.Repository<ITeamUsageRecordRepository, TeamUsageRecord>();
     }
 
     public async Task<ApiResponse<Guid>> CreateAsync(CreateTeamDto dto, CancellationToken ct = default)
@@ -132,6 +144,50 @@ public partial class TeamService : ITeamService
             Currency = "USD"
         };
         await _walletRepository.AddAsync(wallet);
+        var now = DateTime.UtcNow;
+
+        var freeSubscription = new TeamSubscription
+        {
+            Id = Guid.NewGuid(),
+
+            TeamId = team.Id,
+
+            TeamPlanId = TeamPlanSeeds.FreeTeamPlanId,
+
+            BillingPeriod = BillingPeriod.Monthly,
+
+            AutoRenew = false,
+
+            StartedAt = now,
+
+            ExpiresAt = now.AddMonths(1)
+        };
+
+        await teamSubscriptionRepository.AddAsync(freeSubscription, ct);
+
+        var freePlanFeatures =
+            await teamPlanFeatureRepository
+                .GetByPlanIdAsync(TeamPlanSeeds.FreeTeamPlanId);
+
+        foreach (var feature in freePlanFeatures.Where(x => x.IsEnabled))
+        {
+            await teamUsageRecordRepository.AddAsync(
+                new TeamUsageRecord
+                {
+                    Id = Guid.NewGuid(),
+
+                    TeamSubscriptionId = freeSubscription.Id,
+
+                    Feature = feature.Feature,
+
+                    Used = 0,
+
+                    PeriodStart = now,
+
+                    PeriodEnd = freeSubscription.ExpiresAt.Value
+                },
+                ct);
+        }
         await _unitOfWork.SaveChangesAsync(ct);
 
         return ApiResponse.Success(team.Id, "Team created successfully.");

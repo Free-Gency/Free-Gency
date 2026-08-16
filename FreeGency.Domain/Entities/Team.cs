@@ -1,4 +1,5 @@
 using FreeGency.Domain.Abstractions;
+using FreeGency.Domain.Entities.TeamPlans;
 
 namespace FreeGency.Domain.Entities;
 
@@ -38,4 +39,5 @@ public class Team : ISoftDeletableEntity
     public virtual ICollection<Review> Reviews { get; set; } = [];
     public virtual ICollection<TeamFeedback> TeamFeedbacks { get; set; } = [];
     public virtual Wallet? Wallet { get; set; }
+    public virtual TeamSubscription? Subscription { get; set; }
 }

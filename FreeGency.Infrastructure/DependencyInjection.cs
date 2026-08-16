@@ -1,6 +1,8 @@
 
 using CloudinaryDotNet;
+using FreeGency.Domain.Interfaces.Repositories.plansTeam;
 using FreeGency.Infrastructure.Persistence.Repositories.Plans;
+using FreeGency.Infrastructure.Persistence.Repositories.PlansTeam;
 using CloudinaryClient = CloudinaryDotNet.Cloudinary;
 
 namespace FreeGency.Infrastructure;
@@ -20,6 +22,10 @@ public static class DependencyInjection
             var options = sp.GetRequiredService<IOptions<CloudinaryOptions>>().Value;
             return new CloudinaryClient(new Account(options.CloudName, options.ApiKey, options.ApiSecret));
         });
+        services.AddScoped<ITeamPlanRepository, TeamPlanRepository>();
+        services.AddScoped<ITeamPlanFeatureRepository, TeamPlanFeatureRepository>();
+        services.AddScoped<ITeamSubscriptionRepository, TeamSubscriptionRepository>();
+        services.AddScoped<ITeamUsageRecordRepository, TeamUsageRecordRepository>();
         services.AddScoped<IDeveloperNotificationSettingsRepository, DeveloperNotificationSettingsRepository>();
         services.AddScoped<IChatRoomMemberRepository, ChatRoomMemberRepository>();
         services.AddScoped<IClientNotificationSettingsRepository, ClientNotificationSettingsRepository>();
