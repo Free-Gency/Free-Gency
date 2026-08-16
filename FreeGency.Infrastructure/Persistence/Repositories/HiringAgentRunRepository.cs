@@ -121,7 +121,13 @@ public class HiringAgentRunRepository : GenericRepository<HiringAgentRun>, IHiri
 
         var run = new HiringAgentRun { Id = runId };
         _context.HiringAgentRuns.Attach(run);
-        run.Status = HiringAgentRunStatus.WaitingAccepts;
+        var hasDiscussing = candidates.Any(c =>
+            c.Status is HiringAgentCandidateStatus.Discussing
+                or HiringAgentCandidateStatus.PlanProposed
+                or HiringAgentCandidateStatus.Accepted);
+        run.Status = hasDiscussing
+            ? HiringAgentRunStatus.Discussing
+            : HiringAgentRunStatus.WaitingAccepts;
         run.UpdatedAt = DateTime.UtcNow;
         _context.Entry(run).Property(r => r.Status).IsModified = true;
         _context.Entry(run).Property(r => r.UpdatedAt).IsModified = true;

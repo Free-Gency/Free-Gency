@@ -42,6 +42,23 @@ public sealed class ProposalRankingService : IApplicationProposalRankingService
         if (project.ClientId != _currentUser.UserId)
             return ApiResponse.Failure<ProjectRankingResponse>(AppError.Forbidden("Only the project's client can rank proposals."));
 
+        // Don't burn AI tokens after a hire — ranking is only useful while choosing.
+        if (project.Status is ProjectStatus.InProgress or ProjectStatus.Completed
+            || project.AssignedUserId is not null
+            || project.AssignedTeamId is not null)
+        {
+            return ApiResponse.Failure<ProjectRankingResponse>(
+                AppError.Validation("One proposal already accepted."));
+        }
+
+        var hasAccepted = await _proposalRepository.Query()
+            .AnyAsync(p => p.ProjectId == projectId && p.Status == ProposalStatus.Accepted, ct);
+        if (hasAccepted)
+        {
+            return ApiResponse.Failure<ProjectRankingResponse>(
+                AppError.Validation("One proposal already accepted."));
+        }
+
         var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.ProposalRanking, ct);
         if (!quota.IsAllowed)
             return ApiResponse.Failure<ProjectRankingResponse>(quota.ToAppError());

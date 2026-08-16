@@ -240,6 +240,13 @@ public partial class ProposalService : IProposalService
         if (project.Status != ProjectStatus.Open)
             return ApiResponse.Failure<Guid>(AppError.Validation("Project is not open for new discussions."));
 
+        if (await _unitOfWork.Repository<IHiringAgentRunRepository, HiringAgentRun>()
+                .HasActiveRunForProjectAsync(project.Id, ct))
+        {
+            return ApiResponse.Failure<Guid>(AppError.Validation(
+                "Scout is running on this project. You can't open a new discussion until the agent finishes or is cancelled."));
+        }
+
         if (proposal.Status is ProposalStatus.Rejected or ProposalStatus.Withdrawn or ProposalStatus.Expired or ProposalStatus.Accepted)
             return ApiResponse.Failure<Guid>(AppError.Validation("Cannot discuss a closed proposal."));
 
@@ -389,16 +396,48 @@ public partial class ProposalService : IProposalService
         if (project.ClientId != _currentUser.UserId)
             return ApiResponse.Failure(AppError.Forbidden("Only the project's client can close a discussion."));
 
-        if (proposal.Status != ProposalStatus.InDiscussion)
-            return ApiResponse.Failure(AppError.Validation("Proposal is not in discussion."));
-
         if (project.AssignedUserId is not null || project.AssignedTeamId is not null)
             return ApiResponse.Failure(AppError.Validation("Cannot close discussion after hire."));
 
+        // Idempotent: if already closed, still archive any leftover active room.
+        if (proposal.Status != ProposalStatus.InDiscussion)
+        {
+            if (proposal.Status is ProposalStatus.Viewed or ProposalStatus.Pending)
+            {
+                await ArchiveProposalDiscussionRoomAsync(proposalId, ct);
+                await _unitOfWork.SaveChangesAsync(ct);
+                return ApiResponse.Success("Discussion already closed.");
+            }
+
+            return ApiResponse.Failure(AppError.Validation("Proposal is not in discussion."));
+        }
+
         await _proposalRepository.UpdateStatusAsync(proposalId, ProposalStatus.Viewed, ct);
+        await ArchiveProposalDiscussionRoomAsync(proposalId, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
         return ApiResponse.Success("Discussion closed. Proposal returned to Viewed.");
+    }
+
+    private async Task ArchiveProposalDiscussionRoomAsync(Guid proposalId, CancellationToken ct)
+    {
+        var room = await _chatRoomRepository.GetByProposalIdForUpdateAsync(proposalId, ct);
+        if (room is null || room.Status == ChatRoomStatus.Archived)
+            return;
+
+        room.Status = ChatRoomStatus.Archived;
+        room.ArchivedAt = DateTime.UtcNow;
+        room.UpdatedAt = DateTime.UtcNow;
+        room.UpdatedBy = _currentUser.UserId.ToString();
+        _chatRoomRepository.Update(room);
+
+        await _messageRepository.AddAsync(new Message
+        {
+            Id = Guid.NewGuid(),
+            ChatRoomId = room.Id,
+            MessageType = MessageType.System,
+            Text = "Discussion closed by the client. Proposal returned to Viewed."
+        }, ct);
     }
 
     public async Task<ApiResponse> RejectAsync(Guid proposalId, CancellationToken ct = default)

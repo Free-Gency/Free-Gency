@@ -50,6 +50,7 @@ public sealed class HiringAgentService : IHiringAgentService
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly ITeamRepository _teamRepository;
     private readonly IDeveloperProfileRepository _developerProfileRepository;
+    private readonly IProjectProposalRepository _proposalRepository;
 
     public HiringAgentService(
         ICurrentUserService currentUser,
@@ -86,6 +87,7 @@ public sealed class HiringAgentService : IHiringAgentService
         _teamMemberRepository = unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
         _teamRepository = unitOfWork.Repository<ITeamRepository, Team>();
         _developerProfileRepository = unitOfWork.Repository<IDeveloperProfileRepository, DeveloperProfile>();
+        _proposalRepository = unitOfWork.Repository<IProjectProposalRepository, ProjectProposal>();
     }
 
     public async Task<ApiResponse<HiringAgentRunDto>> StartAsync(
@@ -199,9 +201,7 @@ public sealed class HiringAgentService : IHiringAgentService
                     or HiringAgentCandidateStatus.Discussing
                     or HiringAgentCandidateStatus.PlanProposed))
         {
-            run.Status = HiringAgentRunStatus.WaitingAccepts;
-            run.UpdatedAt = DateTime.UtcNow;
-            await _unitOfWork.SaveChangesAsync(ct);
+            await EnsureExistingDiscussionsAttachedAsync(run, ct);
             return;
         }
 
@@ -213,33 +213,142 @@ public sealed class HiringAgentService : IHiringAgentService
         // Suggestions + per-invite saves must not share a polluted change tracker with candidate inserts.
         _unitOfWork.ClearChangeTracker();
 
+        var existingProposals = (await _proposalRepository.GetByProjectIdAsync(projectId, ct: ct))
+            .Where(p => p.Status is ProposalStatus.Pending or ProposalStatus.Viewed or ProposalStatus.InDiscussion)
+            .ToList();
+
+        var existingByKey = existingProposals
+            .Select(p => (
+                Key: ApplicantKey(p.ApplicantType, p.ApplicantType == ApplicantType.Team ? p.TeamId : p.UserId),
+                Proposal: p))
+            .Where(x => x.Key is not null)
+            .GroupBy(x => x.Key!)
+            .ToDictionary(g => g.Key, g => g.First().Proposal);
+
+        // Pull extra matches so we can still fill TopK invites after skipping applicants.
         var suggest = await _suggestionService.SuggestCandidatesForProjectAsSystemAsync(
             projectId,
             clientUserId,
-            topK,
+            Math.Clamp(topK * 3, topK, 30),
             ct);
 
-        if (!suggest.IsSuccess || suggest.Data is null || suggest.Data.Candidates.Count == 0)
+        if (!suggest.IsSuccess || suggest.Data is null)
         {
-            var reason = suggest.IsSuccess
-                ? "No matching candidates were found."
-                : suggest.Error?.message ?? "Candidate matching failed.";
+            var reason = suggest.Error?.message ?? "Candidate matching failed.";
             run = await _runRepository.GetByIdWithCandidatesAsync(runId, ct)
                   ?? throw new InvalidOperationException($"Hiring agent run {runId} disappeared.");
-            await FailRunAsync(run, reason, ct);
-            return;
+            // Still OK to continue with existing discussions only.
+            if (existingProposals.Count == 0)
+            {
+                await FailRunAsync(run, reason, ct);
+                return;
+            }
         }
 
         var built = new List<HiringAgentCandidate>();
+        var seenKeys = new HashSet<string>(StringComparer.Ordinal);
         var rank = 0;
-        foreach (var suggested in suggest.Data.Candidates)
+        var inviteSlots = topK;
+        var discussionKickoffIds = new List<Guid>();
+
+        // 1) Keep working existing open discussions on this project.
+        foreach (var proposal in existingProposals.Where(p => p.Status == ProposalStatus.InDiscussion))
         {
+            var key = ApplicantKey(
+                proposal.ApplicantType,
+                proposal.ApplicantType == ApplicantType.Team ? proposal.TeamId : proposal.UserId);
+            if (key is null || !seenKeys.Add(key)) continue;
+
             rank++;
+            var room = await _chatRoomRepository.GetByProposalIdAsync(proposal.Id, ct);
+            var (name, avatar) = await ResolveApplicantDisplayAsync(proposal, ct);
+            var matchedScore = suggest.Data?.Candidates
+                .FirstOrDefault(s => MatchesSuggestion(s, proposal))
+                ?.FinalScore ?? 0f;
+
+            var candidate = new HiringAgentCandidate
+            {
+                Id = Guid.NewGuid(),
+                HiringAgentRunId = runId,
+                InviteeType = proposal.ApplicantType,
+                InviteeUserId = proposal.ApplicantType == ApplicantType.User ? proposal.UserId : null,
+                InviteeTeamId = proposal.ApplicantType == ApplicantType.Team ? proposal.TeamId : null,
+                DisplayName = name,
+                AvatarUrl = avatar,
+                SuggestionScore = matchedScore,
+                RankOrder = rank,
+                Status = HiringAgentCandidateStatus.Discussing,
+                ProposalId = proposal.Id,
+                ChatRoomId = room?.Id,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = clientUserId.ToString()
+            };
+            built.Add(candidate);
+            if (room is not null)
+                discussionKickoffIds.Add(candidate.Id);
+        }
+
+        // 2) AI recommendations
+        foreach (var suggested in suggest.Data?.Candidates ?? [])
+        {
             var isTeam = string.Equals(suggested.CandidateType, "Team", StringComparison.OrdinalIgnoreCase);
             var inviteeUserId = isTeam ? (Guid?)null : suggested.Id;
             var inviteeTeamId = isTeam ? suggested.Id : (Guid?)null;
+            var key = ApplicantKey(
+                isTeam ? ApplicantType.Team : ApplicantType.User,
+                isTeam ? inviteeTeamId : inviteeUserId);
+            if (key is null) continue;
 
-            var candidate = new HiringAgentCandidate
+            if (seenKeys.Contains(key))
+            {
+                // Already attached as an open discussion — bump AI score if we had 0.
+                var existing = built.FirstOrDefault(c =>
+                    ApplicantKey(c.InviteeType, c.InviteeType == ApplicantType.Team ? c.InviteeTeamId : c.InviteeUserId) == key);
+                if (existing is not null && existing.SuggestionScore <= 0)
+                    existing.SuggestionScore = suggested.FinalScore;
+                continue;
+            }
+
+            existingByKey.TryGetValue(key, out var existingProposal);
+
+            if (existingProposal is not null)
+            {
+                // Already applied — never invite. Attach and (if needed) continue via discussion room.
+                seenKeys.Add(key);
+                rank++;
+                _unitOfWork.ClearChangeTracker();
+                var room = await _chatRoomRepository.GetByProposalIdAsync(existingProposal.Id, ct);
+                var candidate = new HiringAgentCandidate
+                {
+                    Id = Guid.NewGuid(),
+                    HiringAgentRunId = runId,
+                    InviteeType = existingProposal.ApplicantType,
+                    InviteeUserId = existingProposal.ApplicantType == ApplicantType.User ? existingProposal.UserId : null,
+                    InviteeTeamId = existingProposal.ApplicantType == ApplicantType.Team ? existingProposal.TeamId : null,
+                    DisplayName = suggested.Name,
+                    AvatarUrl = suggested.AvatarUrl,
+                    SuggestionScore = suggested.FinalScore,
+                    RankOrder = rank,
+                    Status = room is not null || existingProposal.Status == ProposalStatus.InDiscussion
+                        ? HiringAgentCandidateStatus.Discussing
+                        : HiringAgentCandidateStatus.Accepted,
+                    ProposalId = existingProposal.Id,
+                    ChatRoomId = room?.Id,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = clientUserId.ToString()
+                };
+                built.Add(candidate);
+                if (candidate.Status == HiringAgentCandidateStatus.Discussing && room is not null)
+                    discussionKickoffIds.Add(candidate.Id);
+                continue;
+            }
+
+            if (inviteSlots <= 0)
+                continue;
+
+            seenKeys.Add(key);
+            rank++;
+            var inviteCandidate = new HiringAgentCandidate
             {
                 Id = Guid.NewGuid(),
                 HiringAgentRunId = runId,
@@ -255,45 +364,88 @@ public sealed class HiringAgentService : IHiringAgentService
                 CreatedBy = clientUserId.ToString()
             };
 
-            // Fresh tracker per invite so a failed SaveChanges cannot leave Modified ghosts behind.
             _unitOfWork.ClearChangeTracker();
             var inviteResult = await CreateHiringInviteAsync(
                 runId,
                 projectId,
                 clientUserId,
                 projectTitle,
-                candidate,
+                inviteCandidate,
                 ct);
 
             if (inviteResult is null)
             {
-                candidate.Status = HiringAgentCandidateStatus.InviteFailed;
+                inviteCandidate.Status = HiringAgentCandidateStatus.InviteFailed;
                 _logger.LogWarning(
                     "Hiring agent run {RunId}: invite failed for {CandidateType} {InviteeId} ({Name})",
                     runId,
-                    candidate.InviteeType,
+                    inviteCandidate.InviteeType,
                     inviteeUserId ?? inviteeTeamId,
-                    candidate.DisplayName);
+                    inviteCandidate.DisplayName);
             }
             else
             {
-                candidate.InvitationId = inviteResult.Value;
-                candidate.Status = HiringAgentCandidateStatus.Invited;
+                inviteCandidate.InvitationId = inviteResult.Value;
+                inviteCandidate.Status = HiringAgentCandidateStatus.Invited;
+                inviteSlots--;
             }
 
-            built.Add(candidate);
+            built.Add(inviteCandidate);
         }
 
-        if (built.Count == 0 || built.All(c => c.Status == HiringAgentCandidateStatus.InviteFailed))
+        var usable = built.Where(c => c.Status != HiringAgentCandidateStatus.InviteFailed).ToList();
+        if (usable.Count == 0)
         {
             _unitOfWork.ClearChangeTracker();
             run = await _runRepository.GetByIdWithCandidatesAsync(runId, ct);
             if (run is null) return;
-            await FailRunAsync(run, "Could not invite any matched candidates.", ct);
+            await FailRunAsync(run, "Could not invite or attach any candidates.", ct);
             return;
         }
 
         await _runRepository.PersistMatchInviteResultsAsync(runId, built, ct);
+
+        foreach (var candidateId in discussionKickoffIds)
+        {
+            BackgroundJob.Enqueue<IHiringAgentService>(s =>
+                s.ProcessDiscussionTurnAsync(candidateId, CancellationToken.None));
+        }
+    }
+
+    private static string? ApplicantKey(ApplicantType type, Guid? id)
+        => id is null || id == Guid.Empty ? null : $"{type}:{id.Value:N}";
+
+    private static bool MatchesSuggestion(
+        FreeGency.Application.Features.Suggestions.DTOs.SuggestedCandidateDto suggested,
+        ProjectProposal proposal)
+    {
+        var isTeam = string.Equals(suggested.CandidateType, "Team", StringComparison.OrdinalIgnoreCase);
+        if (isTeam)
+            return proposal.ApplicantType == ApplicantType.Team && proposal.TeamId == suggested.Id;
+        return proposal.ApplicantType == ApplicantType.User && proposal.UserId == suggested.Id;
+    }
+
+    private async Task<(string Name, string? Avatar)> ResolveApplicantDisplayAsync(
+        ProjectProposal proposal,
+        CancellationToken ct)
+    {
+        if (proposal.ApplicantType == ApplicantType.Team && proposal.TeamId is Guid teamId)
+        {
+            var team = await _teamRepository.GetByIdAsync(teamId, ct);
+            return (team?.Name ?? "Team", team?.Logo);
+        }
+
+        if (proposal.UserId is Guid userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId, ct);
+            var name = user is null
+                ? "Developer"
+                : $"{user.FristName} {user.LastName}".Trim();
+            var avatar = user?.DeveloperProfile?.ProfileImage;
+            return (string.IsNullOrWhiteSpace(name) ? "Developer" : name, avatar);
+        }
+
+        return ("Applicant", null);
     }
 
     public async Task OnInvitationAcceptedAsync(
@@ -865,6 +1017,7 @@ public sealed class HiringAgentService : IHiringAgentService
             return ApiResponse.Failure<HiringAgentRunDto>(AppError.Forbidden("You do not own this hiring agent run."));
 
         await TryRepairOpenInviteWindowAsync(run, ct);
+        await EnsureExistingDiscussionsAttachedAsync(run, ct);
         return ApiResponse.Success(MapRunDto(run));
     }
 
@@ -894,6 +1047,7 @@ public sealed class HiringAgentService : IHiringAgentService
                 AppError.NotFound(nameof(HiringAgentRun), projectId));
 
         await TryRepairOpenInviteWindowAsync(run, ct);
+        await EnsureExistingDiscussionsAttachedAsync(run, ct);
         return ApiResponse.Success(MapRunDto(run));
     }
 
@@ -1512,6 +1666,97 @@ public sealed class HiringAgentService : IHiringAgentService
     }
 
     /// <summary>
+    /// Attach any InDiscussion proposals that were missed when the run started,
+    /// so the report board shows open chats under "Already in discussion".
+    /// </summary>
+    private async Task EnsureExistingDiscussionsAttachedAsync(HiringAgentRun run, CancellationToken ct)
+    {
+        // Only after match/invite finished — attaching earlier would short-circuit invite sending.
+        if (run.Status is not (HiringAgentRunStatus.WaitingAccepts or HiringAgentRunStatus.Discussing))
+            return;
+
+        var openDiscussions = (await _proposalRepository.GetByProjectIdAsync(run.ProjectId, ct: ct))
+            .Where(p => p.Status == ProposalStatus.InDiscussion)
+            .ToList();
+        if (openDiscussions.Count == 0)
+            return;
+
+        var existingKeys = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var c in run.Candidates)
+        {
+            var key = ApplicantKey(
+                c.InviteeType,
+                c.InviteeType == ApplicantType.Team ? c.InviteeTeamId : c.InviteeUserId);
+            if (key is not null)
+                existingKeys.Add(key);
+
+            if (c.ProposalId is Guid proposalId)
+                existingKeys.Add($"proposal:{proposalId:N}");
+        }
+
+        var toAdd = new List<HiringAgentCandidate>();
+        var kickoffIds = new List<Guid>();
+        var rank = run.Candidates.Count == 0 ? 0 : run.Candidates.Max(c => c.RankOrder);
+
+        foreach (var proposal in openDiscussions)
+        {
+            var key = ApplicantKey(
+                proposal.ApplicantType,
+                proposal.ApplicantType == ApplicantType.Team ? proposal.TeamId : proposal.UserId);
+            if (key is null)
+                continue;
+            if (existingKeys.Contains(key) || existingKeys.Contains($"proposal:{proposal.Id:N}"))
+                continue;
+
+            existingKeys.Add(key);
+            rank++;
+            var room = await _chatRoomRepository.GetByProposalIdAsync(proposal.Id, ct);
+            var (name, avatar) = await ResolveApplicantDisplayAsync(proposal, ct);
+            var candidate = new HiringAgentCandidate
+            {
+                Id = Guid.NewGuid(),
+                HiringAgentRunId = run.Id,
+                InviteeType = proposal.ApplicantType,
+                InviteeUserId = proposal.ApplicantType == ApplicantType.User ? proposal.UserId : null,
+                InviteeTeamId = proposal.ApplicantType == ApplicantType.Team ? proposal.TeamId : null,
+                DisplayName = name,
+                AvatarUrl = avatar,
+                SuggestionScore = 0f,
+                RankOrder = rank,
+                Status = HiringAgentCandidateStatus.Discussing,
+                ProposalId = proposal.Id,
+                ChatRoomId = room?.Id,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = run.ClientUserId.ToString()
+            };
+            toAdd.Add(candidate);
+            if (room is not null)
+                kickoffIds.Add(candidate.Id);
+        }
+
+        if (toAdd.Count == 0)
+            return;
+
+        _unitOfWork.ClearChangeTracker();
+        await _runRepository.PersistMatchInviteResultsAsync(run.Id, toAdd, ct);
+
+        // Reload so callers map the updated candidate list.
+        var refreshed = await _runRepository.GetByIdWithCandidatesAsync(run.Id, ct);
+        if (refreshed is not null)
+        {
+            run.Candidates = refreshed.Candidates;
+            run.Status = refreshed.Status;
+            run.UpdatedAt = refreshed.UpdatedAt;
+        }
+
+        foreach (var candidateId in kickoffIds)
+        {
+            BackgroundJob.Enqueue<IHiringAgentService>(s =>
+                s.ProcessDiscussionTurnAsync(candidateId, CancellationToken.None));
+        }
+    }
+
+    /// <summary>
     /// Undo early auto-expire while the invite window is still open so candidates
     /// show as Pending again (and can still accept).
     /// </summary>
@@ -1676,23 +1921,45 @@ public sealed class HiringAgentService : IHiringAgentService
             .ToList()
     };
 
-    private static HiringAgentCandidateDto MapCandidateDto(HiringAgentCandidate c) => new()
+    private static HiringAgentCandidateDto MapCandidateDto(HiringAgentCandidate c)
     {
-        Id = c.Id,
-        InviteeType = c.InviteeType,
-        InviteeUserId = c.InviteeUserId,
-        InviteeTeamId = c.InviteeTeamId,
-        DisplayName = c.DisplayName,
-        AvatarUrl = c.AvatarUrl,
-        SuggestionScore = c.SuggestionScore,
-        RankOrder = c.RankOrder,
-        Status = c.Status,
-        InvitationId = c.InvitationId,
-        ProposalId = c.ProposalId,
-        ChatRoomId = c.ChatRoomId,
-        LatestPlanVersionId = c.LatestPlanVersionId,
-        DiscussionScore = c.DiscussionScore,
-        DiscussionNotes = c.DiscussionNotes,
-        AgentMessageCount = c.AgentMessageCount
-    };
+        var alreadyApplied = c.ProposalId is not null && c.InvitationId is null;
+        var aiRecommended = c.SuggestionScore > 0 || c.InvitationId is not null;
+        // Prefer status over score so open discussions aren't labeled as scout-invite/applied.
+        string sourceGroup;
+        if (c.InvitationId is not null)
+            sourceGroup = "scout-invite";
+        else if (c.ProposalId is not null &&
+                 c.Status is HiringAgentCandidateStatus.Discussing
+                     or HiringAgentCandidateStatus.PlanProposed
+                     or HiringAgentCandidateStatus.Ranked)
+            sourceGroup = "existing-discussion";
+        else if (alreadyApplied)
+            sourceGroup = aiRecommended ? "applied-and-recommended" : "existing-discussion";
+        else
+            sourceGroup = "scout-invite";
+
+        return new HiringAgentCandidateDto
+        {
+            Id = c.Id,
+            InviteeType = c.InviteeType,
+            InviteeUserId = c.InviteeUserId,
+            InviteeTeamId = c.InviteeTeamId,
+            DisplayName = c.DisplayName,
+            AvatarUrl = c.AvatarUrl,
+            SuggestionScore = c.SuggestionScore,
+            RankOrder = c.RankOrder,
+            Status = c.Status,
+            InvitationId = c.InvitationId,
+            ProposalId = c.ProposalId,
+            ChatRoomId = c.ChatRoomId,
+            LatestPlanVersionId = c.LatestPlanVersionId,
+            DiscussionScore = c.DiscussionScore,
+            DiscussionNotes = c.DiscussionNotes,
+            AgentMessageCount = c.AgentMessageCount,
+            AlreadyApplied = alreadyApplied,
+            AiRecommended = aiRecommended,
+            SourceGroup = sourceGroup
+        };
+    }
 }

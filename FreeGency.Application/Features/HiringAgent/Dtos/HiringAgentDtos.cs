@@ -60,6 +60,17 @@ public sealed class HiringAgentCandidateDto
     public float? DiscussionScore { get; init; }
     public string? DiscussionNotes { get; init; }
     public int AgentMessageCount { get; init; }
+
+    /// <summary>True when this person already had a proposal on the project (no Scout invite sent).</summary>
+    public bool AlreadyApplied { get; init; }
+
+    /// <summary>True when Scout's matcher recommended this candidate.</summary>
+    public bool AiRecommended { get; init; }
+
+    /// <summary>
+    /// scout-invite | applied-and-recommended | existing-discussion
+    /// </summary>
+    public string SourceGroup { get; init; } = "scout-invite";
 }
 
 public sealed class HiringAgentReportDto
