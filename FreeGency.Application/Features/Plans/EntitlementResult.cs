@@ -12,6 +12,9 @@ public sealed record EntitlementResult(FeatureType Feature, bool IsAllowed, bool
         if (!IsEnabled)
             return AppError.PlanFeatureNotIncluded(Feature.ToString());
 
+        if (AiFeaturePricing.IsTokenBased(Feature))
+            return AppError.PlanTokenLimitReached(Feature.ToString(), Remaining);
+
         return AppError.PlanLimitReached(Feature.ToString(), Limit);
     }
 }

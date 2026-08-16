@@ -83,6 +83,28 @@ public class EntitlementService : IEntitlementService
             return new EntitlementResult(feature, false, false, planFeature.Limit, 0, 0, plan.Name,
                 $"{feature} is not included in your {plan.Name} plan.");
 
+        if (!planFeature.IsEnabled)
+            return new EntitlementResult(feature, false, false, planFeature.Limit, 0, 0, plan.Name,
+                $"{feature} is not included in your {plan.Name} plan.");
+
+        // AI / token-based feature: Limit = per-use price, billed from the plan's monthly pool.
+        if (AiFeaturePricing.IsTokenBased(feature))
+        {
+            var price = planFeature.Limit ?? 0;
+            var poolUsed = await GetTokensUsedAsync(userId, ct);
+            var poolRemaining = Math.Max(plan.AllowedTokens - poolUsed, 0);
+
+            return new EntitlementResult(
+                feature,
+                !requireQuota || poolRemaining >= price,   // "remaining < limit → don't do it"
+                true,
+                planFeature.Limit,
+                (int)Math.Min(poolUsed, int.MaxValue),
+                (int)Math.Min(poolRemaining, int.MaxValue),
+                plan.Name);
+        }
+
+
         if (planFeature.Limit is null)
             return new EntitlementResult(feature, true, true, null, 0, int.MaxValue, plan.Name);
 
@@ -175,6 +197,68 @@ public class EntitlementService : IEntitlementService
 
         await _unitOfWork.SaveChangesAsync(ct);
     }
+
+
+    #region Tokens Helpers
+    private async Task<long> GetTokensUsedAsync(Guid userId, CancellationToken ct)
+    {
+        var now = DateTime.UtcNow;
+        var sub = await _subscriptionRepo.GetLatestByUserIdAsync(userId, ct);
+        if (sub is null)
+            return 0;
+
+        long total = 0;
+        foreach (var feature in AiFeaturePricing.AiFeatures)
+        {
+            var record = await _usageRecordRepo.GetBySubscriptionAndFeatureAsync(sub.Id, feature, ct);
+            if (record is not null && record.PeriodEnd > now)
+                total += record.TokensUsed;
+        }
+        return total;
+    }
+
+    private async Task AddTokensAsync(Guid userId, FeatureType feature, long tokens, CancellationToken ct)
+    {
+        var now = DateTime.UtcNow;
+        var periodStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        var sub = await _subscriptionRepo.GetLatestByUserIdAsync(userId, ct);
+        if (sub is null)
+            return;
+
+        var record = await _usageRecordRepo.GetBySubscriptionAndFeatureAsync(sub.Id, feature, ct);
+
+        if (record is null)
+        {
+            await _usageRecordRepo.AddAsync(new UsageRecord
+            {
+                Id = Guid.NewGuid(),
+                SubscriptionId = sub.Id,
+                Feature = feature,
+                Used = 0,
+                TokensUsed = tokens,
+                PeriodStart = periodStart,
+                PeriodEnd = periodStart.AddMonths(1)
+            }, ct);
+        }
+        else if (record.PeriodEnd <= now)
+        {
+            record.Used = 0;
+            record.TokensUsed = tokens;
+            record.PeriodStart = periodStart;
+            record.PeriodEnd = periodStart.AddMonths(1);
+            _usageRecordRepo.Update(record);
+        }
+        else
+        {
+            record.TokensUsed += tokens;
+            _usageRecordRepo.Update(record);
+        }
+
+        await _unitOfWork.SaveChangesAsync(ct);
+    }
+    #endregion
+
     #endregion
 
 
@@ -197,6 +281,17 @@ public class EntitlementService : IEntitlementService
         if (!result.IsAllowed)
             return result;
 
+        if (AiFeaturePricing.IsTokenBased(feature))
+        {
+            var price = result.Limit ?? 0;
+            await AddTokensAsync(userId, feature, price, ct);
+            return result with
+            {
+                Used = (int)(result.Used + price),
+                Remaining = (int)(result.Remaining - price)
+            };
+        }
+
         await IncrementUsageAsync(userId, feature, ct);
         return result with { Used = result.Used + 1, Remaining = result.Remaining - 1 };
     }
@@ -206,16 +301,40 @@ public class EntitlementService : IEntitlementService
         var plan = await GetCurrentPlanAsync(userId, ct);
         var features = await _planFeatureRepo.GetByPlanIdAsync(plan.Id, ct);
 
+        var sub = await _subscriptionRepo.GetLatestByUserIdAsync(userId, ct);
+        var now = DateTime.UtcNow;
+
         var usage = new Dictionary<FeatureType, FeatureUsageDto>();
+        var tokenUsage = new List<TokenUsageDto>();
+
         foreach (var f in features)
         {
+            if (AiFeaturePricing.IsTokenBased(f.Feature))
+            {
+                var record = sub is null
+                    ? null
+                    : await _usageRecordRepo.GetBySubscriptionAndFeatureAsync(sub.Id, f.Feature, ct);
+                var used = record is not null && record.PeriodEnd > now ? record.TokensUsed : 0;
+                tokenUsage.Add(new TokenUsageDto(f.Feature, used));
+                continue;
+            }
+
             var r = await EvaluateAsync(userId, f.Feature, requireQuota: false, ct);
             usage[f.Feature] = new FeatureUsageDto(r.IsEnabled, r.Limit, r.Used, r.Remaining);
         }
 
-        var sub = await _subscriptionRepo.GetActiveByUserIdAsync(userId, ct);
+        var tokensUsed = tokenUsage.Sum(t => t.TokensUsed);
+        var activeSub = await _subscriptionRepo.GetActiveByUserIdAsync(userId, ct);
 
-        return new PlanSnapshotDto(plan.Name, sub is not null, sub?.ExpiresAt, usage);
+        return new PlanSnapshotDto(
+            plan.Name,
+            activeSub is not null,
+            activeSub?.ExpiresAt,
+            usage,
+            tokenUsage,
+            plan.AllowedTokens,
+            tokensUsed,
+            Math.Max(plan.AllowedTokens - tokensUsed, 0));
     }
     #endregion
 }

@@ -202,6 +202,11 @@ public record AppError(string code, string message, int statusCode,
         new("Plan.NotActive",
             "Your subscription is not active. Please renew to continue.",
             StatusCodes.Status403Forbidden);
+
+    public static AppError PlanTokenLimitReached(string featureName, int? remaining) =>
+        new("Plan.TokenLimitReached",
+            $"You don't have enough AI tokens for {featureName} (remaining: {remaining?.ToString("N0") ?? "0"}). Upgrade your plan to continue.",
+            StatusCodes.Status403Forbidden);
     #endregion
 
 }
