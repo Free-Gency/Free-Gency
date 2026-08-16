@@ -1,6 +1,4 @@
-﻿
-
-namespace FreeGency.Application.Features.Proposals.Dtos;
+﻿namespace FreeGency.Application.Features.Proposals.Dtos;
 
 public sealed class FilterProposalDto : PagedQuery
 {
@@ -14,5 +12,4 @@ public sealed class FilterProposalDto : PagedQuery
     public string? Search { get; init; }
     public string SortBy { get; init; } = "AppliedAt";
     public string SortDirection { get; init; } = "desc";
-   
 }

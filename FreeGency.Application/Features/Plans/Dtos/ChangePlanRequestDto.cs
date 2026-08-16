@@ -1,6 +1,3 @@
 namespace FreeGency.Application.Features.Plans.Dtos;
 
-public class ChangePlanRequestDto
-{
-    
-}
+public sealed record ChangePlanRequestDto(Guid PlanId, BillingPeriod BillingPeriod);
