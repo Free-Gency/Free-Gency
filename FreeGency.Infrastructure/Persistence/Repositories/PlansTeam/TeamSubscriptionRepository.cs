@@ -12,6 +12,12 @@ namespace FreeGency.Infrastructure.Persistence.Repositories.PlansTeam
         {
             
         }
+
+        public async Task<List<TeamSubscription>> GetAllSubscriptions()
+        {
+            return await _dbSet.Include(x=>x.TeamPlan).ToListAsync();
+        }
+
         public async Task<TeamSubscription?> GetByTeamIdAsync(Guid teamId)
         {
             return await _dbSet

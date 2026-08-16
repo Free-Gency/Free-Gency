@@ -4,6 +4,7 @@ using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FreeGency.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260816071316_updatetablesubTeam")]
+    partial class updatetablesubTeam
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4601,10 +4604,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<string>("Description")
-                        .HasMaxLength(350)
-                        .HasColumnType("nvarchar(350)");
-
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -4640,7 +4639,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedBy = "",
-                            Description = "Perfect for small teams just getting started",
                             IsDeleted = false,
                             MonthlyPrice = 0m,
                             Name = "Free",
@@ -4651,22 +4649,20 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedBy = "",
-                            Description = "Great for growing teams",
                             IsDeleted = false,
-                            MonthlyPrice = 5m,
-                            Name = "Premium",
-                            YearlyPrice = 50m
+                            MonthlyPrice = 20m,
+                            Name = "Pro",
+                            YearlyPrice = 200m
                         },
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedBy = "",
-                            Description = "Perfect for large teams",
                             IsDeleted = false,
-                            MonthlyPrice = 10m,
-                            Name = "Pro",
-                            YearlyPrice = 100m
+                            MonthlyPrice = 50m,
+                            Name = "Premium",
+                            YearlyPrice = 500m
                         });
                 });
 
@@ -4747,7 +4743,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = "CreateProposal",
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 15,
+                            Limit = 30,
                             TeamPlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new

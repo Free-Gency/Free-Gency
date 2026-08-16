@@ -172,6 +172,7 @@ namespace FreeGency.Api
             using var scope = scopeFactory.CreateScope();
             var planBackground = scope.ServiceProvider.GetRequiredService<IBackGroundJobPlanService>();
             RecurringJob.AddOrUpdate("planService", () => planBackground.ProcessPlansAsync(), Cron.Daily);
+            RecurringJob.AddOrUpdate("TeamPlanService", () => planBackground.ProcessPlansTeamAsync(), Cron.Daily);
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {

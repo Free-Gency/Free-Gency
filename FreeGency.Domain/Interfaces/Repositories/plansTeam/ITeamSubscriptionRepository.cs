@@ -8,5 +8,6 @@ namespace FreeGency.Domain.Interfaces.Repositories.plansTeam
     public interface ITeamSubscriptionRepository:IGenericRepository<TeamSubscription>
     {
         Task<TeamSubscription?> GetByTeamIdAsync(Guid teamId);
+        Task<List<TeamSubscription>> GetAllSubscriptions();
     }
 }

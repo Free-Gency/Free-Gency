@@ -61,7 +61,7 @@ namespace FreeGency.Application.Features.PlanTeamFeature.Commands
             subscription.TeamPlanId = newPlan.Id;
             subscription.BillingPeriod = dto.BillingPeriod;
             subscription.StartedAt = now;
-
+            subscription.UserId = currentUserService.UserId;
             subscription.ExpiresAt =
                 dto.BillingPeriod == BillingPeriod.Monthly
                     ? now.AddMonths(1)

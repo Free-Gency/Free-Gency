@@ -9,5 +9,9 @@ namespace FreeGency.Domain.Interfaces.Repositories.plansTeam
     {
         Task<List<TeamUsageRecord>> GetUsageRecordsBySubscriptionIdAsync(
        Guid subscriptionId);
+        Task<List<TeamUsageRecord>> GetTeamUsageRecordAsync();
+        Task<List<TeamUsageRecord>> GetByTeamIdAsync(
+    Guid subId,
+    CancellationToken ct = default);
     }
 }
