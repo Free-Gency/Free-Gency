@@ -16,7 +16,9 @@ namespace FreeGency.Domain.Entities.TeamPlans
         public DateTime? DeletedAt { get; set; }
         public string? DeletedBy { get; set; }
 
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; } = "Free";
+
+        public string? Description { get; set; }
 
         public decimal? MonthlyPrice { get; set; }
         public decimal? YearlyPrice { get; set; }

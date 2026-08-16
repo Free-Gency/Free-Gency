@@ -4,6 +4,7 @@ using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FreeGency.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260816142718_UpdateTeamPlanTablesAndSeedind")]
+    partial class UpdateTeamPlanTablesAndSeedind
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4819,17 +4822,12 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("TeamId")
                         .IsUnique();
 
                     b.HasIndex("TeamPlanId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("TeamSubscriptions", "TeamPlans");
                 });
@@ -6729,17 +6727,9 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("FreeGency.Domain.Entities.User", "User")
-                        .WithMany("TeamSubscriptions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Team");
 
                     b.Navigation("TeamPlan");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamUsageRecord", b =>
@@ -7282,8 +7272,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("TeamMemberships");
 
                     b.Navigation("TeamPayoutSplits");
-
-                    b.Navigation("TeamSubscriptions");
 
                     b.Navigation("UploadedProjectFiles");
 
