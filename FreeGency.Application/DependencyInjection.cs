@@ -1,10 +1,7 @@
 
 using FreeGency.Application.Features.BackGroundJobPlan.Commands;
-using FreeGency.Application.Features.LedgerEntryFeature.Queries;
-using FreeGency.Application.Features.Moderation;
-using FreeGency.Application.Features.Plans.Commands;
 using FreeGency.Application.Features.PlanTeamFeature.Commands;
-using FreeGency.Application.Features.UserProfiles;
+using FreeGency.Application.Features.PlanTeamFeature.Queries;
 
 namespace FreeGency.Application;
 
@@ -68,7 +65,9 @@ public static class DependencyInjection
 
         services.AddScoped<ITaskService, TaskService>();
 
+        // Entitlements For Plans
         services.AddScoped<IEntitlementService, EntitlementService>();
+        services.AddScoped<ITeamEntitlementService, TeamEntitlementService>();
 
         services.AddFluentValidationAutoValidation()
                 .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
