@@ -73,24 +73,24 @@ public class PlanFeatureConfigrations : IEntityTypeConfiguration<PlanFeature>
                 "11111111-0000-0000-0000-000000000007",
                 PlanSeeds.FreePlanId,
                 FeatureType.GenerateProjectDraft,
-                2, true),
+                5000, true),
              Feature(
                 "11111111-0000-0000-0000-000000000008",
                 PlanSeeds.FreePlanId,
                 FeatureType.TeamSuggestions,
-                3, true),
+                2000, true),
 
             Feature(
                 "11111111-0000-0000-0000-000000000009",
                 PlanSeeds.FreePlanId,
                 FeatureType.AIChatProposal,
-                20, true),
+                2500, true),
 
                 Feature(
                 "11111111-0000-0000-0000-000000000010",
                 PlanSeeds.FreePlanId,
                 FeatureType.ProposalRanking,
-                5, true),
+                3500, true),
 
             Feature(
                 "11111111-0000-0000-0000-000000000011",
@@ -140,30 +140,30 @@ public class PlanFeatureConfigrations : IEntityTypeConfiguration<PlanFeature>
                 "22222222-0000-0000-0000-000000000007",
                 PlanSeeds.PremiumPlanId,
                 FeatureType.GenerateProjectDraft,
-                15, true),
+                5000, true),
 
             Feature(
                 "22222222-0000-0000-0000-000000000008",
                 PlanSeeds.PremiumPlanId,
                 FeatureType.TeamSuggestions,
-                20, true),
+                2000, true),
 
             Feature(
                 "22222222-0000-0000-0000-000000000009",
                 PlanSeeds.PremiumPlanId,
                 FeatureType.AIChatProposal,
-                200, true),
+                2500, true),
 
             Feature(
                 "22222222-0000-0000-0000-000000000010",
                 PlanSeeds.PremiumPlanId,
                 FeatureType.ProposalRanking,
-                30, true),
+                3500, true),
             Feature(
                 "22222222-0000-0000-0000-000000000011",
                 PlanSeeds.PremiumPlanId,
                 FeatureType.HiringAgent,
-                5, true),
+                10_000, true),
         #endregion
 
         #region Pro Plan
@@ -206,31 +206,31 @@ public class PlanFeatureConfigrations : IEntityTypeConfiguration<PlanFeature>
                 "33333333-0000-0000-0000-000000000007",
                 PlanSeeds.ProPlanId,
                 FeatureType.GenerateProjectDraft,
-                50, true),
+                5000, true),
 
             Feature(
                 "33333333-0000-0000-0000-000000000008",
                 PlanSeeds.ProPlanId,
                 FeatureType.TeamSuggestions,
-                100, true),
+                2000, true),
 
             Feature(
                 "33333333-0000-0000-0000-000000000009",
                 PlanSeeds.ProPlanId,
                 FeatureType.AIChatProposal,
-                1000, true),
+                2500, true),
 
             Feature(
                 "33333333-0000-0000-0000-000000000010",
                 PlanSeeds.ProPlanId,
                 FeatureType.ProposalRanking,
-                150, true),
+                3500, true),
 
             Feature(
                 "33333333-0000-0000-0000-000000000011",
                 PlanSeeds.ProPlanId,
                 FeatureType.HiringAgent,
-                30, true)
+                10_000, true)
             );
         #endregion
     }

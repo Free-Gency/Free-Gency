@@ -19,6 +19,8 @@ public class UsageRecord: ISoftDeletableEntity
 
     public int Used { get; set; }
 
+    public long TokensUsed { get; set; }
+
     public DateTime PeriodStart { get; set; }
 
     public DateTime PeriodEnd { get; set; }

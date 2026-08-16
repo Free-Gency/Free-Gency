@@ -18,6 +18,8 @@ public class Plan: ISoftDeletableEntity
     public decimal YearlyPrice { get; set; }
     public bool IsActive { get; set; } = true;
 
+    public long AllowedTokens { get; set; }
+
     public virtual ICollection<PlanFeature> Features { get; set; }
         = new List<PlanFeature>();
 }

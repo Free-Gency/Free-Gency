@@ -43,6 +43,8 @@ public class PlanConfigrations : IEntityTypeConfiguration<Plan>
 
                 IsActive = true,
 
+                AllowedTokens = 50_000,
+
                 CreatedAt = PlanSeeds.SeedDate,
                 CreatedBy = "System",
 
@@ -60,6 +62,8 @@ public class PlanConfigrations : IEntityTypeConfiguration<Plan>
 
                 IsActive = true,
 
+                AllowedTokens = 300_000,
+
                 CreatedAt = PlanSeeds.SeedDate,
                 CreatedBy = "System",
 
@@ -76,6 +80,8 @@ public class PlanConfigrations : IEntityTypeConfiguration<Plan>
                  YearlyPrice = 250,
 
                  IsActive = true,
+
+                 AllowedTokens = 1000_000_000,
 
                  CreatedAt = PlanSeeds.SeedDate,
                  CreatedBy = "System",

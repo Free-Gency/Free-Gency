@@ -10,6 +10,9 @@ public class UsageRecordConfigrations : IEntityTypeConfiguration<UsageRecord>
         builder.Property(x => x.Used)
             .HasDefaultValue(0);
 
+        builder.Property(x => x.TokensUsed)
+        .HasDefaultValue(0);
+
         builder.HasIndex(x => new
         {
             x.SubscriptionId,

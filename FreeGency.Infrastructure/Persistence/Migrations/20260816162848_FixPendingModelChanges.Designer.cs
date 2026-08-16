@@ -4,6 +4,7 @@ using FreeGency.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FreeGency.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260816162848_FixPendingModelChanges")]
+    partial class FixPendingModelChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1749,9 +1752,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<long>("AllowedTokens")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -1813,7 +1813,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            AllowedTokens = 50000L,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "System",
                             Description = "Essential features to get started.",
@@ -1826,7 +1825,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            AllowedTokens = 300000L,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "System",
                             Description = "More projects, proposals and AI features.",
@@ -1839,7 +1837,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            AllowedTokens = 1000000000L,
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "System",
                             Description = "Maximum limits and full access to advanced features.",
@@ -1982,7 +1979,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 6,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 5000,
+                            Limit = 2,
                             PlanId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -1993,7 +1990,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 7,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 2000,
+                            Limit = 3,
                             PlanId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -2004,7 +2001,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 8,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 2500,
+                            Limit = 20,
                             PlanId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -2015,7 +2012,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 9,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 3500,
+                            Limit = 5,
                             PlanId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
@@ -2102,7 +2099,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 6,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 5000,
+                            Limit = 15,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2113,7 +2110,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 7,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 2000,
+                            Limit = 20,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2124,7 +2121,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 8,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 2500,
+                            Limit = 200,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2135,7 +2132,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 9,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 3500,
+                            Limit = 30,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2146,7 +2143,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 10,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 10000,
+                            Limit = 5,
                             PlanId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
@@ -2223,7 +2220,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 6,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 5000,
+                            Limit = 50,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2234,7 +2231,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 7,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 2000,
+                            Limit = 100,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2245,7 +2242,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 8,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 2500,
+                            Limit = 1000,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2256,7 +2253,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 9,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 3500,
+                            Limit = 150,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
@@ -2267,7 +2264,7 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                             Feature = 10,
                             IsDeleted = false,
                             IsEnabled = true,
-                            Limit = 10000,
+                            Limit = 30,
                             PlanId = new Guid("33333333-3333-3333-3333-333333333333")
                         });
                 });
@@ -2383,11 +2380,6 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("SubscriptionId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<long>("TokensUsed")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValue(0L);
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");

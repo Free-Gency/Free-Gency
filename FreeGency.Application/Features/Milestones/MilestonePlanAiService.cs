@@ -144,7 +144,7 @@ public sealed class MilestonePlanAiService : IMilestonePlanAiService
             }
         }
 
-        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.AIChat, ct);
+        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.AIChatProposal, ct);
         if (!quota.IsAllowed)
             return ApiResponse.Failure<MilestonePlanAiAssistResponseDto>(quota.ToAppError());
 
@@ -159,7 +159,7 @@ public sealed class MilestonePlanAiService : IMilestonePlanAiService
                 changeComment,
                 ct);
 
-            await _entitlementService.ConsumeAsync(_currentUser.UserId, FeatureType.AIChat, ct);
+            await _entitlementService.ConsumeAsync(_currentUser.UserId, FeatureType.AIChatProposal, ct);
 
             return ApiResponse.Success(new MilestonePlanAiAssistResponseDto
             {
