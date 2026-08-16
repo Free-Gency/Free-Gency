@@ -31,7 +31,10 @@ namespace FreeGency.Infrastructure.Persistence.Configurations.plansTeam
                 .WithOne(x => x.Subscription)
                 .HasForeignKey<TeamSubscription>(x => x.TeamId)
                 .OnDelete(DeleteBehavior.Cascade);
-
+            builder.HasOne(x => x.User)
+                    .WithMany(x => x.TeamSubscriptions)
+                    .HasForeignKey(x => x.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
             builder.HasOne(x => x.TeamPlan)
                 .WithMany()
                 .HasForeignKey(x => x.TeamPlanId)

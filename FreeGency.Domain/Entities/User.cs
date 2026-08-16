@@ -1,6 +1,7 @@
 using EntityFrameworkCore.EncryptColumn.Attribute;
 using FreeGency.Domain.Abstractions;
 using FreeGency.Domain.Entities.Plans;
+using FreeGency.Domain.Entities.TeamPlans;
 using FreeGency.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
@@ -55,6 +56,7 @@ public class User : IdentityUser<Guid>, ISoftDeletableEntity
     public virtual ICollection<ProjectEvent> ProjectEvents { get; set; } = [];
     public virtual List<RefreshToken> refreshTokens { get; set; } = [];
     public virtual Subscription? Subscription { get; set; } = null!;
-
+    public virtual ICollection<TeamSubscription> TeamSubscriptions { get; set; }
+    = new List<TeamSubscription>();
 
 }

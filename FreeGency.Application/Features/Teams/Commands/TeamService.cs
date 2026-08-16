@@ -159,7 +159,7 @@ public partial class TeamService : ITeamService
             Id = Guid.NewGuid(),
 
             TeamId = team.Id,
-
+            UserId=ownerUserId,
             TeamPlanId = TeamPlanSeeds.FreeTeamPlanId,
 
             BillingPeriod = BillingPeriod.Monthly,

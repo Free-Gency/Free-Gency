@@ -7,5 +7,6 @@ namespace FreeGency.Application.Common.Interfaces
     public interface IBackGroundJobPlanService
     {
         Task ProcessPlansAsync();
+        Task ProcessPlansTeamAsync();
     }
 }

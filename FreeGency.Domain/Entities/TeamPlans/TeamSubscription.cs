@@ -15,7 +15,8 @@ namespace FreeGency.Domain.Entities.TeamPlans
         public bool IsDeleted { get; set; }
         public DateTime? DeletedAt { get; set; }
         public string? DeletedBy { get; set; }
-
+        public Guid UserId { get; set; }
+        public virtual User User { get; set; } = null!;
         public Guid TeamId { get; set; }
 
         public virtual Team Team { get; set; } = null!;
