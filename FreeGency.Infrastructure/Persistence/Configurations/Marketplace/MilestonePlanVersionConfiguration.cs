@@ -14,7 +14,10 @@ public class MilestonePlanVersionConfiguration : IEntityTypeConfiguration<Milest
             .HasDefaultValue(PlanVersionStatus.Proposed);
         builder.Property(v => v.ChangeComment).HasMaxLength(4000);
 
-        builder.HasIndex(v => new { v.ProjectId, v.Version }).IsUnique();
+        // Versions are unique per discussion (proposal), so multiple invitees can
+        // negotiate independently on the same project.
+        builder.HasIndex(v => new { v.ProposalId, v.Version }).IsUnique();
+        builder.HasIndex(v => v.ProjectId);
 
         builder.HasOne(v => v.Project)
             .WithMany(p => p.MilestonePlanVersions)

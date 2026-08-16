@@ -26,7 +26,7 @@ namespace FreeGency.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-           
+
             builder.Services.AddInfrastructure(builder.Configuration)
                             .AddApplication();
             builder.Services.AddAI(builder.Configuration);
@@ -159,20 +159,14 @@ namespace FreeGency.Api
             app.UseStaticFiles();
             app.UseHangfireDashboard("/jobs");
             DatabaseInitializer.InitializeAsync(app.Services).GetAwaiter().GetResult();
+            RecurringJob.RemoveIfExists("suggestions-full-reindex");
 
-            // Warm local SQL → Qdrant on every API start (background; does not block listen).
-            BackgroundJob.Enqueue<FreeGency.Application.Common.Interfaces.ISuggestionService>(
-                service => service.ReindexAllAsync(CancellationToken.None));
-
-            RecurringJob.AddOrUpdate<FreeGency.Application.Common.Interfaces.ISuggestionService>(
-                "suggestions-full-reindex",
-                service => service.ReindexAllAsync(CancellationToken.None),
-                Cron.Daily);
             var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
             using var scope = scopeFactory.CreateScope();
             var planBackground = scope.ServiceProvider.GetRequiredService<IBackGroundJobPlanService>();
             RecurringJob.AddOrUpdate("planService", () => planBackground.ProcessPlansAsync(), Cron.Daily);
             RecurringJob.AddOrUpdate("TeamPlanService", () => planBackground.ProcessPlansTeamAsync(), Cron.Daily);
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {

@@ -50,6 +50,8 @@ public static class DependencyInjection
 
         // RAG Suggestions
         services.AddScoped<ISuggestionService, SuggestionService>();
+        services.AddScoped<IHiringAgentService, HiringAgentService>();
+        services.AddScoped<IMilestonePlanAiService, MilestonePlanAiService>();
 
         // Content moderation
         services.AddScoped<IContentModerationService, ContentModerationService>();
@@ -76,6 +78,9 @@ public static class DependencyInjection
             .BindConfiguration(JwtOptions.NameSection)
             .ValidateDataAnnotations()
             .ValidateOnStart();
+
+        services.AddOptions<HiringAgentOptions>()
+            .BindConfiguration(HiringAgentOptions.NameSection);
 
         services.Configure<IdentityOptions>(options =>
         {

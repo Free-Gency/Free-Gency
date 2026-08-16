@@ -1,4 +1,4 @@
-﻿namespace FreeGency.Domain.Interfaces
+namespace FreeGency.Domain.Interfaces
 {
     public interface IUnitOfWork : IDisposable, IAsyncDisposable
     {
@@ -9,6 +9,7 @@
 
         // Actions
         Task<int> SaveChangesAsync(CancellationToken ct = default);
+        void ClearChangeTracker();
         Task BeginTransactionAsync(CancellationToken ct = default);
         Task CommitTransactionAsync(CancellationToken ct = default);
         Task RollbackTransactionAsync(CancellationToken ct = default);

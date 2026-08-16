@@ -107,6 +107,73 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                     senderName));
             }
 
+            // Hiring agent: reply when a freelancer posts in an agent-managed discussion room.
+            if (developerProfileId is not null && !string.IsNullOrWhiteSpace(message.Text))
+            {
+                BackgroundJob.Enqueue<IHiringAgentService>(s =>
+                    s.OnFreelancerMessageAsync(ChatRoomId, CancellationToken.None));
+            }
+
+            return Result.Success(dto);
+        }
+
+        public async Task<Result<RoomMessagesDto>> SendAsClientAsync(
+            Guid chatRoomId,
+            Guid clientUserId,
+            string text,
+            bool isAgentGenerated = true)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return Result.Failure<RoomMessagesDto>(ChatErrors.MessageCannotBeEmpty);
+
+            var room = await _chatRoomRepository.GetByIdAsync(chatRoomId);
+            if (room is null)
+                return Result.Failure<RoomMessagesDto>(ChatErrors.ChatRoomNotFound);
+            if (room.Status == ChatRoomStatus.Archived)
+                return Result.Failure<RoomMessagesDto>(ChatErrors.ChatRoomArchived);
+
+            var clientProfileId = await _userRepository.GetClientProfileIdByUserIdAsync(clientUserId);
+            if (clientProfileId is null)
+                return Result.Failure<RoomMessagesDto>(ChatErrors.ProfileNotFound);
+
+            var member = await _chatRoomMemberRepository.IsMember(clientProfileId, null, chatRoomId);
+            if (member is null || !member.CanSend)
+                return Result.Failure<RoomMessagesDto>(ChatErrors.CannotSendMessage);
+
+            var user = await _userRepository.GetByIdAsync(clientUserId);
+            var clientName = user is null
+                ? "Client"
+                : $"{user.FristName} {user.LastName}".Trim();
+            var senderName = isAgentGenerated
+                ? "FreeGency Hiring Agent"
+                : clientName;
+
+            var message = new Message
+            {
+                Id = Guid.NewGuid(),
+                ChatRoomId = chatRoomId,
+                SenderClientProfileId = clientProfileId,
+                SenderDeveloperProfileId = null,
+                Text = text.Trim(),
+                CreatedAt = DateTime.UtcNow,
+                MessageType = MessageType.Text,
+                ModerationStatus = ModerationStatus.Visible,
+                IsAgentGenerated = isAgentGenerated,
+                CreatedBy = clientUserId.ToString()
+            };
+
+            await _messageRepository.AddAsync(message);
+            member.LastReadAt = DateTime.UtcNow;
+            await unitOfWork.SaveChangesAsync();
+
+            var dto = await BroadcastChatMessageAsync(
+                message,
+                clientProfileId.Value,
+                profileMode.Client.ToString(),
+                senderName,
+                moderationWarning: null,
+                notifyOffline: true);
+
             return Result.Success(dto);
         }
 
@@ -190,7 +257,8 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 CreatedAt = message.CreatedAt,
                 IsMine = true,
                 ModerationStatus = message.ModerationStatus.ToString(),
-                ModerationWarning = moderationWarning
+                ModerationWarning = moderationWarning,
+                IsAgentGenerated = message.IsAgentGenerated
             };
 
             var publicText = message.ModerationStatus == ModerationStatus.Visible
@@ -209,7 +277,8 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                 FileUrl = message.ModerationStatus == ModerationStatus.Hidden ? null : message.FileUrl,
                 CreatedAt = message.CreatedAt,
                 IsMine = false,
-                ModerationStatus = message.ModerationStatus.ToString()
+                ModerationStatus = message.ModerationStatus.ToString(),
+                IsAgentGenerated = message.IsAgentGenerated
             };
 
             var lastPreview = message.ModerationStatus == ModerationStatus.Visible
@@ -294,6 +363,12 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
 
             var activeDiscussions =
                 (await _projectProposalRepository.GetActiveDiscussionByProjectIdAsync(proposal.ProjectId)).ToList();
+
+            var hiringAgent = unitOfWork.Repository<IHiringAgentRunRepository, HiringAgentRun>();
+            var activeRun = await hiringAgent.GetActiveByProjectIdAsync(proposal.ProjectId);
+            if (activeRun is not null)
+                return Result.Failure<Guid>(ChatErrors.AnotherDiscussionActive);
+
             if (activeDiscussions.Any(p => p.Id != proposal.Id))
                 return Result.Failure<Guid>(ChatErrors.AnotherDiscussionActive);
 

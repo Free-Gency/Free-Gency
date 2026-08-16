@@ -119,16 +119,20 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                     Id = x.Id,
                     ChatRoomId = x.ChatRoomId,
                     SenderId = x.SenderClientProfileId ?? x.SenderDeveloperProfileId,
-                    SenderProfileType = x.SenderClientProfileId != null
-                        ? nameof(profileMode.Client)
-                        : x.SenderDeveloperProfileId != null
-                            ? nameof(profileMode.Developer)
-                            : null,
-                    SenderName = x.SenderClientProfile != null
-                        ? x.SenderClientProfile.User.FristName + " " + x.SenderClientProfile.User.LastName
-                        : x.SenderDeveloperProfile != null
-                            ? x.SenderDeveloperProfile.User.FristName + " " + x.SenderDeveloperProfile.User.LastName
-                            : null,
+                    SenderProfileType = x.IsAgentGenerated
+                        ? "AI"
+                        : x.SenderClientProfileId != null
+                            ? nameof(profileMode.Client)
+                            : x.SenderDeveloperProfileId != null
+                                ? nameof(profileMode.Developer)
+                                : null,
+                    SenderName = x.IsAgentGenerated
+                        ? "FreeGency Hiring Agent"
+                        : x.SenderClientProfile != null
+                            ? x.SenderClientProfile.User.FristName + " " + x.SenderClientProfile.User.LastName
+                            : x.SenderDeveloperProfile != null
+                                ? x.SenderDeveloperProfile.User.FristName + " " + x.SenderDeveloperProfile.User.LastName
+                                : null,
                     Text =
                         x.ModerationStatus == ModerationStatus.Visible
                             ? x.Text
@@ -159,7 +163,8 @@ namespace FreeGency.Application.Features.ChatFeature.Mapping
                         ((clientProfileId != null && x.SenderClientProfileId == clientProfileId) ||
                          (developerProfileId != null && x.SenderDeveloperProfileId == developerProfileId))
                             ? x.ModerationNote
-                            : null
+                            : null,
+                    IsAgentGenerated = x.IsAgentGenerated
                 });
         }
     }

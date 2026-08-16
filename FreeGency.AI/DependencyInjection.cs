@@ -1,3 +1,5 @@
+using FreeGency.AI.HiringAgent;
+using FreeGency.AI.MilestonePlanAssist;
 using FreeGency.AI.Moderation;
 using FreeGency.AI.ProjectDrafting;
 using FreeGency.AI.ProposalAssistant;
@@ -19,6 +21,9 @@ public static class DependencyInjection
         
         services.AddScoped<ProjectDraftService>();
         services.AddScoped<ProposalAssistantChatService>();
+        services.AddScoped<DiscussionAgentChatService>();
+        services.AddScoped<DiscussionRankingChatService>();
+        services.AddScoped<MilestonePlanAssistChatService>();
         services.AddScoped<IModerationAgent, ModerationAgent>();
 
         services.AddAIFoundation(configuration);

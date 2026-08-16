@@ -25,6 +25,19 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
 
                 query = query.Where(x => x.TeamId == teamId);
             }
+            else
+            {
+                // Developers: team Proposal/Project chats live under Team → Messages.
+                // Clients have no team inbox — include every room they belong to,
+                // including discussions with applicant teams (TeamId set).
+                if (active.Value.Mode == profileMode.Developer)
+                {
+                    query = query.Where(x =>
+                        x.RoomType == RoomType.TeamMain
+                        || x.RoomType == RoomType.TeamGroup
+                        || x.TeamId == null);
+                }
+            }
 
             if (filter.RoomType.HasValue)
             {
@@ -42,13 +55,38 @@ namespace FreeGency.Application.Features.ChatFeature.Commands
                     x.Title!.Contains(filter.Search));
             }
 
-            var result = await PaginatedResult<ChatRoomDto>.CreateAsync(
-                query
+            // Page rooms first (cheap), then project last-message / unread only for that page.
+            // Ordering the full DTO projection by LastMessageAt timed out under SQL Server.
+            var totalCount = await query.CountAsync();
+            var pageNumber = filter.PageNumber < 1 ? 1 : filter.PageNumber;
+            var pageSize = filter.PageSize < 1 ? 20 : filter.PageSize;
+
+            var pageRoomIds = await query
+                .OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(x => x.Id)
+                .ToListAsync();
+
+            var pageItems = pageRoomIds.Count == 0
+                ? new List<ChatRoomDto>()
+                : await _chatRoomRepository.Query()
+                    .AsNoTracking()
+                    .Where(r => pageRoomIds.Contains(r.Id))
                     .ToChatRoomListDto(clientProfileId, developerProfileId)
-                    .OrderByDescending(x => x.LastMessageAt ?? x.CreatedAt),
-                filter.PageNumber,
-                filter.PageSize
-                );
+                    .ToListAsync();
+
+            var byId = pageItems.ToDictionary(x => x.Id);
+            var orderedItems = pageRoomIds
+                .Where(id => byId.ContainsKey(id))
+                .Select(id => byId[id])
+                .ToList();
+
+            var result = PaginatedResult<ChatRoomDto>.FromList(
+                orderedItems,
+                pageNumber,
+                pageSize,
+                totalCount);
 
             // Backfill ProjectId on the DTO only (Proposal rooms often keep ProjectId null
             // because IX_ChatRooms_ProjectId is unique — Project rooms claim that value later).

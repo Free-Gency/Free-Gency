@@ -111,12 +111,7 @@ public partial class MilestoneService
         if (profileError is not null)
             return ApiResponse.Failure<MilestonePlanVersionDto>(profileError);
 
-        var versionCount = await PlanRepo.CountByProjectIdAsync(dto.ProjectId, ct);
-        if (versionCount >= MilestonePlanConstants.MaxPlanVersions)
-            return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Validation(
-                $"Plan version limit reached ({MilestonePlanConstants.MaxPlanVersions}). Close discussion or accept the latest plan."));
-
-        var previous = await PlanRepo.GetLatestByProjectIdAsync(dto.ProjectId, ct);
+        var previous = await PlanRepo.GetLatestByProposalIdAsync(dto.ProposalId, ct);
         if (previous is not null && previous.Status == PlanVersionStatus.Accepted)
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Validation("A plan was already accepted for this project."));
 
@@ -124,11 +119,12 @@ public partial class MilestoneService
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Validation(
                 "A plan is awaiting client response. Wait for Accept or Request Changes."));
 
-        if (previous is not null && previous.ProposalId != dto.ProposalId)
+        var versionCount = await PlanRepo.CountByProposalIdAsync(dto.ProposalId, ct);
+        if (versionCount >= MilestonePlanConstants.MaxPlanVersions)
             return ApiResponse.Failure<MilestonePlanVersionDto>(AppError.Validation(
-                "Plan negotiation is tied to the active discussion proposal."));
+                $"Plan version limit reached ({MilestonePlanConstants.MaxPlanVersions}). Close discussion or accept the latest plan."));
 
-        var nextVersion = versionCount + 1;
+        var nextVersion = (previous?.Version ?? 0) + 1;
         var prevItems = previous?.Items.OrderBy(i => i.SortOrder).ToList() ?? [];
 
         var plan = new MilestonePlanVersion
@@ -214,6 +210,17 @@ public partial class MilestoneService
 
         await RecordEventAsync(project.Id, null, EventType.MilestonePlanProposed, null, ct);
         await _unitOfWork.SaveChangesAsync(ct);
+
+        if (proposalRoom is not null)
+        {
+            BackgroundJob.Enqueue<IHiringAgentService>(s =>
+                s.OnFreelancerMessageAsync(proposalRoom.Id, CancellationToken.None));
+        }
+
+        // After client hire approval, agent auto-reviews each revised plan (no re-click Hire).
+        BackgroundJob.Enqueue<IHiringAgentService>(s =>
+            s.ProcessPostHirePlanReviewAsync(dto.ProposalId, plan.Id, CancellationToken.None));
+
         var clientProfileId =
     await UserRepo.GetClientProfileIdByUserIdAsync(project.ClientId, ct);
 
@@ -349,6 +356,110 @@ public partial class MilestoneService
         return ApiResponse.Success("Changes requested. Waiting for a full revised plan version.");
     }
 
+    /// <inheritdoc />
+    public async Task<ApiResponse> RequestPlanChangesAsClientAsync(
+        Guid planVersionId,
+        Guid clientUserId,
+        string comment,
+        bool isAgentGenerated = true,
+        CancellationToken ct = default)
+    {
+        var plan = await PlanRepo.GetByIdWithItemsAsync(planVersionId, ct);
+        if (plan is null)
+            return ApiResponse.Failure(AppError.NotFound(nameof(MilestonePlanVersion), planVersionId));
+
+        var project = await _projectRepo.GetByIdAsync(plan.ProjectId, ct);
+        if (project is null)
+            return ApiResponse.Failure(AppError.NotFound(nameof(Project), plan.ProjectId));
+
+        if (project.ClientId != clientUserId)
+            return ApiResponse.Failure(AppError.Forbidden("Only the client can request plan changes."));
+
+        if (plan.Status != PlanVersionStatus.Proposed)
+            return ApiResponse.Failure(AppError.Validation("Only a proposed plan can receive change requests."));
+
+        if (string.IsNullOrWhiteSpace(comment))
+            return ApiResponse.Failure(AppError.Validation("A general comment is required."));
+
+        var clientProfileId = await UserRepo.GetClientProfileIdByUserIdAsync(clientUserId, ct);
+        if (clientProfileId is null)
+            return ApiResponse.Failure(AppError.Validation("A Client profile is required for chat."));
+
+        plan.Status = PlanVersionStatus.ChangesRequested;
+        plan.ChangeComment = comment.Trim();
+        PlanRepo.Update(plan);
+
+        await EscrowRepo.UpdatePlanStatusAsync(plan.ProjectId, PlanStatus.PlanRevisionRequested, ct);
+
+        var proposalRoom = await ChatRoomRepo.GetByProposalIdForUpdateAsync(plan.ProposalId, ct);
+        Message? changeMessage = null;
+        if (proposalRoom is not null)
+        {
+            changeMessage = new Message
+            {
+                Id = Guid.NewGuid(),
+                ChatRoomId = proposalRoom.Id,
+                SenderClientProfileId = clientProfileId,
+                SenderDeveloperProfileId = null,
+                MessageType = MessageType.Text,
+                Text = $"Request Changes on plan v{plan.Version}: {plan.ChangeComment}",
+                CreatedAt = DateTime.UtcNow,
+                IsAgentGenerated = isAgentGenerated,
+                CreatedBy = clientUserId.ToString()
+            };
+            await MessageRepo.AddAsync(changeMessage, ct);
+            proposalRoom.UpdatedAt = DateTime.UtcNow;
+        }
+
+        await RecordEventAsync(project.Id, null, EventType.MilestonePlanChangesRequested, clientUserId, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        var proposerProfileId =
+            await UserRepo.GetDeveloperProfileIdByUserIdAsync(plan.ProposedByUserId, ct);
+
+        if (proposerProfileId is not null)
+        {
+            var body = isAgentGenerated
+                ? $"FreeGency Hiring Agent requested changes on milestone plan v{plan.Version} for project {project.Title}."
+                : $"The client requested changes on milestone plan v{plan.Version} for project {project.Title}.";
+
+            BackgroundJob.Enqueue(() =>
+                _notificationService.CreateNotification(
+                    new CreateNotificationRequest
+                    {
+                        DeveloperProfileId = proposerProfileId.Value,
+                        Title = "Milestone plan changes requested",
+                        Body = body,
+                        Type = NotificationType.MilestonePlanChangesRequested,
+                        ProjectId = project.Id,
+                        ProjectProposalId = plan.ProposalId,
+                        ActionUrl = $"/projects/{project.Id}?tab=milestones"
+                    }));
+        }
+
+        if (proposalRoom is not null && changeMessage is not null)
+        {
+            try
+            {
+                var senderName = isAgentGenerated
+                    ? "FreeGency Hiring Agent"
+                    : null;
+                await BroadcastChatMessageAsync(
+                    proposalRoom.Id,
+                    changeMessage,
+                    changeMessage.Text,
+                    ct,
+                    senderNameOverride: senderName);
+            }
+            catch
+            {
+                // Best-effort realtime notify.
+            }
+        }
+
+        return ApiResponse.Success("Changes requested. Waiting for a full revised plan version.");
+    }
+
     /// <summary>Accept Milestone Plan = Hire. Cascade-rejects other proposals.</summary>
     public async Task<ApiResponse> AcceptPlanAsync(Guid planVersionId, CancellationToken ct = default)
     {
@@ -367,6 +478,35 @@ public partial class MilestoneService
         if (profileError is not null)
             return ApiResponse.Failure(profileError);
 
+        return await AcceptPlanCoreAsync(plan, project, _currentUser.UserId, ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResponse> AcceptPlanAsClientAsync(
+        Guid planVersionId,
+        Guid clientUserId,
+        CancellationToken ct = default)
+    {
+        var plan = await PlanRepo.GetByIdWithItemsAsync(planVersionId, ct);
+        if (plan is null)
+            return ApiResponse.Failure(AppError.NotFound(nameof(MilestonePlanVersion), planVersionId));
+
+        var project = await _projectRepo.GetByIdAsync(plan.ProjectId, ct);
+        if (project is null)
+            return ApiResponse.Failure(AppError.NotFound(nameof(Project), plan.ProjectId));
+
+        if (project.ClientId != clientUserId)
+            return ApiResponse.Failure(AppError.Forbidden("Only the client can accept a milestone plan."));
+
+        return await AcceptPlanCoreAsync(plan, project, clientUserId, ct);
+    }
+
+    private async Task<ApiResponse> AcceptPlanCoreAsync(
+        MilestonePlanVersion plan,
+        Project project,
+        Guid actingClientUserId,
+        CancellationToken ct)
+    {
         if (plan.Status != PlanVersionStatus.Proposed)
             return ApiResponse.Failure(AppError.Validation("Only a proposed plan can be accepted."));
 
@@ -449,9 +589,9 @@ public partial class MilestoneService
         {
             invite.Status = ProjectInvitationStatus.Cancelled;
             invite.RespondedAt = DateTime.UtcNow;
-            invite.RespondedByUserId = _currentUser.UserId;
+            invite.RespondedByUserId = actingClientUserId;
             invite.UpdatedAt = DateTime.UtcNow;
-            invite.UpdatedBy = _currentUser.UserId.ToString();
+            invite.UpdatedBy = actingClientUserId.ToString();
             invitationRepo.Update(invite);
         }
 
@@ -531,7 +671,7 @@ public partial class MilestoneService
                 ProposalId = null,
                 SourceProposalRoomId = proposalRoom?.Id,
                 Title = project.Title,
-                CreatedByUserId = _currentUser.UserId
+                CreatedByUserId = actingClientUserId
             };
 
             await ChatRoomRepo.AddWithMembersAsync(projectRoom, projectMembers, ct);
@@ -545,8 +685,8 @@ public partial class MilestoneService
             }, ct);
         }
 
-        await RecordEventAsync(project.Id, null, EventType.MilestonePlanAgreed, null, ct);
-        await RecordEventAsync(project.Id, null, EventType.ProposalAccepted, null, ct);
+        await RecordEventAsync(project.Id, null, EventType.MilestonePlanAgreed, actingClientUserId, ct);
+        await RecordEventAsync(project.Id, null, EventType.ProposalAccepted, actingClientUserId, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
         await NotifyProposalApplicantsAsync(
@@ -1471,15 +1611,20 @@ public partial class MilestoneService
         string? previewText,
         CancellationToken ct,
         ChatRoomStatus? roomStatus = null,
-        DateTime? archivedAt = null)
+        DateTime? archivedAt = null,
+        string? senderNameOverride = null)
     {
         var senderId = message.SenderClientProfileId ?? message.SenderDeveloperProfileId;
-        var senderProfileType = message.SenderClientProfileId.HasValue
-            ? nameof(profileMode.Client)
-            : message.SenderDeveloperProfileId.HasValue
-                ? nameof(profileMode.Developer)
-                : null;
-        var senderName = $"{_currentUser.FirstName} {_currentUser.LastName}".Trim();
+        var senderProfileType = message.IsAgentGenerated
+            ? "AI"
+            : message.SenderClientProfileId.HasValue
+                ? nameof(profileMode.Client)
+                : message.SenderDeveloperProfileId.HasValue
+                    ? nameof(profileMode.Developer)
+                    : null;
+        var senderName = !string.IsNullOrWhiteSpace(senderNameOverride)
+            ? senderNameOverride.Trim()
+            : $"{_currentUser.FirstName} {_currentUser.LastName}".Trim();
         var dto = new RoomMessagesDto
         {
             Id = message.Id,
@@ -1494,7 +1639,8 @@ public partial class MilestoneService
             PlanVersionId = message.PlanVersionId,
             MilestoneId = message.MilestoneId,
             CreatedAt = message.CreatedAt,
-            IsMine = true
+            IsMine = true,
+            IsAgentGenerated = message.IsAgentGenerated
         };
 
         var recipientDto = new RoomMessagesDto
@@ -1511,7 +1657,8 @@ public partial class MilestoneService
             PlanVersionId = dto.PlanVersionId,
             MilestoneId = dto.MilestoneId,
             CreatedAt = dto.CreatedAt,
-            IsMine = false
+            IsMine = false,
+            IsAgentGenerated = message.IsAgentGenerated
         };
 
         var roomUpdated = new RoomUpdatedDto

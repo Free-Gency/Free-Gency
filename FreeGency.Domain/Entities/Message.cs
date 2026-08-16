@@ -28,6 +28,9 @@ public class Message : ISoftDeletableEntity
     /// <summary>Public-facing text when status is Hidden/Redacted; null means use Text.</summary>
     public string? ModeratedText { get; set; }
 
+    /// <summary>True when the Hiring Agent posted this message on behalf of the client.</summary>
+    public bool IsAgentGenerated { get; set; }
+
     public virtual ChatRoom ChatRoom { get; set; } = null!;
     public virtual ClientProfile? SenderClientProfile { get; set; }
     public virtual DeveloperProfile? SenderDeveloperProfile { get; set; }
