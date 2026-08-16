@@ -14,7 +14,7 @@ public class PlanRepository : GenericRepository<Plan>, IPlanRepository
 
     public IQueryable<Plan> GetPlans()
     {
-        return _dbSet.AsQueryable();
+        return _dbSet.AsQueryable().Include(p => p.Features);
     }
 
 

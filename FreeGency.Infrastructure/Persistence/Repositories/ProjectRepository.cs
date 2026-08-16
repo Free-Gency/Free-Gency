@@ -225,4 +225,10 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
     public async Task<int> CountCreatedByClientSinceAsync(Guid clientId, DateTime since, CancellationToken ct = default)
     => await _dbSet.AsNoTracking()
         .CountAsync(p => p.ClientId == clientId && p.CreatedAt >= since, ct);
+
+
+    public async Task<int> CountActiveByClientAsync(Guid clientId, CancellationToken ct = default)
+    => await _dbSet.AsNoTracking()
+        .CountAsync(p => p.ClientId == clientId
+            && (p.Status == ProjectStatus.Open || p.Status == ProjectStatus.InProgress), ct);
 }

@@ -1,6 +1,4 @@
-using FreeGency.Domain.Enums;
-using FreeGency.Domain.Interfaces.Repositories.Teams;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace FreeGency.Infrastructure.Persistence.Repositories.Teams;
 
@@ -488,5 +486,5 @@ public sealed class TeamRepository : GenericRepository<Team>, ITeamRepository
         return result;
     }
 
-   
+
 }

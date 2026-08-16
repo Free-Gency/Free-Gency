@@ -1,7 +1,4 @@
 ﻿
-using Microsoft.EntityFrameworkCore;
-
-
 namespace FreeGency.Infrastructure.Persistence.Repositories.Teams;
 
 public sealed class TeamMemberRepository : GenericRepository<TeamMember>, ITeamMemberRepository
@@ -114,7 +111,14 @@ public sealed class TeamMemberRepository : GenericRepository<TeamMember>, ITeamM
     public async Task<List<Guid>> GetLeaderDeveloperProfileIdsAsync(Guid teamId)
     {
         return await _dbSet.Where(x => x.TeamId == teamId && x.TeamRole == Role.TeamLeader)
-                           .Select(x => x.User.DeveloperProfile.Id)
+                           .Select(x => x.User.DeveloperProfile!.Id)
                            .ToListAsync();
+    }
+
+    public async Task<int> CountByUserIdAsync(Guid userId, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .CountAsync(tm => tm.UserId == userId, ct);
     }
 }

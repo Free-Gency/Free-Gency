@@ -1,6 +1,6 @@
 
 using FreeGency.Application.Features.Proposals.Dtos;
-using Stripe;
+using FreeGency.Domain.Entities.TeamPlans;
 
 
 namespace FreeGency.Application.Features.Proposals.Commands;
@@ -20,12 +20,13 @@ public partial class ProposalService : IProposalService
     private readonly INotificationService _notificationService;
     private readonly ITeamRepository _teamRepository;
     private readonly IEntitlementService _entitlementService;
+    private readonly ITeamEntitlementService _teamEntitlementService;
     public ProposalService(
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
         IMapper mapper,
         IStorageService storageService,INotificationService notificationService,ITeamRepository teamRepository,
-        IEntitlementService entitlementService)
+        IEntitlementService entitlementService,ITeamEntitlementService teamEntitlementService)
     {
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
@@ -34,6 +35,7 @@ public partial class ProposalService : IProposalService
         _notificationService = notificationService;
         _teamRepository = teamRepository;
         _entitlementService = entitlementService;
+        _teamEntitlementService = teamEntitlementService;
         _proposalRepository = _unitOfWork.Repository<IProjectProposalRepository, ProjectProposal>();
         _projectRepository = _unitOfWork.Repository<IProjectRepository, Project>();
         _teamMemberRepository = _unitOfWork.Repository<ITeamMemberRepository, TeamMember>();
@@ -65,10 +67,21 @@ public partial class ProposalService : IProposalService
         if (await _proposalRepository.HasPendingOrActiveAsync(dto.ProjectId, dto.ApplicantType, applicantId, ct))
             return ApiResponse.Failure(AppError.Validation("You already have a pending or active proposal for this project."));
 
+
         // check entitlement before building the proposal:
-        var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.SendProposal, ct);
-        if (!quota.IsAllowed)
-            return ApiResponse.Failure(quota.ToAppError());
+        if (dto.ApplicantType == ApplicantType.Team)
+        {
+            var teamQuota = await _teamEntitlementService.CanConsumeTeamFeatureAsync(
+                dto.TeamId!.Value, TeamFeatureType.CreateProposal, ct);
+            if (!teamQuota.IsAllowed)
+                return ApiResponse.Failure(teamQuota.ToAppError());
+        }
+        else
+        {
+            var quota = await _entitlementService.CanConsumeAsync(_currentUser.UserId, FeatureType.SendProposal, ct);
+            if (!quota.IsAllowed)
+                return ApiResponse.Failure(quota.ToAppError());
+        }
 
         var proposal = new ProjectProposal
         {
@@ -109,6 +122,14 @@ public partial class ProposalService : IProposalService
 
         await _proposalRepository.AddWithAttachmentsAsync(proposal, attachments, ct);
         await _unitOfWork.SaveChangesAsync(ct);
+
+        // Consume For Team
+        if (dto.ApplicantType == ApplicantType.Team)
+        {
+            await _teamEntitlementService.ConsumeTeamFeatureAsync(
+                dto.TeamId!.Value, TeamFeatureType.CreateProposal, ct);
+        }
+
         var clientProfileId =
                    await _userRepository.GetClientProfileIdByUserIdAsync(project.ClientId, ct);
 

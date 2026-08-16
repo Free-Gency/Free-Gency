@@ -4576,6 +4576,313 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.ToTable("TeamPayoutSplits", "finance");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<decimal?>("MonthlyPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<decimal?>("YearlyPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TeamPlans", "TeamPlans");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "",
+                            IsDeleted = false,
+                            MonthlyPrice = 0m,
+                            Name = "Free",
+                            YearlyPrice = 0m
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "",
+                            IsDeleted = false,
+                            MonthlyPrice = 20m,
+                            Name = "Pro",
+                            YearlyPrice = 200m
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "",
+                            IsDeleted = false,
+                            MonthlyPrice = 50m,
+                            Name = "Premium",
+                            YearlyPrice = 500m
+                        });
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamPlanFeature", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Feature")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("Limit")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TeamPlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamPlanId", "Feature")
+                        .IsUnique();
+
+                    b.ToTable("TeamPlanFeatures", "TeamPlans");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "",
+                            Feature = "CreateProposal",
+                            IsDeleted = false,
+                            IsEnabled = true,
+                            Limit = 5,
+                            TeamPlanId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "",
+                            Feature = "CreateProposal",
+                            IsDeleted = false,
+                            IsEnabled = true,
+                            Limit = 30,
+                            TeamPlanId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedBy = "",
+                            Feature = "CreateProposal",
+                            IsDeleted = false,
+                            IsEnabled = true,
+                            Limit = 70,
+                            TeamPlanId = new Guid("33333333-3333-3333-3333-333333333333")
+                        });
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamSubscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("AutoRenew")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("BillingPeriod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TeamPlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId")
+                        .IsUnique();
+
+                    b.HasIndex("TeamPlanId");
+
+                    b.ToTable("TeamSubscriptions", "TeamPlans");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamUsageRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasDefaultValue("system");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Feature")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("PeriodEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TeamSubscriptionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("Used")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamSubscriptionId", "Feature")
+                        .IsUnique();
+
+                    b.ToTable("TeamUsageRecords", "TeamPlans");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.TeamSkill", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6385,6 +6692,47 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamPlanFeature", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.TeamPlans.TeamPlan", "TeamPlan")
+                        .WithMany("Features")
+                        .HasForeignKey("TeamPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TeamPlan");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamSubscription", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.Team", "Team")
+                        .WithOne("Subscription")
+                        .HasForeignKey("FreeGency.Domain.Entities.TeamPlans.TeamSubscription", "TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FreeGency.Domain.Entities.TeamPlans.TeamPlan", "TeamPlan")
+                        .WithMany()
+                        .HasForeignKey("TeamPlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+
+                    b.Navigation("TeamPlan");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamUsageRecord", b =>
+                {
+                    b.HasOne("FreeGency.Domain.Entities.TeamPlans.TeamSubscription", "Subscription")
+                        .WithMany("UsageRecords")
+                        .HasForeignKey("TeamSubscriptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Subscription");
+                });
+
             modelBuilder.Entity("FreeGency.Domain.Entities.TeamSkill", b =>
                 {
                     b.HasOne("FreeGency.Domain.Entities.Skill", "Skill")
@@ -6827,6 +7175,8 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
 
                     b.Navigation("SocialLinks");
 
+                    b.Navigation("Subscription");
+
                     b.Navigation("TeamCategories");
 
                     b.Navigation("TeamFeedbacks");
@@ -6851,6 +7201,16 @@ namespace FreeGency.Infrastructure.Persistence.Migrations
                     b.Navigation("TeamJobSkills");
 
                     b.Navigation("TeamJoinRequests");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamPlan", b =>
+                {
+                    b.Navigation("Features");
+                });
+
+            modelBuilder.Entity("FreeGency.Domain.Entities.TeamPlans.TeamSubscription", b =>
+                {
+                    b.Navigation("UsageRecords");
                 });
 
             modelBuilder.Entity("FreeGency.Domain.Entities.User", b =>

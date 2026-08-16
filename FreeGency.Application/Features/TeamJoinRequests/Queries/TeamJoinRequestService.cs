@@ -1,61 +1,58 @@
 using FreeGency.Application.Features.TeamJoinRequests.Dtos;
 using FreeGency.Application.Features.TeamJoinRequests.Mapping;
 using FreeGency.Domain.Specifications;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace FreeGency.Application.Features.TeamJoinRequests.Commands
+
+namespace FreeGency.Application.Features.TeamJoinRequests.Commands;
+
+public partial class TeamJoinRequestService
 {
-    public partial class TeamJoinRequestService
+    public async Task<Result<PaginatedResult<TeamJoinRequestResponseDto>>> GetJoinRequestAsync(TeamJoinRequestSpecificationParam param, CancellationToken ct = default)
     {
-        public async Task<Result<PaginatedResult<TeamJoinRequestResponseDto>>> GetJoinRequestAsync(TeamJoinRequestSpecificationParam param)
-        {
-            var userId = currentUserService.UserId;
-            var team = await _teamRepository.GetByIdAsync(param.TeamId);
-            if (team is null)
-                return Result.Failure<PaginatedResult<TeamJoinRequestResponseDto>>(TeamErrors.TeamNotFound);
+        var userId = currentUserService.UserId;
+        var team = await _teamRepository.GetByIdAsync(param.TeamId, ct);
+        if (team is null)
+            return Result.Failure<PaginatedResult<TeamJoinRequestResponseDto>>(TeamErrors.TeamNotFound);
 
-            var isLeader = await _teamMemberRepository.IsLeaderAsync(param.TeamId, userId)
-                || team.OwnerUserId == userId;
-            if (!isLeader)
-                return Result.Failure<PaginatedResult<TeamJoinRequestResponseDto>>(TeamErrors.UnauthorizedLeader);
+        var isLeader = await _teamMemberRepository.IsLeaderAsync(param.TeamId, userId, ct)
+            || team.OwnerUserId == userId;
+        if (!isLeader)
+            return Result.Failure<PaginatedResult<TeamJoinRequestResponseDto>>(TeamErrors.UnauthorizedLeader);
 
-            var listSpec = new TeamJoinRequestSpecification(param);
+        var listSpec = new TeamJoinRequestSpecification(param);
 
-            var requests = await _teamJoinRequestRepository.ListAsync(listSpec);
+        var requests = await _teamJoinRequestRepository.ListAsync(listSpec);
 
-            var response = requests.Select(x => x.ToDto()).ToList();
+        var response = requests.Select(x => x.ToDto()).ToList();
 
-            var totalCount = await _teamJoinRequestRepository.CountAsync(listSpec);
+        var totalCount = await _teamJoinRequestRepository.CountAsync(listSpec);
 
-            var paginatedResult = PaginatedResult<TeamJoinRequestResponseDto>.FromList(
-                response,
-                param.PageNumber,
-                param.PageSize,
-                totalCount);
+        var paginatedResult = PaginatedResult<TeamJoinRequestResponseDto>.FromList(
+            response,
+            param.PageNumber,
+            param.PageSize,
+            totalCount);
 
-            return Result.Success(paginatedResult);
-        }
-        public async Task<Result<PaginatedResult<UserRequestJoinResponseDto>>> GetUserJoinRequestsAsync(UserJoinRequestSpecificationParam param)
-        {
-            var userId = currentUserService.UserId;
+        return Result.Success(paginatedResult);
+    }
+    public async Task<Result<PaginatedResult<UserRequestJoinResponseDto>>> GetUserJoinRequestsAsync(UserJoinRequestSpecificationParam param, CancellationToken ct = default)
+    {
+        var userId = currentUserService.UserId;
 
-            var spec = new TeamJoinRequestSpecification(userId, param);
+        var spec = new TeamJoinRequestSpecification(userId, param);
 
-            var requests = await _teamJoinRequestRepository.ListAsync(spec);
+        var requests = await _teamJoinRequestRepository.ListAsync(spec);
 
-            var response = requests.Select(x => x.ToUserRequestJoinDto()).ToList();
+        var response = requests.Select(x => x.ToUserRequestJoinDto()).ToList();
 
-            var totalCount = await _teamJoinRequestRepository.CountAsync(spec);
+        var totalCount = await _teamJoinRequestRepository.CountAsync(spec);
 
-            var paginatedResult = PaginatedResult<UserRequestJoinResponseDto>.FromList(
-                response,
-                param.PageNumber,
-                param.PageSize,
-                totalCount);
+        var paginatedResult = PaginatedResult<UserRequestJoinResponseDto>.FromList(
+            response,
+            param.PageNumber,
+            param.PageSize,
+            totalCount);
 
-            return Result.Success(paginatedResult);
-        }
+        return Result.Success(paginatedResult);
     }
 }
